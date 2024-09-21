@@ -71,6 +71,18 @@
     {
       "name": "dialog_cfg_tk_timeout",
       "value": "刷新时间"
+    },
+    {
+      "name": "dialog_cfg_forti_dev_id",
+      "value": "设备ID"
+    },
+    {
+      "name": "dialog_cfg_forti_token",
+      "value": "用户令牌"
+    },
+    {
+      "name": "dialog_cfg_forti_btn_gen_key",
+      "value": "获取密钥"
     }
   ]
 }

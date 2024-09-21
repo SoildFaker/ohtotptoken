@@ -1,6 +1,7 @@
 import { AppStorageV2 } from '@kit.ArkUI';
 import { AppRuntimeInfo, TokenConfig } from '../utils/CustomAppData';
-import { TOTPConfigDialog } from '../utils/CustomDialog';
+import { TOTPConfigDialog } from '../utils/TOTPConfigDialog';
+import { FortiConfigDialog } from '../utils/FortiConfigDialog';
 import { TokenItem } from '../components/TokenItem';
 import { util } from '@kit.ArkTS';
 import promptAction from '@ohos.promptAction'
@@ -16,6 +17,7 @@ struct Index {
   @Local arrConf: Array<TokenConfig> = [];
   private token_keys: string[] = []
   private dialog_totp_config?: CustomDialogController;
+  private dialog_forti_config?: CustomDialogController;
   private alert_dialog_str: string =
     getContext(this).resourceManager.getStringSync($r('app.string.alert_remove_confirm_msg'))
 
@@ -64,6 +66,14 @@ struct Index {
           this.dialog_totp_config.open()
         })
       MenuItem({ content: $r('app.string.tab_token_add_forti_key') })
+        .onClick(() => {
+          this.dialog_forti_config = new CustomDialogController({
+            builder: FortiConfigDialog({
+              confirm: (new_conf) => {this.addTOTPConfig(JSON.parse(new_conf))}
+            })
+          })
+          this.dialog_forti_config.open()
+        })
     }
   }
 
@@ -113,13 +123,27 @@ struct Index {
       .backgroundColor(Color.Gray)
       .padding(10)
       .onClick(() => {
-        this.dialog_totp_config = new CustomDialogController({
-          builder: TOTPConfigDialog({
-            conf_json: JSON.stringify(conf),
-            confirm: (new_conf) => {this.addTOTPConfig(JSON.parse(new_conf))}
+        if (conf.TokenType == 0 || conf.TokenType == undefined) {
+          this.dialog_totp_config = new CustomDialogController({
+            builder: TOTPConfigDialog({
+              conf_json: JSON.stringify(conf),
+              confirm: (new_conf) => {
+                this.addTOTPConfig(JSON.parse(new_conf))
+              }
+            })
           })
-        })
-        this.dialog_totp_config.open()
+          this.dialog_totp_config.open()
+        } else {
+          this.dialog_forti_config = new CustomDialogController({
+            builder: FortiConfigDialog({
+              conf_json: JSON.stringify(conf),
+              confirm: (new_conf) => {
+                this.addTOTPConfig(JSON.parse(new_conf))
+              }
+            })
+          })
+          this.dialog_forti_config.open()
+        }
       })
     }
     .margin({ left:10 })

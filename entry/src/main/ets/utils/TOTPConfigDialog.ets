@@ -9,8 +9,8 @@ declare type HashAlgorithm = 'SHA1' | 'SHA224' | 'SHA256' | 'SHA384' | 'SHA512' 
 @Preview
 @CustomDialog
 export struct TOTPConfigDialog {
-  controller: CustomDialogController
-  @Prop conf_json?: string
+  controller?: CustomDialogController
+  @Prop conf_json?: string = ''
   @State conf: TokenConfig = new TokenConfig()
   @State btn_camera_clicked: number = 0
 
@@ -20,7 +20,7 @@ export struct TOTPConfigDialog {
   }
 
   aboutToAppear(): void {
-    if (this.conf_json != undefined) {
+    if (this.conf_json != undefined && this.conf_json.length > 0) {
       this.conf = JSON.parse(this.conf_json!)
     }
   }

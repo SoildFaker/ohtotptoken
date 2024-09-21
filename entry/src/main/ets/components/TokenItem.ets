@@ -27,9 +27,9 @@ export struct TokenItem {
         .fontColor([Color.Gray])
         .fontSize(40)
       Column() {
-        Text(this.Config.TokenUser)
-          .fontSize(20)
         Text(this.Config.TokenHost)
+          .fontSize(20)
+        Text(this.Config.TokenUser)
           .fontSize(10)
           .fontColor($r('app.color.str_gray'))
       }

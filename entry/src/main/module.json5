@@ -11,7 +11,7 @@
     ],
     "requestPermissions": [
       {
-        "name": "ohos.permission.STORE_PERSISTENT_DATA"
+        "name": "ohos.permission.INTERNET"
       }
     ],
     "deliveryWithInstall": true,

@@ -9,6 +9,7 @@ export class AppRuntimeInfo {
 }
 
 export class TokenConfig {
+  TokenType: number
   TokenKey: string
   TokenHost: string
   TokenUser: string
@@ -16,8 +17,17 @@ export class TokenConfig {
   TokenPeriod: number
   TokenDigits: number
 
-  constructor(key: string = '0000', host: string = 'Unknown', user: string = 'Unknown', alg: string = 'SHA1', period: number = 30, digits: number = 6) {
+  constructor(
+    key: string = 'EEAEVVEYZSERRHEM',
+    type: number = 0,
+    host: string = 'Unknown',
+    user: string = 'Unknown',
+    alg: string = 'SHA1',
+    period: number = 30,
+    digits: number = 6
+  ) {
     this.TokenKey = key
+    this.TokenType = type
     this.TokenHost = host
     this.TokenUser = user
     this.TokenAlgorithm = alg

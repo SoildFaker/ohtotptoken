@@ -1,7 +1,5 @@
 {
   "src": [
-    "pages/Index",
-    "pages/ScanQRCode",
-    "pages/TOTPConfig"
+    "pages/Index"
   ]
 }
