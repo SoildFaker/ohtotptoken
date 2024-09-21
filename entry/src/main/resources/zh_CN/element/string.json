@@ -2,15 +2,75 @@
   "string": [
     {
       "name": "module_desc",
-      "value": "模块描述"
+      "value": "基于时间的一次性密码令牌"
     },
     {
       "name": "EntryAbility_desc",
-      "value": "description"
+      "value": "基于时间的一次性密码令牌"
     },
     {
       "name": "EntryAbility_label",
-      "value": "label"
+      "value": "TOTP令牌"
+    },
+    {
+      "name": "tab_token",
+      "value": "令牌"
+    },
+    {
+      "name": "tab_token_add_scan",
+      "value": "扫描二维码"
+    },
+    {
+      "name": "tab_token_add_key",
+      "value": "设置TOTP令牌"
+    },
+    {
+      "name": "tab_token_add_forti_scan",
+      "value": "扫描Forti提供的二维码"
+    },
+    {
+      "name": "tab_token_add_forti_key",
+      "value": "设置Forti令牌"
+    },
+    {
+      "name": "tab_setting",
+      "value": "设置"
+    },
+    {
+      "name": "alert_remove_confirm_msg",
+      "value": "确认删除%s的令牌吗?"
+    },
+    {
+      "name": "dialog_btn_confirm",
+      "value": "确认"
+    },
+    {
+      "name": "dialog_btn_cancel",
+      "value": "取消"
+    },
+    {
+      "name": "dialog_cfg_tk_key",
+      "value": "密钥"
+    },
+    {
+      "name": "dialog_cfg_tk_host",
+      "value": "主机名"
+    },
+    {
+      "name": "dialog_cfg_tk_user",
+      "value": "用户名"
+    },
+    {
+      "name": "dialog_cfg_tk_alg",
+      "value": "算法"
+    },
+    {
+      "name": "dialog_cfg_tk_digits",
+      "value": "令牌长度"
+    },
+    {
+      "name": "dialog_cfg_tk_timeout",
+      "value": "刷新时间"
     }
   ]
 }

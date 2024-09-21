@@ -3,6 +3,18 @@
     {
       "name": "start_window_background",
       "value": "#FFFFFF"
+    },
+    {
+      "name": "window_background",
+      "value": "#eeeeee"
+    },
+    {
+      "name": "shadow",
+      "value": "#bbb"
+    },
+    {
+      "name": "str_gray",
+      "value": "#bbb"
     }
   ]
 }

@@ -2,15 +2,75 @@
   "string": [
     {
       "name": "module_desc",
-      "value": "module description"
+      "value": "Time-based One-Time Password Token"
     },
     {
       "name": "EntryAbility_desc",
-      "value": "description"
+      "value": "Time-based One-Time Password Token"
     },
     {
       "name": "EntryAbility_label",
-      "value": "label"
+      "value": "TOTP Token"
+    },
+    {
+      "name": "tab_token",
+      "value": "Token"
+    },
+    {
+      "name": "tab_token_add_scan",
+      "value": "Scan QR Code"
+    },
+    {
+      "name": "tab_token_add_key",
+      "value": "TOTP Configuration"
+    },
+    {
+      "name": "tab_token_add_forti_scan",
+      "value": "Scan Forti QR Code"
+    },
+    {
+      "name": "tab_token_add_forti_key",
+      "value": "Forti Configuration"
+    },
+    {
+      "name": "tab_setting",
+      "value": "Setting"
+    },
+    {
+      "name": "alert_remove_confirm_msg",
+      "value": "Confirm to reomve token for %s?"
+    },
+    {
+      "name": "dialog_btn_confirm",
+      "value": "Confirm"
+    },
+    {
+      "name": "dialog_btn_cancel",
+      "value": "Cancel"
+    },
+    {
+      "name": "dialog_cfg_tk_key",
+      "value": "Key"
+    },
+    {
+      "name": "dialog_cfg_tk_host",
+      "value": "Host"
+    },
+    {
+      "name": "dialog_cfg_tk_user",
+      "value": "User"
+    },
+    {
+      "name": "dialog_cfg_tk_alg",
+      "value": "Algorithm"
+    },
+    {
+      "name": "dialog_cfg_tk_digits",
+      "value": "Digits"
+    },
+    {
+      "name": "dialog_cfg_tk_timeout",
+      "value": "Timeout"
     }
   ]
 }

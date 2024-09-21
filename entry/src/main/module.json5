@@ -9,6 +9,11 @@
       "tablet",
       "2in1"
     ],
+    "requestPermissions": [
+      {
+        "name": "ohos.permission.STORE_PERSISTENT_DATA"
+      }
+    ],
     "deliveryWithInstall": true,
     "installationFree": false,
     "pages": "$profile:main_pages",

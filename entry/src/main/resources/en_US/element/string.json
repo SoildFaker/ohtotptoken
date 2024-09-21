@@ -2,15 +2,15 @@
   "string": [
     {
       "name": "module_desc",
-      "value": "module description"
+      "value": "Time-based One-Time Password Token"
     },
     {
       "name": "EntryAbility_desc",
-      "value": "description"
+      "value": "Time-based One-Time Password Token"
     },
     {
       "name": "EntryAbility_label",
-      "value": "label"
+      "value": "TOTP Token"
     }
   ]
 }
