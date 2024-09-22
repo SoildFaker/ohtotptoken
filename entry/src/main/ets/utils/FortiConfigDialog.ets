@@ -1,9 +1,27 @@
-import { AppRuntimeInfo, TokenConfig } from '../utils/CustomAppData';
+import { TokenConfig } from '../utils/CustomAppData';
+import { base32Decode, base32Encode, stringToIntArray } from '../utils/TokenUtils'
 import { scanCore, scanBarcode } from '@kit.ScanKit';
-import { url } from '@kit.ArkTS';
 import { http } from '@kit.NetworkKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
+import { cryptoFramework } from '@kit.CryptoArchitectureKit';
+import { buffer, util } from '@kit.ArkTS';
+import promptAction from '@ohos.promptAction'
+
+//"{\"d\":{\"__type\":\"SoftToken.MobileProvisionResponse\",\"__version\":\"\",\"__device_version\":\"\",\"__device_build\":\"\",\"mobile_id_hash\":\"\",\"seed\":\"\",\"token\":\"\",\"image_file\":\"\",\"pin_required\":\"\",\"pin_require_type\":\"\",\"pin_length\":0,\"counter\":0,\"encryption_key\":\"\",\"issuer\":\"\",\"result\":0,\"error\":{\"error_code\":40,\"error_message\":\"FTM token Activation Code is invalid\"}}}"
+class forti_server_resp_err {
+  error_code?: string
+  error_message?: string
+}
+
+class  forti_server_resp_data {
+  seed?: string
+  issuer?: string
+  error?: forti_server_resp_err
+}
+class  forti_server_resp {
+  d!: forti_server_resp_data
+}
 
 @Preview
 @CustomDialog
@@ -15,7 +33,7 @@ export struct FortiConfigDialog {
   @State forti_token: string = 'EEAEVVEYZSERRHEM'
   @State forti_dev_id: string = 'e248e1e9527f20ff'
 
-  private filesDir: string = getContext(this).filesDir;
+  private cache_dir: string = getContext(this).cacheDir;
 
   cancel?: () => void
 
@@ -28,24 +46,50 @@ export struct FortiConfigDialog {
     }
   }
 
+
+  decrypt_seed(seed: string): string {
+    let aes_decoder = cryptoFramework.createCipher('AES128|CBC|PKCS7');
+    let aes_iv: cryptoFramework.IvParamsSpec = {
+      algName: "IvParamsSpec",
+      iv: {data: stringToIntArray('fortitokenmobile')}
+    };
+    let symKeyBlob: cryptoFramework.DataBlob = { data: stringToIntArray(this.forti_dev_id) };
+    let aesGenerator = cryptoFramework.createSymKeyGenerator('AES128');
+    let aes_key = aesGenerator.convertKeySync(symKeyBlob);
+    aes_decoder.init(cryptoFramework.CryptoMode.DECRYPT_MODE, aes_key, aes_iv);
+    let base64 = new util.Base64Helper();
+    let decryptData = aes_decoder.doFinalSync({data: base64.decodeSync(seed)});
+    return decryptData.data.slice(0, 40).toString()
+  }
+
   requestKeyFromForti(): void {
+    let raw_token = base32Decode(this.forti_token)
+    let valid_prefix: number[] = [0x21, 0x00]
+    if (!raw_token.slice(0, 2).every((byte, index) => byte == valid_prefix[index])) {
+      promptAction.showToast({ message: 'ERROR: wrong User Token!' })
+      return;
+    }
+    raw_token = raw_token.slice(2)
+    let raw_token_hex = buffer.from(raw_token).toString('hex')// Array.from(raw_token, byte => byte.toString(16).padStart(2, '0')).join('')
     let httpRequest = http.createHttp();
     httpRequest.on('headersReceive', (header: Object) => {
       console.info('header: ' + JSON.stringify(header));
     })
 
+    let cer_path = this.cache_dir + "/fmt.ks"
+
     httpRequest.request(
       "https://globalftm.fortinet.net/SoftToken/Provisioning.asmx/Mobile",
       {
         method: http.RequestMethod.POST,
-        extraData: 'd=1',
+        extraData: {'d': {'mobile_id': this.forti_dev_id, '__type': 'SoftToken.MobileProvisionRequest', 'token_activation_code': raw_token_hex}},
         header: { 'Accept' : 'application/json' },
         readTimeout: 60000,
         connectTimeout: 60000,
         usingProtocol: http.HttpProtocol.HTTP1_1,
         usingProxy: false,
         clientCert: {
-          certPath: 'resource://rawfile/ftm.ks',
+          certPath: cer_path,
           keyPath: '',
           certType: http.CertType.P12,
           keyPassword: "Terran2023"
@@ -53,22 +97,21 @@ export struct FortiConfigDialog {
       },
       (err: BusinessError, data: http.HttpResponse) => {
         if (!err) {
-          // data.result为HTTP响应内容，可根据业务需要进行解析
-          console.info('Result:' + JSON.stringify(data.result));
-          console.info('code:' + JSON.stringify(data.responseCode));
-          console.info('type:' + JSON.stringify(data.resultType));
-          // data.header为HTTP响应头，可根据业务需要进行解析
-          console.info('header:' + JSON.stringify(data.header));
-          console.info('cookies:' + JSON.stringify(data.cookies)); // 自API version 8开始支持cookie
-          // 取消订阅HTTP响应头事件
+          console.log(JSON.stringify(data.result))
+          let resp: forti_server_resp = JSON.parse(data.result.toString())
+
+          if (resp.d.error != undefined) {
+            console.error(`${resp.d.error.error_message}, code ${resp.d.error.error_code}`)
+            promptAction.showToast({ message: `${resp.d.error.error_message}, code ${resp.d.error.error_code}` })
+          } else {
+            this.conf.TokenKey = this.decrypt_seed(resp.d.seed!)
+            this.conf.TokenUser = resp.d.issuer!
+          }
           httpRequest.off('headersReceive');
-          // 当该请求使用完毕时，开发者务必调用destroy方法主动销毁该JavaScript Object。
           httpRequest.destroy();
         } else {
           console.info('error:' + JSON.stringify(err));
-          // 取消订阅HTTP响应头事件
           httpRequest.off('headersReceive');
-          // 当该请求使用完毕时，开发者务必调用destroy方法主动销毁该JavaScript Object。
           httpRequest.destroy();
         }
       });
@@ -191,9 +234,13 @@ export struct FortiConfigDialog {
           .fontColor(Color.Red)
           .backgroundColor(Color.Transparent)
           .onClick(() => {
-            if (this.controller != undefined) {
-              this.confirm(JSON.stringify(this.conf))
-              this.controller.close()
+            if (this.conf.TokenKey.length > 0) {
+              if (this.controller != undefined) {
+                this.confirm(JSON.stringify(this.conf))
+                this.controller.close()
+              }
+            } else {
+              promptAction.showToast({ message: 'Enter a correct key' })
             }
           })
           .width('100%')

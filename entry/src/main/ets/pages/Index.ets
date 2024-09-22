@@ -4,8 +4,10 @@ import { TOTPConfigDialog } from '../utils/TOTPConfigDialog';
 import { FortiConfigDialog } from '../utils/FortiConfigDialog';
 import { TokenItem } from '../components/TokenItem';
 import { util } from '@kit.ArkTS';
-import promptAction from '@ohos.promptAction'
+import { fileIo as fs } from '@kit.CoreFileKit';
 import { MMKV } from '@tencent/mmkv';
+import { BusinessError } from '@kit.BasicServicesKit';
+import promptAction from '@ohos.promptAction'
 
 let mmkv = MMKV.defaultMMKV();
 
@@ -31,6 +33,20 @@ struct Index {
     let token_str: string = JSON.stringify(new TokenConfig())
     this.token_keys.forEach(key => {
       this.arrConf.push(JSON.parse(mmkv.decodeString(`token_${key}`) ?? token_str))
+    })
+    let cer_path = getContext(this).cacheDir + "/fmt.ks"
+    fs.access(cer_path, fs.AccessModeType.EXIST).then((exist) => {
+      if (!exist) {
+        fs.open(cer_path, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE).then((cer_file) => {
+          let arr= getContext(this).resourceManager.getRawFileContentSync('ftm.ks')
+          fs.write(cer_file.fd, arr.buffer).then((cnt) => {
+            console.log('store fmt.ks to cache dir')
+          })
+            .catch((err:BusinessError) => {
+              console.error(`${err.message}`)
+            })
+        })
+      }
     })
   }
 
