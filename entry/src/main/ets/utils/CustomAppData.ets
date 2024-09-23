@@ -16,6 +16,8 @@ export class TokenConfig {
   TokenAlgorithm: string
   TokenPeriod: number
   TokenDigits: number
+  FortiToken: string
+  FortiDevID: string
 
   constructor(
     key: string = 'EEAEVVEYZSERRHEM',
@@ -33,6 +35,8 @@ export class TokenConfig {
     this.TokenAlgorithm = alg
     this.TokenPeriod = period
     this.TokenDigits = digits
+    this.FortiToken = ''
+    this.FortiDevID = ''
   }
 
 }

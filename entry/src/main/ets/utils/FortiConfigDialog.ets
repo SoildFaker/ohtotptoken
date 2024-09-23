@@ -30,8 +30,7 @@ export struct FortiConfigDialog {
   @Prop conf_json?: string = ''
   @State conf: TokenConfig = new TokenConfig('', 1)
   @State btn_camera_clicked: number = 0
-  @State forti_token: string = 'EEAEVVEYZSERRHEM'
-  @State forti_dev_id: string = 'e248e1e9527f20ff'
+  @State btn_dev_id_clicked: number = 0
 
   private cache_dir: string = getContext(this).cacheDir;
 
@@ -43,9 +42,14 @@ export struct FortiConfigDialog {
   aboutToAppear(): void {
     if (this.conf_json != undefined && this.conf_json.length > 0) {
       this.conf = JSON.parse(this.conf_json!)
+    } else {
+      this.getRandDevID()
     }
   }
 
+  getRandDevID(): void {
+    this.conf.FortiDevID = buffer.from(util.generateRandomBinaryUUID()).toString('hex').slice(0, 16)
+  }
 
   decrypt_seed(seed: string): string {
     let aes_decoder = cryptoFramework.createCipher('AES128|CBC|PKCS7');
@@ -53,7 +57,7 @@ export struct FortiConfigDialog {
       algName: "IvParamsSpec",
       iv: {data: stringToIntArray('fortitokenmobile')}
     };
-    let symKeyBlob: cryptoFramework.DataBlob = { data: stringToIntArray(this.forti_dev_id) };
+    let symKeyBlob: cryptoFramework.DataBlob = { data: stringToIntArray(this.conf.FortiDevID) };
     let aesGenerator = cryptoFramework.createSymKeyGenerator('AES128');
     let aes_key = aesGenerator.convertKeySync(symKeyBlob);
     aes_decoder.init(cryptoFramework.CryptoMode.DECRYPT_MODE, aes_key, aes_iv);
@@ -63,10 +67,17 @@ export struct FortiConfigDialog {
   }
 
   requestKeyFromForti(): void {
-    let raw_token = base32Decode(this.forti_token)
-    let valid_prefix: number[] = [0x21, 0x00]
-    if (!raw_token.slice(0, 2).every((byte, index) => byte == valid_prefix[index])) {
-      promptAction.showToast({ message: 'ERROR: wrong User Token!' })
+    if (this.conf.FortiToken.length !== 16) {
+      promptAction.showToast({ message: 'ERROR: Wrong Forti Token!' })
+      return;
+    }
+    if (this.conf.FortiDevID.length !== 16) {
+      promptAction.showToast({ message: 'ERROR: Wrong Device ID!' })
+      return;
+    }
+    let raw_token = base32Decode(this.conf.FortiToken)
+    if (!(raw_token[0] === 0x21)) {
+      promptAction.showToast({ message: 'ERROR: Wrong User Token!' })
       return;
     }
     raw_token = raw_token.slice(2)
@@ -82,7 +93,7 @@ export struct FortiConfigDialog {
       "https://globalftm.fortinet.net/SoftToken/Provisioning.asmx/Mobile",
       {
         method: http.RequestMethod.POST,
-        extraData: {'d': {'mobile_id': this.forti_dev_id, '__type': 'SoftToken.MobileProvisionRequest', 'token_activation_code': raw_token_hex}},
+        extraData: {'d': {'mobile_id': this.conf.FortiDevID, '__type': 'SoftToken.MobileProvisionRequest', 'token_activation_code': raw_token_hex}},
         header: { 'Accept' : 'application/json' },
         readTimeout: 60000,
         connectTimeout: 60000,
@@ -117,10 +128,6 @@ export struct FortiConfigDialog {
       });
   }
 
-  addNewConfigOTP(uri: string): void {
-
-  }
-
   build() {
     Column({ space: 10 }) {
       Row() {
@@ -144,7 +151,7 @@ export struct FortiConfigDialog {
               enableAlbum: true
             };
             scanBarcode.startScanForResult(getContext(this), options).then((result: scanBarcode.ScanResult) => {
-              this.forti_token = result.originalValue
+              this.conf.FortiToken = result.originalValue
               hilog.info(0x0001, '[Scan CPSample]', `Succeeded in getting ScanResult by promise with options, result is ${JSON.stringify(result)}`);
             }).catch((error: BusinessError) => {
               hilog.error(0x0001, '[Scan CPSample]',
@@ -164,9 +171,9 @@ export struct FortiConfigDialog {
       Column({ space: 10 }) {
         Row() {
           Text($r('app.string.dialog_cfg_forti_token'))
-          TextInput({ text: this.forti_token, placeholder: this.forti_token })
+          TextInput({ text: this.conf.FortiToken, placeholder: this.conf.FortiToken })
             .onChange((value) => {
-              this.forti_token = value
+              this.conf.FortiToken = value
             })
             .width('70%')
         }
@@ -174,11 +181,28 @@ export struct FortiConfigDialog {
         .justifyContent(FlexAlign.SpaceBetween)
         Row() {
           Text($r('app.string.dialog_cfg_forti_dev_id'))
-          TextInput({ text: this.forti_dev_id, placeholder: this.forti_dev_id })
-            .onChange((value) => {
-              this.forti_dev_id = value
+          Stack() {
+            Row() {
+              SymbolGlyph($r('sys.symbol.arrow_counterclockwise'))
+                .margin({ right: 10 })
+                .fontSize(20)
+                .symbolEffect(new BounceSymbolEffect(EffectScope.WHOLE, EffectDirection.UP),
+                  this.btn_dev_id_clicked)
+            }
+            .onClick(() => {
+              this.btn_dev_id_clicked++
+              this.getRandDevID()
             })
-            .width('70%')
+            .zIndex(2)
+            .height(30)
+            TextInput({ text: this.conf.FortiDevID, placeholder: this.conf.FortiDevID })
+              .onChange((value) => {
+                this.conf.FortiDevID = value
+              })
+              .zIndex(1)
+              .width('70%')
+          }
+          .alignContent(Alignment.End)
         }
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)
