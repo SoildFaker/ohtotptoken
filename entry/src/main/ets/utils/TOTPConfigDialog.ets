@@ -38,9 +38,10 @@ export struct TOTPConfigDialog {
       console.error('Invalid protocol');
       return;
     }
+
     const type = otp_url.host;
     const pathParts = otp_url.pathname.slice(1).split('/');
-    const labelParts = pathParts[0].split(':');
+    const labelParts = decodeURIComponent(pathParts[0]).split(':');
     this.conf.TokenHost = labelParts[0];
     this.conf.TokenUser = labelParts[1];
 
