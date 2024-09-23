@@ -140,6 +140,7 @@ export struct FortiConfigDialog {
           .fontWeight(FontWeight.Bold)
         SymbolGlyph($r('sys.symbol.camera'))
           .fontSize(30)
+          .fontColor([$r('app.color.item_fg')])
           .fontWeight(FontWeight.Medium)
           .symbolEffect(new BounceSymbolEffect(EffectScope.WHOLE, EffectDirection.UP),
             this.btn_camera_clicked)
@@ -166,7 +167,7 @@ export struct FortiConfigDialog {
       }
       .width('100%')
       .borderRadius(1)
-      .backgroundColor(Color.Black)
+      .backgroundColor($r('app.color.item_fg'))
       .height(2)
       Column({ space: 10 }) {
         Row() {
@@ -211,8 +212,8 @@ export struct FortiConfigDialog {
             .onClick(() => {
               this.requestKeyFromForti()
             })
-            .backgroundColor(Color.White)
-            .fontColor(Color.Black)
+            .backgroundColor($r('app.color.item_background'))
+            .fontColor($r('app.color.str_main'))
             .border({ width: 1 })
             .width('100%')
         }
@@ -246,7 +247,7 @@ export struct FortiConfigDialog {
 
       Flex({ justifyContent: FlexAlign.SpaceAround }) {
         Button($r('app.string.dialog_btn_cancel'))
-          .fontColor(Color.Black)
+          .fontColor($r('app.color.item_fg'))
           .backgroundColor(Color.Transparent)
           .onClick(() => {
             if (this.controller != undefined) {

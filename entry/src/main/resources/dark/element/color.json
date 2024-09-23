@@ -2,35 +2,35 @@
   "color": [
     {
       "name": "start_window_background",
-      "value": "#FFFFFF"
+      "value": "#111"
     },
     {
       "name": "window_background",
-      "value": "#eeeeee"
+      "value": "#222"
     },
     {
       "name": "item_background",
-      "value": "#FFFFFFFF"
+      "value": "#333"
     },
     {
       "name": "item_fg",
-      "value": "#FF131313"
+      "value": "#FFD6D6D6"
     },
     {
       "name": "shadow",
-      "value": "#bbb"
+      "value": "#FF1A1A1A"
     },
     {
       "name": "str_gray",
-      "value": "#FFBCBABA"
+      "value": "#aaa"
     },
     {
       "name": "str_main",
-      "value": "#FF161616"
+      "value": "#eee"
     },
     {
       "name": "token_number",
-      "value": "#FF012EE0"
+      "value": "#FF638FF6"
     }
   ]
 }

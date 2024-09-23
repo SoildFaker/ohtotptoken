@@ -29,6 +29,7 @@ export struct TokenItem {
       Column() {
         Text(this.Config.TokenHost)
           .fontSize(20)
+          .fontColor($r('app.color.str_main'))
         Text(this.Config.TokenUser)
           .fontSize(10)
           .fontColor($r('app.color.str_gray'))
@@ -36,12 +37,11 @@ export struct TokenItem {
       .alignItems(HorizontalAlign.Start)
       Blank()
       Text(this.TokenNumber)
-        .fontColor(Color.Blue)
+        .fontColor($r('app.color.token_number'))
         .fontSize(30)
       Stack() {
         Text(this.TokenLeftPeriod.toString())
         Progress({ value: this.TokenLeftPeriod, total: this.Config.TokenPeriod, type: ProgressType.Ring })
-          //.color(Color.Blue)
           .style({ strokeWidth: 8 })
           .width(40)
           .height(40)
@@ -53,7 +53,7 @@ export struct TokenItem {
     .justifyContent(FlexAlign.SpaceBetween)
     .width('100%')
     .height(60)
-    .backgroundColor(Color.White)
+    .backgroundColor($r('app.color.item_background'))
     .onAppear(() => {
       this.updateToken()
       setInterval(() => {

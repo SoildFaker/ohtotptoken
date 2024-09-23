@@ -111,7 +111,7 @@ struct Index {
           autoCancel: true,
           alignment: DialogAlignment.Center,
           primaryButton: {
-            defaultFocus: true,
+            defaultFocus: false,
             value: $r('app.string.dialog_btn_cancel'),
             action: () => {
               return
@@ -216,7 +216,7 @@ struct Index {
                 .symbolEffect(new BounceSymbolEffect(EffectScope.WHOLE, EffectDirection.UP),
                   this.btn_token_add_clicked)
             }
-            .backgroundColor(Color.Blue)
+            .backgroundColor($r('app.color.token_number'))
             .shadow({ radius: 10, color: $r('app.color.shadow') })
             .margin({ bottom: 10, right: 10 })
             .padding(10)

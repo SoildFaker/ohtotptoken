@@ -67,6 +67,7 @@ export struct TOTPConfigDialog {
           .fontWeight(FontWeight.Bold)
         SymbolGlyph($r('sys.symbol.camera'))
           .fontSize(30)
+          .fontColor([$r('app.color.item_fg')])
           .fontWeight(FontWeight.Medium)
           .symbolEffect(new BounceSymbolEffect(EffectScope.WHOLE, EffectDirection.UP),
             this.btn_camera_clicked)
@@ -93,7 +94,7 @@ export struct TOTPConfigDialog {
       }
       .width('100%')
       .borderRadius(1)
-      .backgroundColor(Color.Black)
+      .backgroundColor($r('app.color.item_fg'))
       .height(2)
       Column({ space: 10 }) {
         Row() {
@@ -195,7 +196,6 @@ export struct TOTPConfigDialog {
               style: SliderStyle.InSet
             })
               .blockColor('#191970')
-              .trackColor('#ADD8E6')
               .selectedColor('#4169E1')
               .onChange((value: number, mode: SliderChangeMode) => {
                 this.conf.TokenPeriod = value
@@ -213,7 +213,7 @@ export struct TOTPConfigDialog {
 
       Flex({ justifyContent: FlexAlign.SpaceAround }) {
         Button($r('app.string.dialog_btn_cancel'))
-          .fontColor(Color.Black)
+          .fontColor($r('app.color.item_fg'))
           .backgroundColor(Color.Transparent)
           .onClick(() => {
             if (this.controller != undefined) {
