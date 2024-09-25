@@ -141,7 +141,7 @@ export struct FortiConfigDialog {
       }
       .height(10)
       Row() {
-        Text("Forti Config")
+        Text($r('app.string.tab_token_add_forti_key'))
           .fontSize(30)
           .fontWeight(FontWeight.Bold)
         SymbolGlyph($r('sys.symbol.camera'))

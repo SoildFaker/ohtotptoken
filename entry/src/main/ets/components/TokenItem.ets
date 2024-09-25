@@ -28,15 +28,23 @@ export struct TokenItem {
         .fontSize(40)
       Column() {
         Text(this.Config.TokenHost)
+          .textOverflow({overflow: TextOverflow.Ellipsis})
+          .maxLines(1)
           .fontSize(20)
           .fontColor($r('app.color.str_main'))
         Text(this.Config.TokenUser)
+          .textOverflow({overflow: TextOverflow.Ellipsis})
+          .maxLines(1)
           .fontSize(10)
           .fontColor($r('app.color.str_gray'))
       }
+      .layoutWeight(1)
       .alignItems(HorizontalAlign.Start)
       Blank()
       Text(this.TokenNumber)
+        .textAlign(TextAlign.End)
+        .textOverflow({overflow: TextOverflow.MARQUEE})
+        .maxLines(1)
         .fontColor($r('app.color.token_number'))
         .fontSize(30)
       Stack() {

@@ -63,7 +63,7 @@ export struct TOTPConfigDialog {
       }
       .height(10)
       Row() {
-        Text("TOTP Config")
+        Text($r('app.string.tab_token_add_key'))
           .fontSize(30)
           .fontWeight(FontWeight.Bold)
         SymbolGlyph($r('sys.symbol.camera'))

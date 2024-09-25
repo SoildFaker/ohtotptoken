@@ -38,7 +38,7 @@
     },
     {
       "name": "alert_remove_confirm_msg",
-      "value": "Confirm to reomve token for %s?"
+      "value": "Confirm to remove token for %s?"
     },
     {
       "name": "dialog_btn_confirm",
