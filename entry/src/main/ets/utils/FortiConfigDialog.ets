@@ -194,7 +194,12 @@ export struct FortiConfigDialog {
               .fontColor([Color.Red])
               .margin({right: 10})
               .bindPopup(this.warn_dev_id_popup, {
-                message: getContext(this).resourceManager.getStringSync($r('app.string.warn_forti_dev_id_popup')).toString()
+                message: getContext(this).resourceManager.getStringSync($r('app.string.warn_forti_dev_id_popup')).toString(),
+                onStateChange: (e)=> {
+                  if (!e.isVisible) {
+                    this.warn_dev_id_popup = false
+                  }
+                }
               })
 
           }
