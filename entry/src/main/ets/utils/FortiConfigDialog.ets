@@ -31,6 +31,7 @@ export struct FortiConfigDialog {
   @State conf: TokenConfig = new TokenConfig('', 1)
   @State btn_camera_clicked: number = 0
   @State btn_dev_id_clicked: number = 0
+  @State warn_dev_id_popup: boolean = false
 
   private cache_dir: string = getContext(this).cacheDir;
 
@@ -62,8 +63,13 @@ export struct FortiConfigDialog {
     let aes_key = aesGenerator.convertKeySync(symKeyBlob);
     aes_decoder.init(cryptoFramework.CryptoMode.DECRYPT_MODE, aes_key, aes_iv);
     let base64 = new util.Base64Helper();
-    let decryptData = aes_decoder.doFinalSync({data: base64.decodeSync(seed)});
-    return decryptData.data.slice(0, 40).toString()
+    try {
+      let decryptData = aes_decoder.doFinalSync({data: base64.decodeSync(seed).slice(0, 40)});
+      return buffer.from(decryptData.data).toString('hex')
+    } catch (err) {
+      promptAction.showToast({message: `Error: ${err.message}`})
+      return `Error: ${err.message}`
+    }
   }
 
   requestKeyFromForti(): void {
@@ -172,6 +178,7 @@ export struct FortiConfigDialog {
       Column({ space: 10 }) {
         Row() {
           Text($r('app.string.dialog_cfg_forti_token'))
+            .width('30%')
           TextInput({ text: this.conf.FortiToken, placeholder: this.conf.FortiToken })
             .onChange((value) => {
               this.conf.FortiToken = value
@@ -181,7 +188,21 @@ export struct FortiConfigDialog {
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)
         Row() {
-          Text($r('app.string.dialog_cfg_forti_dev_id'))
+          Row() {
+            Text($r('app.string.dialog_cfg_forti_dev_id'))
+            SymbolGlyph($r('sys.symbol.exclamationmark_circle'))
+              .fontColor([Color.Red])
+              .margin({right: 10})
+              .bindPopup(this.warn_dev_id_popup, {
+                message: getContext(this).resourceManager.getStringSync($r('app.string.warn_forti_dev_id_popup')).toString()
+              })
+
+          }
+          .onClick(() => {
+            this.warn_dev_id_popup = !this.warn_dev_id_popup;
+          })
+          .width('30%')
+          .justifyContent(FlexAlign.SpaceBetween)
           Stack() {
             Row() {
               SymbolGlyph($r('sys.symbol.arrow_counterclockwise'))
@@ -221,6 +242,7 @@ export struct FortiConfigDialog {
         .justifyContent(FlexAlign.SpaceBetween)
         Row() {
           Text($r('app.string.dialog_cfg_tk_key'))
+            .width('30%')
           TextInput({ text: this.conf.TokenKey, placeholder: this.conf.TokenKey })
             .onChange((value) => {
               this.conf.TokenKey = value
@@ -232,6 +254,7 @@ export struct FortiConfigDialog {
 
         Row() {
           Text($r('app.string.dialog_cfg_tk_user'))
+            .width('30%')
           TextInput({ text: this.conf.TokenUser, placeholder: this.conf.TokenUser })
             .onChange((value) => {
               this.conf.TokenUser = value

@@ -78,11 +78,15 @@
     },
     {
       "name": "dialog_cfg_forti_token",
-      "value": "用户令牌"
+      "value": "激活码"
     },
     {
       "name": "dialog_cfg_forti_btn_gen_key",
       "value": "获取密钥"
+    },
+    {
+      "name": "warn_forti_dev_id_popup",
+      "value": "Forti只允许你激活一次并绑定此设备ID"
     }
   ]
 }

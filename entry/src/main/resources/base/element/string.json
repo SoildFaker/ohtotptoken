@@ -78,11 +78,15 @@
     },
     {
       "name": "dialog_cfg_forti_token",
-      "value": "User Token"
+      "value": "Activation Code"
     },
     {
       "name": "dialog_cfg_forti_btn_gen_key",
       "value": "Request Key"
+    },
+    {
+      "name": "warn_forti_dev_id_popup",
+      "value": "FortiToken allows you to register a token only once with this device id"
     }
   ]
 }

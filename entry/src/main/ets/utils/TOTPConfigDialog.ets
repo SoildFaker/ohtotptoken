@@ -100,6 +100,7 @@ export struct TOTPConfigDialog {
       Column({ space: 10 }) {
         Row() {
           Text($r('app.string.dialog_cfg_tk_key'))
+            .width('30%')
           TextInput({ text: this.conf.TokenKey, placeholder: this.conf.TokenKey })
             .onChange((value) => {
               this.conf.TokenKey = value
@@ -110,6 +111,7 @@ export struct TOTPConfigDialog {
         .justifyContent(FlexAlign.SpaceBetween)
         Row() {
           Text($r('app.string.dialog_cfg_tk_host'))
+            .width('30%')
           TextInput({ text: this.conf.TokenHost, placeholder: this.conf.TokenHost })
             .onChange((value) => {
               this.conf.TokenHost = value
@@ -120,6 +122,7 @@ export struct TOTPConfigDialog {
         .justifyContent(FlexAlign.SpaceBetween)
         Row() {
           Text($r('app.string.dialog_cfg_tk_user'))
+            .width('30%')
           TextInput({ text: this.conf.TokenUser, placeholder: this.conf.TokenUser })
             .onChange((value) => {
               this.conf.TokenUser = value
@@ -130,6 +133,7 @@ export struct TOTPConfigDialog {
         .justifyContent(FlexAlign.SpaceBetween)
         Row() {
           Text($r('app.string.dialog_cfg_tk_alg'))
+            .width('30%')
           Select([
             {value: 'SHA1'},
             {value: 'SHA224'},
@@ -149,6 +153,7 @@ export struct TOTPConfigDialog {
         .justifyContent(FlexAlign.SpaceBetween)
         Row() {
           Text($r('app.string.dialog_cfg_tk_digits'))
+            .width('30%')
           Row() {
             Text("4")
             Radio({ value: '4', group: 'rg_cfg_digits' }).checked(this.conf.TokenDigits === 4)
@@ -188,6 +193,7 @@ export struct TOTPConfigDialog {
         .justifyContent(FlexAlign.SpaceBetween)
         Row() {
           Text($r('app.string.dialog_cfg_tk_timeout'))
+            .width('30%')
           Row() {
             Slider({
               min: 1,
