@@ -32,6 +32,7 @@ export struct FortiConfigDialog {
   @State btn_camera_clicked: number = 0
   @State btn_dev_id_clicked: number = 0
   @State warn_dev_id_popup: boolean = false
+  @State btn_wait_from_forti: boolean = false
 
   private cache_dir: string = getContext(this).cacheDir;
 
@@ -50,10 +51,12 @@ export struct FortiConfigDialog {
 
   getRandDevID(): void {
     this.conf.FortiDevID = buffer.from(util.generateRandomBinaryUUID()).toString('hex').slice(0, 16)
+    this.conf.TokenHost = 'Forti'
+    this.conf.TokenPeriod = 60
   }
 
-  decrypt_seed(seed: string): string {
-    let aes_decoder = cryptoFramework.createCipher('AES128|CBC|PKCS7');
+  decrypt_seed(seed: string) {
+    let aes_decoder = cryptoFramework.createCipher('AES128|CBC|NoPadding');
     let aes_iv: cryptoFramework.IvParamsSpec = {
       algName: "IvParamsSpec",
       iv: {data: stringToIntArray('fortitokenmobile')}
@@ -64,11 +67,18 @@ export struct FortiConfigDialog {
     aes_decoder.init(cryptoFramework.CryptoMode.DECRYPT_MODE, aes_key, aes_iv);
     let base64 = new util.Base64Helper();
     try {
-      let decryptData = aes_decoder.doFinalSync({data: base64.decodeSync(seed).slice(0, 40)});
-      return buffer.from(decryptData.data).toString('hex')
+      let b64seed = base64.decodeSync(seed)
+      setTimeout(() => {
+        aes_decoder.doFinal({data: b64seed}).then((decryptData) => {
+          let decoder = new util.TextDecoder()
+          let decode_hex = decoder.decodeToString(decryptData.data.slice(0, 40))
+          this.conf.TokenKey = base32Encode(buffer.from(decode_hex, 'hex').buffer as Uint8Array)
+          this.btn_wait_from_forti = false;
+        });
+      }, 1000)
     } catch (err) {
+      this.btn_wait_from_forti = false;
       promptAction.showToast({message: `Error: ${err.message}`})
-      return `Error: ${err.message}`
     }
   }
 
@@ -86,6 +96,7 @@ export struct FortiConfigDialog {
       promptAction.showToast({ message: 'ERROR: Wrong User Token!' })
       return;
     }
+    this.btn_wait_from_forti = true;
     raw_token = raw_token.slice(2)
     let raw_token_hex = buffer.from(raw_token).toString('hex')// Array.from(raw_token, byte => byte.toString(16).padStart(2, '0')).join('')
     let httpRequest = http.createHttp();
@@ -121,17 +132,19 @@ export struct FortiConfigDialog {
             console.error(`${resp.d.error.error_message}, code ${resp.d.error.error_code}`)
             promptAction.showToast({ message: `${resp.d.error.error_message}, code ${resp.d.error.error_code}` })
           } else {
-            this.conf.TokenKey = this.decrypt_seed(resp.d.seed!)
+            this.decrypt_seed(resp.d.seed!)
             this.conf.TokenUser = resp.d.issuer!
           }
           httpRequest.off('headersReceive');
           httpRequest.destroy();
         } else {
+          this.btn_wait_from_forti = false;
           console.info('error:' + JSON.stringify(err));
           httpRequest.off('headersReceive');
           httpRequest.destroy();
         }
       });
+
   }
 
   build() {
@@ -234,14 +247,20 @@ export struct FortiConfigDialog {
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)
         Row() {
-          Button($r('app.string.dialog_cfg_forti_btn_gen_key'))
-            .onClick(() => {
-              this.requestKeyFromForti()
-            })
-            .backgroundColor($r('app.color.item_background'))
-            .fontColor($r('app.color.str_main'))
-            .border({ width: 1 })
-            .width('100%')
+          Stack() {
+            Button($r('app.string.dialog_cfg_forti_btn_gen_key'))
+              .onClick(() => {
+                this.requestKeyFromForti()
+              })
+              .enabled(!this.btn_wait_from_forti)
+              .backgroundColor($r('app.color.item_background'))
+              .fontColor($r('app.color.str_main'))
+              .border({ width: 1 })
+              .width('100%')
+            LoadingProgress()
+              .height(30)
+              .visibility(this.btn_wait_from_forti ? Visibility.Visible : Visibility.Hidden)
+          }
         }
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)

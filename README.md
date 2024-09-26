@@ -3,7 +3,7 @@ TOTP Token for HarmonyOS Next
 
 # Plan
  - [x] Support TOTP Tokens
- - [ ] Support Forti Token
+ - [x] Support Forti Token
  - [ ] Asset Store Kit
  - [ ] Setting Page
 

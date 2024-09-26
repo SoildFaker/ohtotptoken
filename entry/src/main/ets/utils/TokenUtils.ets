@@ -1,3 +1,5 @@
+import { buffer } from "@kit.ArkTS";
+
 const RFC4648 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 const RFC4648_HEX = '0123456789ABCDEFGHIJKLMNOPQRSTUV';
 const CROCKFORD = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
@@ -17,7 +19,6 @@ function readChar(alphabet: string, char: string): number {
 export function stringToIntArray(input: string): Uint8Array {
   return Uint8Array.from(input, c => c.charCodeAt(0))
 }
-
 
 export function base32Encode(
   input: Uint8Array,

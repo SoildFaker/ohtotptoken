@@ -1,8 +1,7 @@
-import { generateTotp } from 'totp-generator'
+import { generateTOTP } from 'libtotp_mcu.so'
 import { systemDateTime } from '@kit.BasicServicesKit';
 import { TokenConfig } from '../utils/CustomAppData';
-
-declare type HashAlgorithm = 'SHA1' | 'SHA224' | 'SHA256' | 'SHA384' | 'SHA512' | 'SHA3';
+import { base32Decode } from '../utils/TokenUtils';
 
 @Preview
 @ComponentV2
@@ -13,12 +12,15 @@ export struct TokenItem {
   @Local TokenLeftPeriod: number = 0
 
   updateToken() {
-    this.TokenLeftPeriod = this.Config.TokenPeriod - Math.floor(systemDateTime.getTime() / 1000) % this.Config.TokenPeriod
-    this.TokenNumber = generateTotp(this.Config.TokenKey, {
-      digits: this.Config.TokenDigits,
-      algorithm: this.Config.TokenAlgorithm as HashAlgorithm,
-      period: this.Config.TokenPeriod,
-    });
+    let timestamp = Math.floor(systemDateTime.getTime() / 1000)
+    this.TokenLeftPeriod = this.Config.TokenPeriod - timestamp % this.Config.TokenPeriod
+    this.TokenNumber = generateTOTP(
+      this.Config.TokenKey,
+      this.Config.TokenKey.length,
+      this.Config.TokenDigits,
+      this.Config.TokenPeriod,
+      timestamp
+    ).toString().padStart(this.Config.TokenDigits, '0')
   }
 
   build() {

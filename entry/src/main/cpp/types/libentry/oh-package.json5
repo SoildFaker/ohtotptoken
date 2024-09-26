@@ -1,0 +1,6 @@
+{
+  "name": "libtotp_mcu.so",
+  "types": "./index.d.ts",
+  "version": "0.1.0",
+  "description": "Please describe the basic information."
+}
