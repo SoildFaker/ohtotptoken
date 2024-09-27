@@ -1,7 +1,7 @@
 import { generateTOTP } from 'libtotp_mcu.so'
 import { systemDateTime } from '@kit.BasicServicesKit';
 import { TokenConfig } from '../utils/CustomAppData';
-import { base32Decode } from '../utils/TokenUtils';
+import { base32Decode, base32Encode } from '../utils/TokenUtils';
 
 @Preview
 @ComponentV2
@@ -15,7 +15,7 @@ export struct TokenItem {
     let timestamp = Math.floor(systemDateTime.getTime() / 1000)
     this.TokenLeftPeriod = this.Config.TokenPeriod - timestamp % this.Config.TokenPeriod
     this.TokenNumber = generateTOTP(
-      this.Config.TokenKey,
+      this.Config.TokenKey.toUpperCase(),
       this.Config.TokenKey.length,
       this.Config.TokenDigits,
       this.Config.TokenPeriod,

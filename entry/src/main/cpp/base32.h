@@ -2,6 +2,7 @@
 #ifndef _LIBBASE32_BASE32_H
 #define _LIBBASE32_BASE32_H
 #include <inttypes.h>
+#include <stdlib.h>
 
 typedef enum cotp_error {
     NO_ERROR = 0,

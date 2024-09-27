@@ -31,15 +31,15 @@
 
 #define MAKE_FILE_NAME (strrchr(__FILE__, '/') + 1)
 
-#define TOTP_LOGE(fmt, ...)                                                                                  \
+#define TOTP_LOGE(fmt, ...) if (0)                                                                             \
     OH_LOG_Print(LOG_APP, LOG_ERROR, 0x15b0, "TOTP-MCU", "TOTP [%{public}s %{public}d] " fmt, MAKE_FILE_NAME,  \
                  __LINE__, ##__VA_ARGS__)
 
-#define TOTP_LOGI(fmt, ...)                                                                                  \
+#define TOTP_LOGI(fmt, ...) if (0)                                                                             \
     OH_LOG_Print(LOG_APP, LOG_INFO, 0x15b0, "TOTP-MCU", "TOTP [%{public}s %{public}d] " fmt, MAKE_FILE_NAME,   \
                  __LINE__, ##__VA_ARGS__)
 
-#define TOTP_LOGD(fmt, ...)                                                                                  \
+#define TOTP_LOGD(fmt, ...) if (0)                                                                             \
     OH_LOG_Print(LOG_APP, LOG_DEBUG, 0x15b0, "TOTP-MCU", "TOTP [%{public}s %{public}d] " fmt, MAKE_FILE_NAME,  \
                  __LINE__, ##__VA_ARGS__)
 
@@ -76,12 +76,19 @@ static napi_value generateTOTP(napi_env env, napi_callback_info info)
         key_raw, key_raw_len
     );
     
-    totp(key_raw, (uint8_t)key_raw_len, period);
-    uint32_t code = getCodeFromTimestamp(timestamp, digits);
+    uint32_t code = 0;
     
-    TOTP_LOGI("key_buf:%{public}s, key_len:%{public}d, period: %{public}d, digits: %{public}d, timestamp: %{public}d, token: %{public}d",
-        key_buf, key_len, period, digits, timestamp, code
-    );
+    if (err_code == NO_ERROR) {
+    
+        totp(key_raw, (uint8_t)key_raw_len, period);
+        code = getCodeFromTimestamp(timestamp, digits);
+        
+        TOTP_LOGI("key_buf:%{public}s, key_len:%{public}d, period: %{public}d, digits: %{public}d, timestamp: %{public}d, token: %{public}d",
+            key_buf, key_len, period, digits, timestamp, code
+        );
+    } else {
+        TOTP_LOGE("decode error: %{public}d", err_code);
+    }
     
     napi_value token;
     napi_create_uint32(env, code, &token);
