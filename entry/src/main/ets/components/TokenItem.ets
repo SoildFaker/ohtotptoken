@@ -11,9 +11,20 @@ export struct TokenItem {
   @Local TokenNumber: string = '000000'
   @Local TokenLeftPeriod: number = 0
 
+  aboutToAppear(): void {
+    let timestamp = Math.floor(systemDateTime.getTime() / 1000)
+    this.refreshToken(timestamp)
+  }
+
   updateToken() {
     let timestamp = Math.floor(systemDateTime.getTime() / 1000)
     this.TokenLeftPeriod = this.Config.TokenPeriod - timestamp % this.Config.TokenPeriod
+    if (this.TokenLeftPeriod == this.Config.TokenPeriod) {
+      this.refreshToken(timestamp)
+    }
+  }
+
+  refreshToken(timestamp: number) {
     this.TokenNumber = generateTOTP(
       this.Config.TokenKey.toUpperCase(),
       this.Config.TokenKey.length,
