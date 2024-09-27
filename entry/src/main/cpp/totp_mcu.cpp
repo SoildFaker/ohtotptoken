@@ -86,9 +86,13 @@ static napi_value generateTOTP(napi_env env, napi_callback_info info)
         TOTP_LOGI("key_buf:%{public}s, key_len:%{public}d, period: %{public}d, digits: %{public}d, timestamp: %{public}d, token: %{public}d",
             key_buf, key_len, period, digits, timestamp, code
         );
+        
+        free((void *)key_raw);
     } else {
         TOTP_LOGE("decode error: %{public}d", err_code);
     }
+    
+    free((void *)key_buf);
     
     napi_value token;
     napi_create_uint32(env, code, &token);

@@ -129,6 +129,7 @@ export struct FortiConfigDialog {
           let resp: forti_server_resp = JSON.parse(data.result.toString())
 
           if (resp.d.error != undefined) {
+            this.btn_wait_from_forti = false;
             console.error(`${resp.d.error.error_message}, code ${resp.d.error.error_code}`)
             promptAction.showToast({ message: `${resp.d.error.error_message}, code ${resp.d.error.error_code}` })
           } else {
