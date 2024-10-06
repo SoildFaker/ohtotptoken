@@ -17,29 +17,25 @@
 #include "hilog/log.h"
 
 #include <cstring>
-#include <thread>
 #include <js_native_api.h>
 #include <js_native_api_types.h>
-#include <unistd.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <thread>
-#include <sys/time.h>
 
 #include "totp.h"
 #include "base32.h"
 
 #define MAKE_FILE_NAME (strrchr(__FILE__, '/') + 1)
 
-#define TOTP_LOGE(fmt, ...) if (0)                                                                             \
+#define TOTP_LOG_ENABLE 0
+
+#define TOTP_LOGE(fmt, ...) if (TOTP_LOG_ENABLE)                                                                             \
     OH_LOG_Print(LOG_APP, LOG_ERROR, 0x15b0, "TOTP-MCU", "TOTP [%{public}s %{public}d] " fmt, MAKE_FILE_NAME,  \
                  __LINE__, ##__VA_ARGS__)
 
-#define TOTP_LOGI(fmt, ...) if (0)                                                                             \
+#define TOTP_LOGI(fmt, ...) if (TOTP_LOG_ENABLE)                                                                             \
     OH_LOG_Print(LOG_APP, LOG_INFO, 0x15b0, "TOTP-MCU", "TOTP [%{public}s %{public}d] " fmt, MAKE_FILE_NAME,   \
                  __LINE__, ##__VA_ARGS__)
 
-#define TOTP_LOGD(fmt, ...) if (0)                                                                             \
+#define TOTP_LOGD(fmt, ...) if (TOTP_LOG_ENABLE)                                                                             \
     OH_LOG_Print(LOG_APP, LOG_DEBUG, 0x15b0, "TOTP-MCU", "TOTP [%{public}s %{public}d] " fmt, MAKE_FILE_NAME,  \
                  __LINE__, ##__VA_ARGS__)
 

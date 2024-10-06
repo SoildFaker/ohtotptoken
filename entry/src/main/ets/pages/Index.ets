@@ -3,6 +3,7 @@ import { AppRuntimeInfo, TokenConfig } from '../utils/CustomAppData';
 import { TOTPConfigDialog } from '../utils/TOTPConfigDialog';
 import { FortiConfigDialog } from '../utils/FortiConfigDialog';
 import { TokenItem } from '../components/TokenItem';
+import { SettingPage } from '../pages/SettingPage'
 import { util } from '@kit.ArkTS';
 import { fileIo as fs } from '@kit.CoreFileKit';
 import { MMKV } from '@tencent/mmkv';
@@ -231,7 +232,8 @@ struct Index {
         .tabBar($r('app.string.tab_token'))
 
         TabContent() {
-          Text("Empty")
+          SettingPage()
+            .height('100%')
         }
         .backgroundColor($r('app.color.window_background'))
         .tabBar($r('app.string.tab_setting'))

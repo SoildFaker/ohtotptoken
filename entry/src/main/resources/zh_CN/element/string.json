@@ -87,6 +87,14 @@
     {
       "name": "warn_forti_dev_id_popup",
       "value": "Forti只允许你激活一次并绑定此设备ID"
+    },
+    {
+      "name": "setting_opensource_leg",
+      "value": "使用到的开源软件"
+    },
+    {
+      "name": "setting_about",
+      "value": "关于"
     }
   ]
 }

@@ -74,7 +74,7 @@ export struct TokenItem {
     .justifyContent(FlexAlign.SpaceBetween)
     .width('100%')
     .height(60)
-    .backgroundColor($r('app.color.item_background'))
+    .backgroundColor($r("app.color.item_bg"))
     .onAppear(() => {
       this.updateToken()
       setInterval(() => {

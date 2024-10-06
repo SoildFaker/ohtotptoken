@@ -87,6 +87,14 @@
     {
       "name": "warn_forti_dev_id_popup",
       "value": "FortiToken allows you to register a token only once with this device id"
+    },
+    {
+      "name": "setting_opensource_leg",
+      "value": "Used Opensource Projects"
+    },
+    {
+      "name": "setting_about",
+      "value": "About"
     }
   ]
 }

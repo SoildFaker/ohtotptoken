@@ -254,7 +254,7 @@ export struct FortiConfigDialog {
                 this.requestKeyFromForti()
               })
               .enabled(!this.btn_wait_from_forti)
-              .backgroundColor($r('app.color.item_background'))
+              .backgroundColor($r("app.color.item_bg"))
               .fontColor($r('app.color.str_main'))
               .border({ width: 1 })
               .width('100%')

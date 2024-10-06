@@ -142,6 +142,7 @@ export struct TOTPConfigDialog {
             {value: 'SHA512'},
             {value: 'SHA3'},
           ])
+            .enabled(false)
             .selected(0)
             .value(this.conf.TokenAlgorithm)
             .onSelect((_, value) => {
