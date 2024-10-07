@@ -5,13 +5,26 @@
         "name": "default",
         "type": "HarmonyOS",
         "material": {
-          "certpath": "C:\\Users\\Enbin\\.ohos\\config\\default_ohtotptoken_zEfyPz1RN8ob1pMCTZfbW1apFSh333TcemZR0Z8gQfk=.cer",
-          "storePassword": "0000001BE69307F6A99308768CAEE345F169AE560CFF1984E5A832D76F9550A7C5112F1914EB2A768C5548",
+          "certpath": "C:/Users/Enbin/.ohos/config/default_ohtotptoken_zEfyPz1RN8ob1pMCTZfbW1apFSh333TcemZR0Z8gQfk=.cer",
+          "storePassword": "0000001BB66CF13DFFF52781A402D98B90FB4DC3CEB987851F9F4F62FED2E2ACF283735474941199A65182",
           "keyAlias": "debugKey",
-          "keyPassword": "0000001BD9D440608096780F75A446C57E1CF1EFF102F33CF9F07F53F62929AB45509AB65C5B82ADC2714E",
-          "profile": "C:\\Users\\Enbin\\.ohos\\config\\default_ohtotptoken_zEfyPz1RN8ob1pMCTZfbW1apFSh333TcemZR0Z8gQfk=.p7b",
+          "keyPassword": "0000001B82B8AF540B7535EE7753A9F5B0EA3BFEB4CAB75760CA689539E7234C1213D8EE5CB60EB5610515",
+          "profile": "C:/Users/Enbin/.ohos/config/default_ohtotptoken_zEfyPz1RN8ob1pMCTZfbW1apFSh333TcemZR0Z8gQfk=.p7b",
           "signAlg": "SHA256withECDSA",
-          "storeFile": "C:\\Users\\Enbin\\.ohos\\config\\default_ohtotptoken_zEfyPz1RN8ob1pMCTZfbW1apFSh333TcemZR0Z8gQfk=.p12"
+          "storeFile": "C:/Users/Enbin/.ohos/config/default_ohtotptoken_zEfyPz1RN8ob1pMCTZfbW1apFSh333TcemZR0Z8gQfk=.p12"
+        }
+      },
+      {
+        "name": "release",
+        "type": "HarmonyOS",
+        "material": {
+          "storePassword": "0000001A9DE9C6D630C7D05551C2E1ABE989979CB48BBCBECF9C75F1F71E0BB3C423425B8AA4969732CD",
+          "certpath": "D:/Dev/OpenHarmony/Key_and_CSR/Release.cer",
+          "keyAlias": "release",
+          "keyPassword": "0000001A717F7247A1216197638AEEE7BC48403B986D093FF6AB1A0077D72784D436BA286CBEDD7C2826",
+          "profile": "D:/Dev/OpenHarmony/Key_and_CSR/ReleaseRelease.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "D:/Dev/OpenHarmony/Key_and_CSR/.p12"
         }
       }
     ],

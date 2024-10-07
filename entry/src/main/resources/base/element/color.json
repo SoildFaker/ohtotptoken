@@ -31,6 +31,10 @@
     {
       "name": "token_number",
       "value": "#FF012EE0"
+    },
+    {
+      "name": "tab_bar_bg",
+      "value": "#fdfdfd"
     }
   ]
 }

@@ -170,6 +170,8 @@ struct Index {
   build() {
     Column() {
       Row()
+        .backgroundColor($r('app.color.tab_bar_bg'))
+        .width('100%')
         .height(this.appInfo.appTopAvoidHeight)
       Tabs() {
         TabContent() {
@@ -245,6 +247,8 @@ struct Index {
         .backgroundColor($r('app.color.window_background'))
         .tabBar($r('app.string.tab_setting'))
       }
+      .barBackgroundColor($r('app.color.tab_bar_bg'))
+      .backgroundColor($r('app.color.window_background'))
       .layoutWeight(1)
     }
   }

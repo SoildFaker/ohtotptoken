@@ -96,6 +96,8 @@ export struct SettingPage {
               Button({ type: ButtonType.Capsule }) {
                 Row() {
                   Text($r('app.string.setting_backup_export'))
+                  Blank()
+                    .width(10)
                   SymbolGlyph($r('sys.symbol.save_fill'))
                     .fontColor([$r('app.color.str_main')])
                 }
@@ -111,6 +113,8 @@ export struct SettingPage {
               Button({ type: ButtonType.Capsule }) {
                 Row() {
                   Text($r('app.string.setting_backup_import'))
+                  Blank()
+                    .width(10)
                   SymbolGlyph($r('sys.symbol.folder_fill'))
                     .fontColor([$r('app.color.str_main')])
                 }
