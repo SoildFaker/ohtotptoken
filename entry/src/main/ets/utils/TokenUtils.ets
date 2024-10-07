@@ -1,4 +1,4 @@
-import { buffer } from "@kit.ArkTS";
+import { buffer } from '@kit.ArkTS';
 
 const RFC4648 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 const RFC4648_HEX = '0123456789ABCDEFGHIJKLMNOPQRSTUV';
@@ -14,6 +14,23 @@ function readChar(alphabet: string, char: string): number {
   }
 
   return idx;
+}
+
+export function generateFileNameWithDate(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0'); // 月份从0开始，所以加1
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+
+  const fileName = `${year}${month}${day}${hours}${minutes}${seconds}`;
+  return fileName;
+}
+
+export function intArrayToString(input: ArrayBuffer): string {
+  return buffer.from(input).toString()
 }
 
 export function stringToIntArray(input: string): Uint8Array {

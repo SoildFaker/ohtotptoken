@@ -95,6 +95,18 @@
     {
       "name": "setting_about",
       "value": "About"
+    },
+    {
+      "name": "setting_backup",
+      "value": "Backup"
+    },
+    {
+      "name": "setting_backup_export",
+      "value": "Export"
+    },
+    {
+      "name": "setting_backup_import",
+      "value": "Import"
     }
   ]
 }

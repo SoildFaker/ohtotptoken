@@ -1,7 +1,6 @@
 import { generateTOTP } from 'libtotp_mcu.so'
 import { systemDateTime } from '@kit.BasicServicesKit';
 import { TokenConfig } from '../utils/CustomAppData';
-import { base32Decode, base32Encode } from '../utils/TokenUtils';
 
 @Preview
 @ComponentV2

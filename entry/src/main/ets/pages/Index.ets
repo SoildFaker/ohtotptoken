@@ -24,11 +24,6 @@ struct Index {
   private alert_dialog_str: string =
     getContext(this).resourceManager.getStringSync($r('app.string.alert_remove_confirm_msg'))
 
-  stringToArray(str: string): Uint8Array {
-    let textEncoder = new util.TextEncoder();
-    return textEncoder.encodeInto(str);
-  }
-
   aboutToAppear(): void {
     this.token_keys = mmkv.decodeStringSet('token_keys') ?? []
     let token_str: string = JSON.stringify(new TokenConfig())
@@ -51,10 +46,6 @@ struct Index {
     })
   }
 
-  aboutToDisappear(): void {
-
-  }
-
   addTOTPConfig(conf: TokenConfig): void {
     const idx = this.arrConf.findIndex(_ => _.TokenKey === conf.TokenKey)
     if (idx !== -1) {
@@ -68,6 +59,15 @@ struct Index {
       mmkv.encodeStringSet('token_keys', this.token_keys)
       promptAction.showToast({message: `token ${conf.TokenKey} added.`})
     }
+  }
+
+  updateTOTPConfigs(confs: Array<TokenConfig>): void {
+    this.token_keys = confs.map(conf => conf.TokenKey);
+    mmkv.encodeStringSet('token_keys', this.token_keys)
+    confs.forEach(conf => {
+      mmkv.encodeString(`token_${conf.TokenKey}`, JSON.stringify(conf))
+    });
+    promptAction.showToast({message: `${confs.length} token(s) updated.`})
   }
 
   @Builder
@@ -232,8 +232,15 @@ struct Index {
         .tabBar($r('app.string.tab_token'))
 
         TabContent() {
-          SettingPage()
+          SettingPage({
+            arrConf: this.arrConf,
+            backupReload: (conf) => {
+              this.arrConf = conf;
+              this.updateTOTPConfigs(conf);
+            }
+          })
             .height('100%')
+
         }
         .backgroundColor($r('app.color.window_background'))
         .tabBar($r('app.string.tab_setting'))

@@ -95,6 +95,18 @@
     {
       "name": "setting_about",
       "value": "关于"
+    },
+    {
+      "name": "setting_backup",
+      "value": "备份"
+    },
+    {
+      "name": "setting_backup_export",
+      "value": "导出"
+    },
+    {
+      "name": "setting_backup_import",
+      "value": "导入"
     }
   ]
 }
