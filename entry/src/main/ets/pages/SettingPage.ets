@@ -65,7 +65,6 @@ export struct SettingPage {
     const documentSelectOptions = new picker.DocumentSelectOptions();
     documentSelectOptions.maxSelectNumber = 1;
     documentSelectOptions.fileSuffixFilters = ['JSON|.json', '.json'];
-    documentSelectOptions.defaultFilePathUri = 'file://docs/storage/Users/currentUser/Documents/totp_backup.json'
     let context = getContext(this) as common.Context;
     const documentViewPicker = new picker.DocumentViewPicker(context);
     documentViewPicker.select(documentSelectOptions).then((documentSelectResult: Array<string>) => {

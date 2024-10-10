@@ -64,18 +64,16 @@ export struct FortiConfigDialog {
     let symKeyBlob: cryptoFramework.DataBlob = { data: stringToIntArray(this.conf.FortiDevID) };
     let aesGenerator = cryptoFramework.createSymKeyGenerator('AES128');
     let aes_key = aesGenerator.convertKeySync(symKeyBlob);
-    aes_decoder.init(cryptoFramework.CryptoMode.DECRYPT_MODE, aes_key, aes_iv);
+    aes_decoder.initSync(cryptoFramework.CryptoMode.DECRYPT_MODE, aes_key, aes_iv);
     let base64 = new util.Base64Helper();
     try {
       let b64seed = base64.decodeSync(seed)
-      setTimeout(() => {
-        aes_decoder.doFinal({data: b64seed}).then((decryptData) => {
-          let decoder = new util.TextDecoder()
-          let decode_hex = decoder.decodeToString(decryptData.data.slice(0, 40))
-          this.conf.TokenKey = base32Encode(buffer.from(decode_hex, 'hex').buffer as Uint8Array)
-          this.btn_wait_from_forti = false;
-        });
-      }, 1000)
+      aes_decoder.doFinal({data: b64seed}).then((decryptData) => {
+        let decoder = new util.TextDecoder()
+        let decode_hex = decoder.decodeToString(decryptData.data.slice(0, 40))
+        this.conf.TokenKey = base32Encode(buffer.from(decode_hex, 'hex').buffer as Uint8Array)
+        this.btn_wait_from_forti = false;
+      });
     } catch (err) {
       this.btn_wait_from_forti = false;
       promptAction.showToast({message: `Error: ${err.message}`})
