@@ -107,6 +107,26 @@
     {
       "name": "setting_backup_import",
       "value": "Import"
+    },
+    {
+      "name": "setting_safety",
+      "value": "Safety"
+    },
+    {
+      "name": "setting_safety_privacy",
+      "value": "Privacy Mode"
+    },
+    {
+      "name": "setting_safety_privacy_des",
+      "value": "Prohibit other applications from capturing your screen, including one-time passwords. Please note that if you change this setting, please restart the application."
+    },
+    {
+      "name": "setting_safety_lock",
+      "value": "Application Lock"
+    },
+    {
+      "name": "setting_safety_lock_des",
+      "value": "Require screen lock verification of your identity information when opening the application。"
     }
   ]
 }

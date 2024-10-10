@@ -107,6 +107,26 @@
     {
       "name": "setting_backup_import",
       "value": "导入"
+    },
+    {
+      "name": "setting_safety",
+      "value": "安全性"
+    },
+    {
+      "name": "setting_safety_privacy",
+      "value": "隐私模式"
+    },
+    {
+      "name": "setting_safety_privacy_des",
+      "value": "禁止其他应用程序捕获您的屏幕，包括一次性密码。请注意，如果更改此设置，请重启应用程序。"
+    },
+    {
+      "name": "setting_safety_lock",
+      "value": "应用锁定"
+    },
+    {
+      "name": "setting_safety_lock_des",
+      "value": "要求在打开应用时锁屏验证您的身份信息。"
     }
   ]
 }

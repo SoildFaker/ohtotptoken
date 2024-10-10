@@ -7,6 +7,9 @@ import promptAction from '@ohos.promptAction'
 import Logger from '../utils/Logger';
 import MediaFileUri from '../utils/MediaFileUri';
 
+import { SubItemToggle } from '../components/SubItemToggle'
+import { ItemDescription } from '../components/ItemDescription'
+
 class backup_file {
   magic!: number;
   configs!: Array<TokenConfig>;
@@ -65,7 +68,6 @@ export struct SettingPage {
     const documentSelectOptions = new picker.DocumentSelectOptions();
     documentSelectOptions.maxSelectNumber = 1;
     documentSelectOptions.fileSuffixFilters = ['JSON|.json', '.json'];
-    documentSelectOptions.defaultFilePathUri = 'file://docs/storage/Users/currentUser/Documents/totp_backup.json'
     let context = getContext(this) as common.Context;
     const documentViewPicker = new picker.DocumentViewPicker(context);
     documentViewPicker.select(documentSelectOptions).then((documentSelectResult: Array<string>) => {
@@ -138,7 +140,6 @@ export struct SettingPage {
         .padding(10)
       }
       .padding({ left: 10, right: 10})
-
       ListItem() {
         Row() {
           Column({ space: 5 }) {
@@ -148,6 +149,37 @@ export struct SettingPage {
             Text("Github: SoildFaker/ohtotptoken\nE-mail: enbinli@outlook.com")
               .fontSize(10)
               .fontColor($r('app.color.str_gray'))
+          }
+          .alignItems(HorizontalAlign.Start)
+        }
+        .backgroundColor($r('app.color.item_bg'))
+        .borderRadius(10)
+        .shadow({ radius: 10, color: $r('app.color.shadow'), offsetX: 10, offsetY: 10 })
+        .padding(10)
+      }
+      .padding({ left: 10, right: 10})
+      ListItem() {
+        Row() {
+          Column({ space: 5 }) {
+            Text($r('app.string.setting_safety'))
+              .fontSize(20)
+            Divider().vertical(false)
+            SubItemToggle({title: $r('app.string.setting_safety_privacy')})
+            ItemDescription({description: $r('app.string.setting_safety_privacy_des')})
+              .margin({
+                top: 8,
+                bottom: 24,
+                left: 12,
+                right: 12
+              })
+            SubItemToggle({title: $r('app.string.setting_safety_lock')})
+            ItemDescription({description: $r('app.string.setting_safety_lock_des')})
+              .margin({
+                top: 8,
+                bottom: 24,
+                left: 12,
+                right: 12
+              })
           }
           .alignItems(HorizontalAlign.Start)
         }
