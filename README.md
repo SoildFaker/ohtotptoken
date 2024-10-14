@@ -3,9 +3,11 @@ TOTP Token for HarmonyOS Next
 
 # Plan
  - [x] Support TOTP Tokens
+ - [x] Support HOTP Tokens
+ - [x] Support Steam Tokens, refer to [Importing from Steam](https://github.com/stratumauth/app/wiki/Importing-from-Steam)
  - [x] Support Forti Token
  - [ ] Asset Store Kit
- - [ ] Setting Page
+ - [x] Setting Page
 
 
 # Screenshot

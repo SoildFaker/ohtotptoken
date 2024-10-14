@@ -1,9 +1,3 @@
-//
-// Created on 2024/9/26.
-//
-// Node APIs are not fully supported. To solve the compilation error of the interface cannot be found,
-// please include "napi/native_api.h".
-
 #include "totp.h"
 #include "sha1.h"
 
@@ -11,12 +5,19 @@ uint8_t* _hmacKey;
 uint8_t _keyLength;
 uint8_t _timeZoneOffset;
 uint32_t _timeStep;
+uint32_t _initCounter;
 
 // Init the library with the private key, its length and the timeStep duration
 void totp(uint8_t* hmacKey, uint8_t keyLength, uint32_t timeStep) {
     _hmacKey = hmacKey;
     _keyLength = keyLength;
     _timeStep = timeStep;
+}
+
+void hotp(uint8_t* hmacKey, uint8_t keyLength, uint32_t initCounter) {
+    _hmacKey = hmacKey;
+    _keyLength = keyLength;
+    _initCounter = initCounter;
 }
 
 void setTimezone(uint8_t timezone){
@@ -38,6 +39,10 @@ uint32_t getCodeFromTimestamp(uint32_t timeStamp, uint32_t digits) {
 // Generate a code, using the timestamp provided
 uint32_t getCodeFromTimeStruct(struct tm time, uint32_t digits) {
     return getCodeFromTimestamp(TimeStruct2Timestamp(time), digits);
+}
+
+uint32_t getCodeFromCounter(uint32_t counter, uint32_t digits) {
+    return getCodeFromSteps(_initCounter + counter, digits);
 }
 
 // Generate a code, using the number of steps provided
@@ -69,11 +74,13 @@ uint32_t getCodeFromSteps(uint32_t steps, uint32_t digits) {
 
     // STEP 3, compute the OTP value
     _truncatedHash &= 0x7FFFFFFF;    //Disabled
-    uint32_t filter = 1;
-    for (size_t i = 0; i < digits; i++) {
-        filter *= 10;
+    if (digits < 10) {
+        uint32_t filter = 1;
+        for (size_t i = 0; i < digits; i++) {
+            filter *= 10;
+        }
+        _truncatedHash %= filter;
     }
-    _truncatedHash %= filter;
-
+    
     return _truncatedHash;
 }

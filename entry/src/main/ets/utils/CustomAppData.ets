@@ -9,34 +9,37 @@ export class AppRuntimeInfo {
 }
 
 export class TokenConfig {
-  TokenType: number
-  TokenKey: string
-  TokenHost: string
-  TokenUser: string
-  TokenAlgorithm: string
-  TokenPeriod: number
-  TokenDigits: number
-  FortiToken: string
-  FortiDevID: string
+  TokenType: number; // 0 - TOTP, 1 - Forti, 2 - HOTP, 3 - Steam
+  TokenKey: string;
+  TokenHost: string;
+  TokenUser: string;
+  TokenAlgorithm: string;
+  TokenPeriod: number;
+  TokenDigits: number;
+  TokenCounter: number;
+  FortiToken: string;
+  FortiDevID: string;
 
   constructor(
-    key: string = 'EEAEVVEYZSERRHEM',
+    key: string = '',
     type: number = 0,
     host: string = 'Unknown',
     user: string = 'Unknown',
     alg: string = 'SHA1',
     period: number = 30,
-    digits: number = 6
+    digits: number = 6,
+    counter: number = 0
   ) {
-    this.TokenKey = key
-    this.TokenType = type
-    this.TokenHost = host
-    this.TokenUser = user
-    this.TokenAlgorithm = alg
-    this.TokenPeriod = period
-    this.TokenDigits = digits
-    this.FortiToken = ''
-    this.FortiDevID = ''
+    this.TokenKey = key;
+    this.TokenType = type;
+    this.TokenHost = host;
+    this.TokenUser = user;
+    this.TokenAlgorithm = alg;
+    this.TokenPeriod = period;
+    this.TokenDigits = digits;
+    this.TokenCounter = counter;
+    this.FortiToken = '';
+    this.FortiDevID = '';
   }
 
 }

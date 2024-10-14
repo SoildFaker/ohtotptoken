@@ -6,10 +6,10 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 
 @Preview
 @CustomDialog
-export struct TOTPConfigDialog {
+export struct SteamConfigDialog {
   controller?: CustomDialogController;
   @Prop conf_json?: string = '';
-  @State conf: TokenConfig = new TokenConfig();
+  @State conf: TokenConfig = new TokenConfig('', 3);
   @State btn_camera_clicked: number = 0;
 
   cancel?: () => void
@@ -58,6 +58,8 @@ export struct TOTPConfigDialog {
     this.conf.TokenKey = parameters['secret'];
     this.conf.TokenPeriod = parseInt(parameters['period'] ?? '30');
     this.conf.TokenDigits = parseInt(parameters['digits'] ?? '6');
+    this.conf.TokenDigits = 10;
+    this.conf.TokenPeriod = 30;
   }
 
   build() {
@@ -67,7 +69,7 @@ export struct TOTPConfigDialog {
       }
       .height(10)
       Row() {
-        Text($r('app.string.tab_token_add_key'))
+        Text($r('app.string.tab_token_add_stream_key'))
           .fontSize(30)
           .fontWeight(FontWeight.Bold)
         SymbolGlyph($r('sys.symbol.camera'))
@@ -132,89 +134,6 @@ export struct TOTPConfigDialog {
               this.conf.TokenUser = value
             })
             .width('70%')
-        }
-        .width('100%')
-        .justifyContent(FlexAlign.SpaceBetween)
-        Row() {
-          Text($r('app.string.dialog_cfg_tk_alg'))
-            .width('30%')
-          Select([
-            {value: 'SHA1'},
-            {value: 'SHA224'},
-            {value: 'SHA256'},
-            {value: 'SHA384'},
-            {value: 'SHA512'},
-            {value: 'SHA3'},
-          ])
-            .enabled(false)
-            .selected(0)
-            .value(this.conf.TokenAlgorithm)
-            .onSelect((_, value) => {
-              this.conf.TokenAlgorithm = value
-            })
-            .width('70%')
-        }
-        .width('100%')
-        .justifyContent(FlexAlign.SpaceBetween)
-        Row() {
-          Text($r('app.string.dialog_cfg_tk_digits'))
-            .width('30%')
-          Row() {
-            Text("4")
-            Radio({ value: '4', group: 'rg_cfg_digits' }).checked(this.conf.TokenDigits === 4)
-              .radioStyle({
-                checkedBackgroundColor: Color.Blue
-              })
-              .onChange((isChecked: boolean) => {
-                if (isChecked) {
-                  this.conf.TokenDigits = 4
-                }
-              })
-            Text("6")
-            Radio({ value: '6', group: 'rg_cfg_digits' }).checked(this.conf.TokenDigits === 6)
-              .radioStyle({
-                checkedBackgroundColor: Color.Blue
-              })
-              .onChange((isChecked: boolean) => {
-                if (isChecked) {
-                  this.conf.TokenDigits = 6
-                }
-              })
-            Text("8")
-            Radio({ value: '8', group: 'rg_cfg_digits' }).checked(this.conf.TokenDigits === 8)
-              .radioStyle({
-                checkedBackgroundColor: Color.Blue
-              })
-              .onChange((isChecked: boolean) => {
-                if (isChecked) {
-                  this.conf.TokenDigits = 8
-                }
-              })
-          }
-          .width('70%')
-          .justifyContent(FlexAlign.SpaceEvenly)
-        }
-        .width('100%')
-        .justifyContent(FlexAlign.SpaceBetween)
-        Row() {
-          Text($r('app.string.dialog_cfg_tk_timeout'))
-            .width('30%')
-          Row() {
-            Slider({
-              min: 1,
-              max: 60,
-              value: this.conf.TokenPeriod,
-              step: 1,
-              style: SliderStyle.InSet
-            })
-              .blockColor('#191970')
-              .selectedColor('#4169E1')
-              .onChange((value: number, mode: SliderChangeMode) => {
-                this.conf.TokenPeriod = value
-              })
-            Text(this.conf.TokenPeriod.toFixed(0)).fontSize(12)
-          }
-          .width('70%')
         }
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)
