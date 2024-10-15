@@ -1,6 +1,7 @@
 
 #ifndef _LIBBASE32_BASE32_H
 #define _LIBBASE32_BASE32_H
+#include <cstddef>
 #include <inttypes.h>
 #include <stdlib.h>
 
@@ -20,7 +21,7 @@ typedef enum cotp_error {
     WHMAC_ERROR
 } cotp_error_t;
 
-uint8_t *base32_decode (const char *user_data_untrimmed, size_t data_len, cotp_error_t *err_code);
-bool is_string_valid_b32 (const char *user_data);
+uint8_t *base32_decode(const char *user_data_untrimmed, size_t data_len, size_t *raw_len, cotp_error_t *err_code);
+bool is_string_valid_b32(const char *user_data);
 
 #endif //LIBBASE32_BASE32_H

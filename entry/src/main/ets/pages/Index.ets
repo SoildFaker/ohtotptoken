@@ -9,6 +9,8 @@ import { fileIo as fs } from '@kit.CoreFileKit';
 import { MMKV } from '@tencent/mmkv';
 import { BusinessError } from '@kit.BasicServicesKit';
 import promptAction from '@ohos.promptAction'
+import { SteamConfigDialog } from '../utils/SteamConfigDialog';
+import { HOTPConfigDialog } from '../utils/HOTPConfigDialog';
 
 let mmkv = MMKV.defaultMMKV();
 
@@ -21,6 +23,8 @@ struct Index {
   private token_keys: string[] = []
   private dialog_totp_config?: CustomDialogController;
   private dialog_forti_config?: CustomDialogController;
+  private dialog_hotp_config?: CustomDialogController;
+  private dialog_steam_config?: CustomDialogController;
   private alert_dialog_str: string =
     getContext(this).resourceManager.getStringSync($r('app.string.alert_remove_confirm_msg'))
 
@@ -46,7 +50,7 @@ struct Index {
     })
   }
 
-  addTOTPConfig(conf: TokenConfig): void {
+  addTokenConfig(conf: TokenConfig): void {
     const idx = this.arrConf.findIndex(_ => _.TokenKey === conf.TokenKey)
     if (idx !== -1) {
       this.arrConf[idx] = conf
@@ -61,7 +65,7 @@ struct Index {
     }
   }
 
-  updateTOTPConfigs(confs: Array<TokenConfig>): void {
+  updateTokenConfigs(confs: Array<TokenConfig>): void {
     this.token_keys = confs.map(conf => conf.TokenKey);
     mmkv.encodeStringSet('token_keys', this.token_keys)
     confs.forEach(conf => {
@@ -77,7 +81,7 @@ struct Index {
         .onClick(() => {
           this.dialog_totp_config = new CustomDialogController({
             builder: TOTPConfigDialog({
-              confirm: (new_conf) => {this.addTOTPConfig(JSON.parse(new_conf))}
+              confirm: (new_conf) => {this.addTokenConfig(JSON.parse(new_conf))}
             })
           })
           this.dialog_totp_config.open()
@@ -86,10 +90,28 @@ struct Index {
         .onClick(() => {
           this.dialog_forti_config = new CustomDialogController({
             builder: FortiConfigDialog({
-              confirm: (new_conf) => {this.addTOTPConfig(JSON.parse(new_conf))}
+              confirm: (new_conf) => {this.addTokenConfig(JSON.parse(new_conf))}
             })
           })
           this.dialog_forti_config.open()
+        })
+      MenuItem({ content: $r('app.string.tab_token_add_hotp_key') })
+        .onClick(() => {
+          this.dialog_hotp_config = new CustomDialogController({
+            builder: HOTPConfigDialog({
+              confirm: (new_conf) => {this.addTokenConfig(JSON.parse(new_conf))}
+            })
+          })
+          this.dialog_hotp_config.open()
+        })
+      MenuItem({ content: $r('app.string.tab_token_add_stream_key') })
+        .onClick(() => {
+          this.dialog_steam_config = new CustomDialogController({
+            builder: SteamConfigDialog({
+              confirm: (new_conf) => {this.addTokenConfig(JSON.parse(new_conf))}
+            })
+          })
+          this.dialog_steam_config.open()
         })
     }
   }
@@ -140,26 +162,46 @@ struct Index {
       .backgroundColor(Color.Gray)
       .padding(10)
       .onClick(() => {
-        if (conf.TokenType == 0 || conf.TokenType == undefined) {
+        if (conf.TokenType === 0 || conf.TokenType === undefined) { // totp default
           this.dialog_totp_config = new CustomDialogController({
             builder: TOTPConfigDialog({
               conf_json: JSON.stringify(conf),
               confirm: (new_conf) => {
-                this.addTOTPConfig(JSON.parse(new_conf))
+                this.addTokenConfig(JSON.parse(new_conf))
               }
             })
           })
           this.dialog_totp_config.open()
-        } else {
+        } else if (conf.TokenType === 1) { // forti
           this.dialog_forti_config = new CustomDialogController({
             builder: FortiConfigDialog({
               conf_json: JSON.stringify(conf),
               confirm: (new_conf) => {
-                this.addTOTPConfig(JSON.parse(new_conf))
+                this.addTokenConfig(JSON.parse(new_conf))
               }
             })
           })
           this.dialog_forti_config.open()
+        } else if (conf.TokenType === 2) { // hotp
+          this.dialog_hotp_config = new CustomDialogController({
+            builder: HOTPConfigDialog({
+              conf_json: JSON.stringify(conf),
+              confirm: (new_conf) => {
+                this.addTokenConfig(JSON.parse(new_conf))
+              }
+            })
+          })
+          this.dialog_hotp_config.open()
+        } else if (conf.TokenType === 3) { // steam
+          this.dialog_steam_config = new CustomDialogController({
+            builder: SteamConfigDialog({
+              conf_json: JSON.stringify(conf),
+              confirm: (new_conf) => {
+                this.addTokenConfig(JSON.parse(new_conf))
+              }
+            })
+          })
+          this.dialog_steam_config.open()
         }
       })
     }
@@ -184,10 +226,14 @@ struct Index {
                     .height(5)
                     .width('100%')
                 }
-                ForEach(this.arrConf, (conf: TokenConfig) => {
+                ForEach(this.arrConf, (conf: TokenConfig, index: number) => {
                   ListItem() {
                     TokenItem({
-                      Config: conf
+                      Config: conf,
+                      Update: (conf_new) => {
+                        this.arrConf[index].TokenCounter = conf_new.TokenCounter;
+                        mmkv.encodeString(`token_${this.arrConf[index].TokenKey}`, JSON.stringify(this.arrConf[index]))
+                      }
                     })
                   }
                   .padding({ left: 10, right: 10 })
@@ -238,7 +284,7 @@ struct Index {
             arrConf: this.arrConf,
             backupReload: (conf) => {
               this.arrConf = conf;
-              this.updateTOTPConfigs(conf);
+              this.updateTokenConfigs(conf);
             }
           })
             .height('100%')

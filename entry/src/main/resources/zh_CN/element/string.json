@@ -33,6 +33,14 @@
       "value": "设置Forti令牌"
     },
     {
+      "name": "tab_token_add_hotp_key",
+      "value": "设置HOTP令牌"
+    },
+    {
+      "name": "tab_token_add_stream_key",
+      "value": "设置Steam令牌"
+    },
+    {
       "name": "tab_setting",
       "value": "设置"
     },
@@ -71,6 +79,10 @@
     {
       "name": "dialog_cfg_tk_timeout",
       "value": "刷新时间"
+    },
+    {
+      "name": "dialog_cfg_tk_counter",
+      "value": "计数"
     },
     {
       "name": "dialog_cfg_forti_dev_id",

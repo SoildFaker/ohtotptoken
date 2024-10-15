@@ -1,9 +1,3 @@
-//
-// Created on 2024/9/26.
-//
-// Node APIs are not fully supported. To solve the compilation error of the interface cannot be found,
-// please include "napi/native_api.h".
-
 #include <string.h>
 #include "sha1.h"
 
@@ -146,15 +140,15 @@ uint8_t* result(void) {
 
 void initHmac(const uint8_t* key, uint8_t keyLength) {
   uint8_t i;
-  memset(keyBuffer,0,BLOCK_LENGTH);
+  memset(keyBuffer, 0, BLOCK_LENGTH);
   if (keyLength > BLOCK_LENGTH) {
     // Hash long keys
     init();
     for (;keyLength--;) write(*key++);
-    memcpy(keyBuffer,result(),HASH_LENGTH);
+    memcpy(keyBuffer, result(), HASH_LENGTH);
   } else {
     // Block length keys are used as is
-    memcpy(keyBuffer,key,keyLength);
+    memcpy(keyBuffer, key, keyLength);
   }
   // Start inner hash
   init();
@@ -166,7 +160,7 @@ void initHmac(const uint8_t* key, uint8_t keyLength) {
 uint8_t* resultHmac(void) {
   uint8_t i;
   // Complete inner hash
-  memcpy(innerHash,result(),HASH_LENGTH);
+  memcpy(innerHash, result(), HASH_LENGTH);
   // Calculate outer hash
   init();
   for (i=0; i<BLOCK_LENGTH; i++) write(keyBuffer[i] ^ HMAC_OPAD);

@@ -26,33 +26,32 @@ class  forti_server_resp {
 @Preview
 @CustomDialog
 export struct FortiConfigDialog {
-  controller?: CustomDialogController
-  @Prop conf_json?: string = ''
-  @State conf: TokenConfig = new TokenConfig('', 1)
-  @State btn_camera_clicked: number = 0
-  @State btn_dev_id_clicked: number = 0
-  @State warn_dev_id_popup: boolean = false
-  @State btn_wait_from_forti: boolean = false
+  controller?: CustomDialogController;
+  @Prop conf_json?: string = '';
+  @State conf: TokenConfig = new TokenConfig('', 1, 'Forti', 'User', 'SHA1', 60, 6);
+  @State btn_camera_clicked: number = 0;
+  @State btn_dev_id_clicked: number = 0;
+  @State warn_dev_id_popup: boolean = false;
+  @State btn_wait_from_forti: boolean = false;
 
   private cache_dir: string = getContext(this).cacheDir;
 
-  cancel?: () => void
+  cancel?: () => void;
 
-  confirm: (new_conf: string) => void = () => {
-  }
+  confirm: (new_conf: string) => void = () => {};
 
   aboutToAppear(): void {
     if (this.conf_json != undefined && this.conf_json.length > 0) {
-      this.conf = JSON.parse(this.conf_json!)
+      this.conf = JSON.parse(this.conf_json!);
     } else {
-      this.getRandDevID()
+      this.getRandDevID();
     }
   }
 
   getRandDevID(): void {
-    this.conf.FortiDevID = buffer.from(util.generateRandomBinaryUUID()).toString('hex').slice(0, 16)
-    this.conf.TokenHost = 'Forti'
-    this.conf.TokenPeriod = 60
+    this.conf.FortiDevID = buffer.from(util.generateRandomBinaryUUID()).toString('hex').slice(0, 16);
+    this.conf.TokenHost = 'Forti';
+    this.conf.TokenPeriod = 60;
   }
 
   decrypt_seed(seed: string) {

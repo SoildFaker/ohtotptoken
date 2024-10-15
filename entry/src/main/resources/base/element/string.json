@@ -29,6 +29,14 @@
       "value": "Scan Forti QR Code"
     },
     {
+      "name": "tab_token_add_hotp_key",
+      "value": "HOTP Configuration"
+    },
+    {
+      "name": "tab_token_add_stream_key",
+      "value": "Steam Configuration"
+    },
+    {
       "name": "tab_token_add_forti_key",
       "value": "Forti Configuration"
     },
@@ -71,6 +79,10 @@
     {
       "name": "dialog_cfg_tk_timeout",
       "value": "Timeout"
+    },
+    {
+      "name": "dialog_cfg_tk_counter",
+      "value": "Counter"
     },
     {
       "name": "dialog_cfg_forti_dev_id",
