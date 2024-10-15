@@ -38,7 +38,7 @@
     },
     {
       "name": "tab_token_add_stream_key",
-      "value": "设置Stream令牌"
+      "value": "设置Steam令牌"
     },
     {
       "name": "tab_setting",
@@ -82,7 +82,7 @@
     },
     {
       "name": "dialog_cfg_tk_counter",
-      "value": "初始值"
+      "value": "计数"
     },
     {
       "name": "dialog_cfg_forti_dev_id",

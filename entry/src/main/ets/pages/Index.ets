@@ -226,10 +226,14 @@ struct Index {
                     .height(5)
                     .width('100%')
                 }
-                ForEach(this.arrConf, (conf: TokenConfig) => {
+                ForEach(this.arrConf, (conf: TokenConfig, index: number) => {
                   ListItem() {
                     TokenItem({
-                      Config: conf
+                      Config: conf,
+                      Update: (conf_new) => {
+                        this.arrConf[index].TokenCounter = conf_new.TokenCounter;
+                        mmkv.encodeString(`token_${this.arrConf[index].TokenKey}`, JSON.stringify(this.arrConf[index]))
+                      }
                     })
                   }
                   .padding({ left: 10, right: 10 })

@@ -1,39 +1,38 @@
 import { generateTOTP, generateHOTP } from 'libtotp_mcu.so'
 import { systemDateTime } from '@kit.BasicServicesKit';
 import { TokenConfig } from '../utils/CustomAppData';
-import { NumberInputDialog } from '../utils/NumberInputDialog';
-import { IntentionCode } from '@kit.InputKit';
 
 @Preview
 @ComponentV2
 export struct TokenItem {
   @Require @Param Config: TokenConfig = new TokenConfig();
+  @Event Update: (conf: TokenConfig) => void = () => {};
 
   @Local TokenNumber: string = '000000';
+  @Local TokenCounter: string = '0';
   @Local TokenLeftPeriod: number = 0;
   @Local btn_hotp_clicked: number = 0;
 
   private steam_chars: string = "23456789BCDFGHJKMNPQRTVWXY";
   private steam_digits: number = 5;
 
-  private dialog_counter_config?: CustomDialogController;
-
   aboutToAppear(): void {
     if (this.Config.TokenType == 2) {
-      this.updateHOTPToken(0);
+      this.updateHOTPToken();
     } else {
       let timestamp = Math.floor(systemDateTime.getTime() / 1000)
       this.refreshTOTPToken(timestamp);
     }
   }
 
-  updateHOTPToken(counter: number) {
+  updateHOTPToken() {
+    this.TokenCounter = this.Config.TokenCounter.toString();
     this.TokenNumber = generateHOTP(
       this.Config.TokenKey.toUpperCase(),
       this.Config.TokenKey.length,
       this.Config.TokenDigits,
       this.Config.TokenCounter,
-      counter
+      0
     ).toString().padStart(this.Config.TokenDigits, '0');
   }
 
@@ -92,14 +91,24 @@ export struct TokenItem {
       .layoutWeight(1)
       .alignItems(HorizontalAlign.Start)
       Blank()
-      Text(this.TokenNumber)
-        .textAlign(TextAlign.End)
-        .textOverflow({overflow: TextOverflow.MARQUEE})
-        .maxLines(1)
-        .fontColor($r('app.color.token_number'))
-        .fontSize(30)
+      Column() {
+        Text(this.TokenNumber)
+          .textAlign(TextAlign.End)
+          .textOverflow({overflow: TextOverflow.MARQUEE})
+          .maxLines(1)
+          .fontColor($r('app.color.token_number'))
+          .fontSize(30)
+        if (this.Config.TokenType == 2)  { // hotp
+          Text(this.TokenCounter)
+            .textAlign(TextAlign.End)
+            .textOverflow({overflow: TextOverflow.MARQUEE})
+            .maxLines(1)
+            .fontColor($r('app.color.str_gray'))
+            .fontSize(10)
+        }
+      }
       if (this.Config.TokenType == 2)  { // hotp
-        SymbolGlyph($r('sys.symbol.arrow_counterclockwise_clock'))
+        SymbolGlyph($r('sys.symbol.lock_filled_arrow_counterclockwise'))
           .fontColor([$r('app.color.token_number')])
           .fontSize(40)
           .fontWeight(FontWeight.Medium)
@@ -107,12 +116,9 @@ export struct TokenItem {
             this.btn_hotp_clicked)
           .onClick(() => {
             this.btn_hotp_clicked++;
-            this.dialog_counter_config = new CustomDialogController({
-              builder: NumberInputDialog({
-                confirm: (counter) => {this.updateHOTPToken(counter)}
-              })
-            })
-            this.dialog_counter_config.open()
+            this.Config.TokenCounter++;
+            this.Update(this.Config)
+            this.updateHOTPToken();
           })
       } else {
         Stack() {
