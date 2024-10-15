@@ -12,10 +12,9 @@ export struct TOTPConfigDialog {
   @State conf: TokenConfig = new TokenConfig();
   @State btn_camera_clicked: number = 0;
 
-  cancel?: () => void
+  cancel?: () => void;
 
-  confirm: (new_conf: string) => void = () => {
-  }
+  confirm: (new_conf: string) => void = () => {};
 
   aboutToAppear(): void {
     if (this.conf_json != undefined && this.conf_json.length > 0) {

@@ -12,10 +12,9 @@ export struct HOTPConfigDialog {
   @State conf: TokenConfig = new TokenConfig('', 2);
   @State btn_camera_clicked: number = 0;
 
-  cancel?: () => void
+  cancel?: () => void;
 
-  confirm: (new_conf: string) => void = () => {
-  }
+  confirm: (new_conf: string) => void = () => {};
 
   aboutToAppear(): void {
     if (this.conf_json != undefined && this.conf_json.length > 0) {
@@ -201,7 +200,8 @@ export struct HOTPConfigDialog {
             .width('30%')
           TextInput({ text: this.conf.TokenCounter.toString(), placeholder: this.conf.TokenCounter.toString() })
             .onChange((value) => {
-              this.conf.TokenCounter = parseInt(value) ?? 0;
+              let counter = parseInt(value);
+              this.conf.TokenCounter = isNaN(counter) ? 0 : counter;
             })
             .width('70%')
         }
