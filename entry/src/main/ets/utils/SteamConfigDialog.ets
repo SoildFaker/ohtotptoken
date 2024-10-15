@@ -57,9 +57,7 @@ export struct SteamConfigDialog {
     }
     this.conf.TokenKey = parameters['secret'];
     this.conf.TokenPeriod = parseInt(parameters['period'] ?? '30');
-    this.conf.TokenDigits = parseInt(parameters['digits'] ?? '6');
-    this.conf.TokenDigits = 10;
-    this.conf.TokenPeriod = 30;
+    this.conf.TokenDigits = parseInt(parameters['digits'] ?? '10');
   }
 
   build() {

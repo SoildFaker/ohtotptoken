@@ -9,7 +9,7 @@ import { fileIo as fs } from '@kit.CoreFileKit';
 import { MMKV } from '@tencent/mmkv';
 import { BusinessError } from '@kit.BasicServicesKit';
 import promptAction from '@ohos.promptAction'
-import { SteamConfigDialog } from '../utils/StreamConfigDialog';
+import { SteamConfigDialog } from '../utils/SteamConfigDialog';
 import { HOTPConfigDialog } from '../utils/HOTPConfigDialog';
 
 let mmkv = MMKV.defaultMMKV();

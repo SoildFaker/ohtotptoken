@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <stdlib.h>
 #include <string.h>
 #include "base32.h"
@@ -93,12 +94,9 @@ base32_encode (const uint8_t *user_data,
 }
 
 
-uint8_t *
-base32_decode (const char   *user_data_untrimmed,
-               size_t        data_len,
-               cotp_error_t *err_code)
+uint8_t *base32_decode(const char *user_data_untrimmed, size_t data_len, size_t *raw_len, cotp_error_t *err_code)
 {
-    cotp_error_t error = check_input ((uint8_t *)user_data_untrimmed, data_len, MAX_DECODE_BASE32_INPUT_LEN);
+    cotp_error_t error = check_input((uint8_t *)user_data_untrimmed, data_len, MAX_DECODE_BASE32_INPUT_LEN);
     if (error == EMPTY_STRING) {
         *err_code = error;
         return (uint8_t *)strdup ("");
@@ -130,6 +128,7 @@ base32_decode (const char   *user_data_untrimmed,
     }
 
     size_t output_length = (size_t)((user_data_chars + 1.6 + 1) / 1.6);  // round up
+    *raw_len = output_length;
     uint8_t *decoded_data = (uint8_t *)calloc(output_length + 1, 1);
     if (decoded_data == NULL) {
         free (user_data);

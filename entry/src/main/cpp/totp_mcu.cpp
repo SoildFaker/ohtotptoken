@@ -50,8 +50,8 @@ static napi_value generateTOTP(napi_env env, napi_callback_info info)
     napi_get_value_uint32(env, args[4], &timestamp);
     cotp_error_t err_code;
     
-    uint8_t* key_raw = base32_decode((const char *)key_buf, key_len, &err_code);
     uint32_t key_raw_len = key_len;
+    uint8_t* key_raw = base32_decode((const char *)key_buf, key_len, (size_t *)&key_raw_len, &err_code);
     
     TOTP_LOGD("key_raw:%{public}s, key_raw_len:%{public}d",
         key_raw, key_raw_len
@@ -104,9 +104,9 @@ static napi_value generateHOTP(napi_env env, napi_callback_info info) {
     napi_get_value_uint32(env, args[4], &counter);
     cotp_error_t err_code;
     
-    uint8_t* key_raw = base32_decode((const char *)key_buf, key_len, &err_code);
     uint32_t key_raw_len = key_len;
-    
+    uint8_t* key_raw = base32_decode((const char *)key_buf, key_len, (size_t *)&key_raw_len, &err_code);
+
     TOTP_LOGD("key_raw:%{public}s, key_raw_len:%{public}d",
         key_raw, key_raw_len
     );
