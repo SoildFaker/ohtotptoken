@@ -9,7 +9,7 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 export struct SteamConfigDialog {
   controller?: CustomDialogController;
   @Prop conf_json?: string = '';
-  @State conf: TokenConfig = new TokenConfig('', 3);
+  @State conf: TokenConfig = new TokenConfig('', 3, 'Steam', 'User', 'SHA1', 30, 10);
   @State btn_camera_clicked: number = 0;
 
   cancel?: () => void
