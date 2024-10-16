@@ -1,3 +1,4 @@
+import { window } from '@kit.ArkUI';
 import { AppStorageV2 } from '@kit.ArkUI';
 import { AppRuntimeInfo, TokenConfig } from '../utils/CustomAppData';
 import { TOTPConfigDialog } from '../utils/TOTPConfigDialog';
@@ -23,6 +24,9 @@ struct Index {
   @Local btn_token_add_clicked: number = 0;
   @Local arrConf: Array<TokenConfig> = [];
 
+  private windowStage = AppStorage.get("windowStage") as window.WindowStage
+  private windowClass = AppStorage.get("windowClass") as window.Window
+
   //安全性——隐私模式设置
   private app_safety_privacy_enable:boolean =false;
   //安全性应用锁定设置
@@ -36,6 +40,11 @@ struct Index {
   private alert_dialog_str: string =
     getContext(this).resourceManager.getStringSync($r('app.string.alert_remove_confirm_msg'))
 
+  //页面显示事件 Todo 如果启用了锁定检查要验证pin
+  onPageShow(): void {
+
+  }
+  //build()函数之前执行 如果启用了隐私防截屏 在这里设置为隐私模式
   aboutToAppear(): void {
     this.app_safety_privacy_enable = mmkv.decodeBool('app_safety_privacy_enable') ?? false;
     this.app_safety_lock_enable = mmkv.decodeBool('app_safety_lock_enable') ?? false;
@@ -58,6 +67,23 @@ struct Index {
         })
       }
     })
+
+    //设置隐私模式
+    if (this.app_safety_privacy_enable) {
+      try {
+        this.windowClass.setWindowPrivacyMode(true, (err) => {
+          const errCode = err.code;
+          if (errCode) {
+            console.error('Failed to set the window to privacy mode. Cause:' + JSON.stringify(err));
+            return;
+          }
+          console.info('Succeeded in setting the window to privacy mode.');
+        });
+      } catch (exception) {
+        console.error('Failed to set the window to privacy mode. Cause:' + JSON.stringify(exception));
+      }
+    }
+
   }
 
   addTokenConfig(conf: TokenConfig): void {
