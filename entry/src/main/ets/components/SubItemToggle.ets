@@ -16,9 +16,9 @@
 @Component
 export struct SubItemToggle {
   @LocalStorageProp('currentBreakpoint') curBp: string = 'sm';
+  onChange: (isOn: boolean) => void = () => {};
   private title: string | Resource = '';
   private isOn: boolean = false;
-
   build() {
     Row() {
       Text(this.title)
@@ -34,6 +34,9 @@ export struct SubItemToggle {
         .width(36)
         .height(20)
         .selectedColor('#007DFF')
+        .onChange((isOn: boolean) => {
+          this.onChange(isOn);
+        })
     }
     .height(48)
     .width('100%')

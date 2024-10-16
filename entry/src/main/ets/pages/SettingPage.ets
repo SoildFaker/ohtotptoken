@@ -6,7 +6,7 @@ import { base32Decode, base32Encode, stringToIntArray, intArrayToString, generat
 import promptAction from '@ohos.promptAction'
 import Logger from '../utils/Logger';
 import MediaFileUri from '../utils/MediaFileUri';
-
+import { MMKV } from '@tencent/mmkv';
 import { SubItemToggle } from '../components/SubItemToggle'
 import { ItemDescription } from '../components/ItemDescription'
 
@@ -18,8 +18,14 @@ class backup_file {
 @Preview
 @ComponentV2
 export struct SettingPage {
+  //安全性——隐私模式设置
+  @Param app_safety_privacy_enable:boolean =false;
+  //安全性应用锁定设置
+  @Param app_safety_lock_enable:boolean =false;
   @Require @Param arrConf: Array<TokenConfig> = [];
   @Event backupReload: (conf: Array<TokenConfig>) => void = () => {};
+  @Event safetyPrivacyUpdateEvent: (conf: boolean) => void = () => {};
+  @Event safetyLockUpdateEvent: (conf: boolean) => void = () => {};
 
   private backup_magic:number = 0x55aaeebb;
   private backup_save_uri: string = '';
@@ -140,15 +146,35 @@ export struct SettingPage {
         .padding(10)
       }
       .padding({ left: 10, right: 10})
+
       ListItem() {
         Row() {
           Column({ space: 5 }) {
-            Text($r('app.string.setting_about'))
+            Text($r('app.string.setting_safety'))
               .fontSize(20)
             Divider().vertical(false)
-            Text("Github: SoildFaker/ohtotptoken\nE-mail: enbinli@outlook.com")
-              .fontSize(10)
-              .fontColor($r('app.color.str_gray'))
+            SubItemToggle({title: $r('app.string.setting_safety_privacy'),isOn:this.app_safety_privacy_enable,
+              onChange:(IsOn:boolean)=>{
+                this.safetyPrivacyUpdateEvent(IsOn);
+              }})
+            ItemDescription({description: $r('app.string.setting_safety_privacy_des')})
+              .margin({
+                top: 0,
+                bottom: 2,
+                left: 12,
+                right: 12
+              })
+            SubItemToggle({title: $r('app.string.setting_safety_lock'),isOn:this.app_safety_lock_enable,
+              onChange:(IsOn:boolean)=>{
+                this.safetyLockUpdateEvent(IsOn);
+            }})
+            ItemDescription({description: $r('app.string.setting_safety_lock_des')})
+              .margin({
+                top: 0,
+                bottom: 2,
+                left: 12,
+                right: 12
+              })
           }
           .alignItems(HorizontalAlign.Start)
         }
@@ -158,28 +184,16 @@ export struct SettingPage {
         .padding(10)
       }
       .padding({ left: 10, right: 10})
+
       ListItem() {
         Row() {
           Column({ space: 5 }) {
-            Text($r('app.string.setting_safety'))
+            Text($r('app.string.setting_about'))
               .fontSize(20)
             Divider().vertical(false)
-            SubItemToggle({title: $r('app.string.setting_safety_privacy')})
-            ItemDescription({description: $r('app.string.setting_safety_privacy_des')})
-              .margin({
-                top: 8,
-                bottom: 24,
-                left: 12,
-                right: 12
-              })
-            SubItemToggle({title: $r('app.string.setting_safety_lock')})
-            ItemDescription({description: $r('app.string.setting_safety_lock_des')})
-              .margin({
-                top: 8,
-                bottom: 24,
-                left: 12,
-                right: 12
-              })
+            Text("Github: SoildFaker/ohtotptoken\nE-mail: enbinli@outlook.com")
+              .fontSize(10)
+              .fontColor($r('app.color.str_gray'))
           }
           .alignItems(HorizontalAlign.Start)
         }
