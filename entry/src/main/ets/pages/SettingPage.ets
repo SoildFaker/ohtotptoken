@@ -51,7 +51,7 @@ struct EncryptionPassWordDialog {
               this.confirm(this.inputValue)
             }
           }).backgroundColor(0xffffff).fontColor(Color.Red)
-      }.margin({ bottom: 10 })
+      }.margin({ top:10, bottom: 10 })
 
 
     }.borderRadius(10)

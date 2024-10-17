@@ -42,6 +42,6 @@ export struct SubItemToggle {
     .width('100%')
     .padding({left: 8, right: 8})
     .borderRadius(24)
-    .backgroundColor($r('app.color.itemInactivated'))
+    .backgroundColor($r('app.color.item_bg'))
   }
 }
