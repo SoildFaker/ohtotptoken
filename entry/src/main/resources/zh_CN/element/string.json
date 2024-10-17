@@ -139,6 +139,35 @@
     {
       "name": "setting_safety_lock_des",
       "value": "要求在打开应用时锁屏验证您的身份信息。"
+    },
+    {
+      "name": "setting_backup_output",
+      "value": "导出密码？"
+    },
+    {
+      "name": "setting_backup_output_des",
+      "value": "如果您选择普通导出方式，密码将以纯文本形式显示给有权访问该文件的任何人。是否确实要导出密码？"
+    },
+    {
+      "name": "setting_backup_output_msg",
+      "value": "请选择导出方式"
+    },
+    {
+      "name": "setting_backup_type_default",
+      "value": "明文"
+    },
+    {
+      "name": "setting_backup_type_enc",
+      "value": "加密"
+    }
+  ,
+    {
+      "name": "setting_backup_cancel",
+      "value": "取消"
+    },
+    {
+      "name": "setting_backup_confirm",
+      "value": "确认"
     }
   ]
 }
