@@ -1,6 +1,6 @@
 import { window } from '@kit.ArkUI';
 import { AppStorageV2 } from '@kit.ArkUI';
-import { AppRuntimeInfo, TokenConfig } from '../utils/CustomAppData';
+import { AppRuntimeInfo, TokenConfig, otpType } from '../utils/CustomAppData';
 import { TOTPConfigDialog } from '../utils/TOTPConfigDialog';
 import { FortiConfigDialog } from '../utils/FortiConfigDialog';
 import { TokenItem } from '../components/TokenItem';
@@ -14,6 +14,7 @@ import { SteamConfigDialog } from '../utils/SteamConfigDialog';
 import { HOTPConfigDialog } from '../utils/HOTPConfigDialog';
 import { sendablePreferences } from '@kit.ArkData';
 import FaultLogger from '@ohos.faultLogger';
+import { QRCodeDialog } from '../utils/QRCodeDialog';
 
 let mmkv = MMKV.defaultMMKV();
 
@@ -37,6 +38,7 @@ struct Index {
   private dialog_forti_config?: CustomDialogController;
   private dialog_hotp_config?: CustomDialogController;
   private dialog_steam_config?: CustomDialogController;
+  private dialog_qrcode?: CustomDialogController;
   private alert_dialog_str: string =
     getContext(this).resourceManager.getStringSync($r('app.string.alert_remove_confirm_msg'))
 
@@ -152,7 +154,44 @@ struct Index {
     }
   }
 
-  @Builder TokenItemEnd(conf: TokenConfig) {
+  convertToken2URI(conf: TokenConfig): string {
+    let prefix = 'otpauth://';
+    let otp_type = conf.TokenType == otpType.HOTP ? 'hotp' : 'totp';
+    let label = conf.TokenHost + ':' + conf.TokenUser;
+    let period_or_counter = conf.TokenType == otpType.HOTP ? ('&counter=' + conf.TokenCounter) : ('&period=' + conf.TokenPeriod);
+    return prefix + otp_type + '/' + label + '?'
+      + 'secret=' + conf.TokenKey + '&issuer=' + conf.TokenHost
+      + '&digits=' + conf.TokenDigits
+      + period_or_counter;
+  }
+
+  @Builder
+  TokenItemStart(conf: TokenConfig) {
+    Row({ space: 10 }) {
+      Button({ type: ButtonType.Circle }) {
+        Text() {
+          SymbolSpan($r('sys.symbol.qrcode'))
+            .fontSize(30)
+            .fontWeight(FontWeight.Medium)
+            .fontColor([Color.White])
+        }
+      }
+      .backgroundColor(Color.Orange)
+      .padding(10)
+      .onClick(() => {
+        this.dialog_qrcode = new CustomDialogController({
+          builder: QRCodeDialog({
+            content: this.convertToken2URI(conf)
+          })
+        });
+        this.dialog_qrcode.open();
+      })
+      .margin({ right: 10 })
+    }
+  }
+
+  @Builder
+  TokenItemEnd(conf: TokenConfig) {
     Row({ space: 10 }) {
       Button({ type: ButtonType.Circle }) {
         Text() {
@@ -241,7 +280,7 @@ struct Index {
         }
       })
     }
-    .margin({ left:10 })
+    .margin({ left: 10 })
   }
 
 
@@ -274,6 +313,9 @@ struct Index {
                   }
                   .padding({ left: 10, right: 10 })
                   .swipeAction({
+                    start: {
+                      builder: () => { this.TokenItemStart(this.arrConf.find(_ => _.TokenKey === conf.TokenKey)) }
+                    },
                     end: {
                       builder: () => { this.TokenItemEnd(this.arrConf.find(_ => _.TokenKey === conf.TokenKey)) },
                     }

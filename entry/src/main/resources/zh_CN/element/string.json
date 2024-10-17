@@ -97,6 +97,14 @@
       "value": "获取密钥"
     },
     {
+      "name": "dialog_backup_password",
+      "value": "密码"
+    },
+    {
+      "name": "dialog_backup_password_placeholder",
+      "value": "输入备份文件的密码..."
+    },
+    {
       "name": "warn_forti_dev_id_popup",
       "value": "Forti只允许你激活一次并绑定此设备ID"
     },

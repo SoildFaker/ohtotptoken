@@ -8,8 +8,15 @@ export class AppRuntimeInfo {
   @Trace appConfigs: Array<TokenConfig> = [];
 }
 
+export enum otpType {
+  TOTP,
+  Forti,
+  HOTP,
+  Steam
+}
+
 export class TokenConfig {
-  TokenType: number; // 0 - TOTP, 1 - Forti, 2 - HOTP, 3 - Steam
+  TokenType: otpType;
   TokenKey: string;
   TokenHost: string;
   TokenUser: string;

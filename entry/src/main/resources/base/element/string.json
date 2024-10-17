@@ -97,6 +97,14 @@
       "value": "Request Key"
     },
     {
+      "name": "dialog_backup_password",
+      "value": "Password"
+    },
+    {
+      "name": "dialog_backup_password_placeholder",
+      "value": "input your password..."
+    },
+    {
       "name": "warn_forti_dev_id_popup",
       "value": "FortiToken allows you to register a token only once with this device id"
     },
