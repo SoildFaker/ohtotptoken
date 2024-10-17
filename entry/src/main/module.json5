@@ -12,6 +12,19 @@
     "requestPermissions": [
       {
         "name": "ohos.permission.INTERNET",
+      },
+      {
+        "name" : 'ohos.permission.PRIVACY_WINDOW'
+      },
+      {
+        "name": "ohos.permission.STORE_PERSISTENT_DATA",
+        "usedScene": {
+          "abilities": [
+            "EntryAbility"
+          ],
+          "when": "always"
+        },
+        "reason": "$string:app_name"
       }
     ],
     "deliveryWithInstall": true,

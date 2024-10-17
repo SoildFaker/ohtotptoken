@@ -35,6 +35,14 @@
     {
       "name": "tab_bar_bg",
       "value": "#fdfdfd"
+    },
+    {
+      "name": "itemActivated",
+      "value": "#335291FF"
+    },
+    {
+      "name": "itemInactivated",
+      "value": "#FFFFFF"
     }
   ]
 }

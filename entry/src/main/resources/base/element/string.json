@@ -119,6 +119,55 @@
     {
       "name": "setting_backup_import",
       "value": "Import"
+    },
+    {
+      "name": "setting_safety",
+      "value": "Safety"
+    },
+    {
+      "name": "setting_safety_privacy",
+      "value": "Privacy Mode"
+    },
+    {
+      "name": "setting_safety_privacy_des",
+      "value": "Prohibit other applications from capturing your screen, including one-time passwords. Please note that if you change this setting, please restart the application."
+    },
+    {
+      "name": "setting_safety_lock",
+      "value": "Application Lock"
+    },
+    {
+      "name": "setting_safety_lock_des",
+      "value": "Require screen lock verification of your identity information when opening the application。"
+    },
+    {
+      "name": "setting_backup_output",
+      "value": "导出密码？"
+    },
+    {
+      "name": "setting_backup_output_des",
+      "value": "如果您选择普通导出方式，密码将以纯文本形式显示给有权访问该文件的任何人。是否确实要导出密码？"
+    },
+    {
+      "name": "setting_backup_output_msg",
+      "value": "请选择导出方式"
+    },
+    {
+      "name": "setting_backup_type_default",
+      "value": "默认"
+    },
+    {
+      "name": "setting_backup_type_enc",
+      "value": "加密"
+    }
+  ,
+    {
+      "name": "setting_backup_cancel",
+      "value": "取消"
+    },
+    {
+      "name": "setting_backup_confirm",
+      "value": "确认"
     }
   ]
 }
