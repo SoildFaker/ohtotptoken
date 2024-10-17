@@ -9,11 +9,10 @@ import { util } from '@kit.ArkTS';
 import { fileIo as fs } from '@kit.CoreFileKit';
 import { MMKV } from '@tencent/mmkv';
 import { BusinessError } from '@kit.BasicServicesKit';
+import { router } from '@kit.ArkUI';
 import promptAction from '@ohos.promptAction'
 import { SteamConfigDialog } from '../utils/SteamConfigDialog';
 import { HOTPConfigDialog } from '../utils/HOTPConfigDialog';
-import { sendablePreferences } from '@kit.ArkData';
-import FaultLogger from '@ohos.faultLogger';
 import { QRCodeDialog } from '../utils/QRCodeDialog';
 
 let mmkv = MMKV.defaultMMKV();
@@ -42,12 +41,18 @@ struct Index {
   private alert_dialog_str: string =
     getContext(this).resourceManager.getStringSync($r('app.string.alert_remove_confirm_msg'))
 
-  //页面显示事件 Todo 如果启用了锁定检查要验证pin
-  onPageShow(): void {
-
+  // 如果启用了锁定检查要回到开屏验证pin
+  onPageHide(): void {
+    if (this.app_safety_lock_enable) {
+      setTimeout(() => {
+        router.pushUrl({ url: 'pages/SplashPage' });
+      }, 10);
+    }
   }
+
   //build()函数之前执行 如果启用了隐私防截屏 在这里设置为隐私模式
   aboutToAppear(): void {
+    router.clear();
     this.app_safety_privacy_enable = mmkv.decodeBool('app_safety_privacy_enable') ?? false;
     this.app_safety_lock_enable = mmkv.decodeBool('app_safety_lock_enable') ?? false;
     this.token_keys = mmkv.decodeStringSet('token_keys') ?? []
@@ -366,13 +371,13 @@ struct Index {
               this.arrConf = conf;
               this.updateTokenConfigs(conf);
             },
-            safetyPrivacyUpdateEvent:(IsOn)=>
-            {
-              mmkv.encodeBool('app_safety_privacy_enable',IsOn);
+            safetyPrivacyUpdateEvent: (IsOn) => {
+              this.app_safety_privacy_enable = IsOn;
+              mmkv.encodeBool('app_safety_privacy_enable', IsOn);
             },
-            safetyLockUpdateEvent:(IsOn)=>
-            {
-              mmkv.encodeBool('app_safety_lock_enable',IsOn);
+            safetyLockUpdateEvent: (IsOn) => {
+              this.app_safety_lock_enable = IsOn;
+              mmkv.encodeBool('app_safety_lock_enable', IsOn);
             }
           })
             .height('100%')

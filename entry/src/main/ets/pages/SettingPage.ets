@@ -40,23 +40,23 @@ struct EncryptionPassWordDialog {
         Button($r('app.string.setting_backup_cancel'))
           .onClick(() => {
             if (this.controller != undefined) {
-              this.controller.close()
               this.cancel()
+              this.controller.close()
             }
-          }).backgroundColor(0xffffff).fontColor(Color.Black).width('100%')
+          }).backgroundColor(Color.Transparent).width('100%')
         Button($r('app.string.setting_backup_confirm'))
           .onClick(() => {
             if (this.controller != undefined) {
               this.inputValue = this.textValue
-              this.controller.close()
               this.confirm(this.inputValue)
+              this.controller.close()
             }
-          }).backgroundColor(0xffffff).fontColor(Color.Red).width('100%')
+          }).backgroundColor(Color.Transparent).width('100%')
       }.margin({ bottom: 10 })
 
 
-    }.borderRadius(10)
-    .backgroundColor(0xffffff)
+    }
+    .borderRadius(10)
   }
 }
 
@@ -84,7 +84,20 @@ export struct SettingPage {
       cancel: ()=> {},
       confirm: (password: string)=> {
         if (this.backup_is_input) { // 如果是导出 就要调用导出加密函数
-          this.writeContentForSaveAsFileEncryption(this.backup_save_uri, password);
+          const documentSaveOptions = new picker.DocumentSaveOptions();
+          documentSaveOptions.newFileNames = [`totp_backup_${generateFileNameWithDate()}.bak`];
+          documentSaveOptions.fileSuffixChoices = ['BAK|.bak', '.bak'];
+          let context = getContext(this) as common.Context;
+          const documentViewPicker = new picker.DocumentViewPicker(context);
+          documentViewPicker.save(documentSaveOptions).then((documentSaveResult: Array<string>) => {
+            if (documentSaveResult !== null && documentSaveResult !== undefined && documentSaveResult.length == 1) {
+              this.backup_save_uri = documentSaveResult[0];
+              Logger.info('documentViewPicker.save to file succeed and uris are:' + documentSaveResult);
+              this.writeContentForSaveAsFileEncryption(this.backup_save_uri, password);
+            }
+          }).catch((err: BusinessError) => {
+            Logger.error(`Invoke documentViewPicker.save failed, code is ${err.code}, message is ${err.message}`);
+          })
         } else {
           // 加密导入
           this.readContentFromSelectedFileEncryption(this.backup_select_uri, password);
@@ -254,28 +267,12 @@ export struct SettingPage {
           {
             value: $r('app.string.setting_backup_type_enc'),
             action: () => {
-              const documentSaveOptions = new picker.DocumentSaveOptions();
-              documentSaveOptions.newFileNames = [`totp_backup_${generateFileNameWithDate()}.bak`];
-              documentSaveOptions.fileSuffixChoices = ['BAK|.bak', '.bak'];
-              let context = getContext(this) as common.Context;
-              const documentViewPicker = new picker.DocumentViewPicker(context);
-              documentViewPicker.save(documentSaveOptions).then((documentSaveResult: Array<string>) => {
-                if (documentSaveResult !== null && documentSaveResult !== undefined && documentSaveResult.length == 1) {
-                  this.backup_save_uri = documentSaveResult[0];
-                  Logger.info('documentViewPicker.save to file succeed and uris are:' + documentSaveResult);
-                  this.dialogController?.open();
-                  //this.writeContentForSaveAsFileEncryption(this.backup_save_uri);
-                }
-              }).catch((err: BusinessError) => {
-                Logger.error(`Invoke documentViewPicker.save failed, code is ${err.code}, message is ${err.message}`);
-              })
+              this.dialogController?.open();
             }
           },
           {
             value:$r('app.string.setting_backup_cancel'),
             enabled: true,
-            defaultFocus: true,
-            style: DialogButtonStyle.HIGHLIGHT,
             action: () => {
               console.info('Callback when button3 is clicked')
             }
@@ -407,17 +404,17 @@ export struct SettingPage {
                 left: 12,
                 right: 12
               })
-            // SubItemToggle({title: $r('app.string.setting_safety_lock'),isOn:this.app_safety_lock_enable,
-            //   onChange:(IsOn:boolean)=>{
-            //     this.safetyLockUpdateEvent(IsOn);
-            // }})
-            // ItemDescription({description: $r('app.string.setting_safety_lock_des')})
-            //   .margin({
-            //     top: 0,
-            //     bottom: 2,
-            //     left: 12,
-            //     right: 12
-            //   })
+            SubItemToggle({ title: $r('app.string.setting_safety_lock'),isOn:this.app_safety_lock_enable,
+              onChange: (IsOn: boolean) => {
+                this.safetyLockUpdateEvent(IsOn);
+            } })
+            ItemDescription({description: $r('app.string.setting_safety_lock_des')})
+              .margin({
+                top: 0,
+                bottom: 2,
+                left: 12,
+                right: 12
+              })
           }
           .alignItems(HorizontalAlign.Start)
         }
