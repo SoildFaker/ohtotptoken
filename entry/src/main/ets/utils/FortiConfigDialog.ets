@@ -50,7 +50,7 @@ export struct FortiConfigDialog {
 
   getRandDevID(): void {
     this.conf.FortiDevID = buffer.from(util.generateRandomBinaryUUID()).toString('hex').slice(0, 16);
-    this.conf.TokenHost = 'Forti';
+    this.conf.TokenIssuer = 'Forti';
     this.conf.TokenPeriod = 60;
   }
 
@@ -70,7 +70,7 @@ export struct FortiConfigDialog {
       aes_decoder.doFinal({data: b64seed}).then((decryptData) => {
         let decoder = new util.TextDecoder()
         let decode_hex = decoder.decodeToString(decryptData.data.slice(0, 40))
-        this.conf.TokenKey = base32Encode(buffer.from(decode_hex, 'hex').buffer as Uint8Array)
+        this.conf.TokenSecret = base32Encode(buffer.from(decode_hex, 'hex').buffer as Uint8Array)
         this.btn_wait_from_forti = false;
       });
     } catch (err) {
@@ -131,7 +131,7 @@ export struct FortiConfigDialog {
             promptAction.showToast({ message: `${resp.d.error.error_message}, code ${resp.d.error.error_code}` })
           } else {
             this.decrypt_seed(resp.d.seed!)
-            this.conf.TokenUser = resp.d.issuer!
+            this.conf.TokenName = resp.d.issuer!
           }
           httpRequest.off('headersReceive');
           httpRequest.destroy();
@@ -263,11 +263,11 @@ export struct FortiConfigDialog {
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)
         Row() {
-          Text($r('app.string.dialog_cfg_tk_key'))
+          Text($r("app.string.dialog_cfg_tk_secret"))
             .width('30%')
-          TextInput({ text: this.conf.TokenKey, placeholder: this.conf.TokenKey })
+          TextInput({ text: this.conf.TokenSecret, placeholder: this.conf.TokenSecret })
             .onChange((value) => {
-              this.conf.TokenKey = value
+              this.conf.TokenSecret = value
             })
             .width('70%')
         }
@@ -275,11 +275,11 @@ export struct FortiConfigDialog {
         .justifyContent(FlexAlign.SpaceBetween)
 
         Row() {
-          Text($r('app.string.dialog_cfg_tk_user'))
+          Text($r("app.string.dialog_cfg_tk_name"))
             .width('30%')
-          TextInput({ text: this.conf.TokenUser, placeholder: this.conf.TokenUser })
+          TextInput({ text: this.conf.TokenName, placeholder: this.conf.TokenName })
             .onChange((value) => {
-              this.conf.TokenUser = value
+              this.conf.TokenName = value
             })
             .width('70%')
         }
@@ -304,7 +304,7 @@ export struct FortiConfigDialog {
           .fontColor(Color.Red)
           .backgroundColor(Color.Transparent)
           .onClick(() => {
-            if (this.conf.TokenKey.length > 0) {
+            if (this.conf.TokenSecret.length > 0) {
               if (this.controller != undefined) {
                 this.confirm(JSON.stringify(this.conf))
                 this.controller.close()

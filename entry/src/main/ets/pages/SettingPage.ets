@@ -1,7 +1,7 @@
 import { TokenConfig } from '../utils/CustomAppData';
 import { picker } from '@kit.CoreFileKit';
 import { BusinessError } from '@kit.BasicServicesKit';
-import { common } from '@kit.AbilityKit';
+import { bundleManager, common } from '@kit.AbilityKit';
 import { base32Decode, base32Encode, stringToIntArray, intArrayToString, generateFileNameWithDate } from '../utils/TokenUtils'
 import promptAction from '@ohos.promptAction'
 import Logger from '../utils/Logger';
@@ -13,6 +13,7 @@ import { ItemDescription } from '../components/ItemDescription'
 
 class backup_file {
   magic!: number;
+  version!: number;
   configs!: Array<TokenConfig>;
 }
 
@@ -79,6 +80,14 @@ export struct SettingPage {
   private backup_select_uri: string = '';
   private mediaFileUri: MediaFileUri = new MediaFileUri();
 
+  private versionCode?: number;
+
+  aboutToAppear(): void {
+    bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION).then((bundleInfo) => {
+      this.versionCode = bundleInfo.versionCode;
+    });
+  }
+
   private dialogController: CustomDialogController | null = new CustomDialogController({
     builder: EncryptionPassWordDialog({
       cancel: ()=> {},
@@ -126,7 +135,7 @@ export struct SettingPage {
   })
 
   async writeContentForSaveAsFile(myUri: string): Promise<void> {
-    let backup: backup_file = {magic: this.backup_magic, configs: this.arrConf};
+    let backup: backup_file = {magic: this.backup_magic, version: this.versionCode ?? 0, configs: this.arrConf};
     let backup_string = base32Encode(stringToIntArray(JSON.stringify(backup)));
     this.mediaFileUri.writeFileContent(myUri, backup_string);
     promptAction.showToast({message: `BackUp Success.`})
@@ -134,7 +143,7 @@ export struct SettingPage {
 
   // 加密导出
   async writeContentForSaveAsFileEncryption(myUri: string, password: string): Promise<void> {
-    let backup: backup_file = {magic: this.backup_magic, configs: this.arrConf};
+    let backup: backup_file = {magic: this.backup_magic, version: this.versionCode ?? 0, configs: this.arrConf};
     this.encryptFile(JSON.stringify(backup), password).then((backup_string) => {
       this.mediaFileUri.writeFileContent(myUri, backup_string);
       promptAction.showToast({message: `BackUp Success.`})

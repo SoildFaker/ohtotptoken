@@ -22,7 +22,7 @@
     },
     {
       "name": "tab_token_add_key",
-      "value": "TOTP Configuration"
+      "value": "TOTP Token"
     },
     {
       "name": "tab_token_add_forti_scan",
@@ -30,15 +30,15 @@
     },
     {
       "name": "tab_token_add_hotp_key",
-      "value": "HOTP Configuration"
+      "value": "HOTP Token"
     },
     {
       "name": "tab_token_add_stream_key",
-      "value": "Steam Configuration"
+      "value": "Steam Token"
     },
     {
       "name": "tab_token_add_forti_key",
-      "value": "Forti Configuration"
+      "value": "Forti Token"
     },
     {
       "name": "tab_setting",
@@ -57,16 +57,16 @@
       "value": "Cancel"
     },
     {
-      "name": "dialog_cfg_tk_key",
-      "value": "Key"
+      "name": "dialog_cfg_tk_secret",
+      "value": "Secret"
     },
     {
-      "name": "dialog_cfg_tk_host",
-      "value": "Host"
+      "name": "dialog_cfg_tk_issuer",
+      "value": "Issuer"
     },
     {
-      "name": "dialog_cfg_tk_user",
-      "value": "User"
+      "name": "dialog_cfg_tk_name",
+      "value": "Name"
     },
     {
       "name": "dialog_cfg_tk_alg",

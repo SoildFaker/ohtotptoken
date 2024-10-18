@@ -1,4 +1,5 @@
 import { common } from '@kit.AbilityKit';
+import { HMACAlgorithm } from './TokenUtils';
 
 @ObservedV2
 export class AppRuntimeInfo {
@@ -17,10 +18,10 @@ export enum otpType {
 
 export class TokenConfig {
   TokenType: otpType;
-  TokenKey: string;
-  TokenHost: string;
-  TokenUser: string;
-  TokenAlgorithm: string;
+  TokenSecret: string;
+  TokenIssuer: string;
+  TokenName: string;
+  TokenAlgorithm: HMACAlgorithm;
   TokenPeriod: number;
   TokenDigits: number;
   TokenCounter: number;
@@ -28,20 +29,20 @@ export class TokenConfig {
   FortiDevID: string;
 
   constructor(
-    key: string = '',
-    type: number = 0,
-    host: string = 'Unknown',
-    user: string = 'Unknown',
-    alg: string = 'SHA1',
+    secret: string = '',
+    type: otpType = 0,
+    issuer: string = 'Unknown',
+    name: string = 'Unknown',
+    algorithm: HMACAlgorithm = 'SHA1',
     period: number = 30,
     digits: number = 6,
     counter: number = 0
   ) {
-    this.TokenKey = key;
+    this.TokenSecret = secret;
     this.TokenType = type;
-    this.TokenHost = host;
-    this.TokenUser = user;
-    this.TokenAlgorithm = alg;
+    this.TokenIssuer = issuer;
+    this.TokenName = name;
+    this.TokenAlgorithm = algorithm;
     this.TokenPeriod = period;
     this.TokenDigits = digits;
     this.TokenCounter = counter;

@@ -1,2 +1,0 @@
-export const generateTOTP: (arrKey: string, length: number, digits: number, period: number, timestamp: number) => number;
-export const generateHOTP: (arrKey: string, length: number, digits: number, init_counter: number, counter: number) => number;

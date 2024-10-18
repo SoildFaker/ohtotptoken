@@ -43,8 +43,8 @@ export struct SteamConfigDialog {
     }
     const pathParts = otp_url.pathname.slice(1).split('/');
     const labelParts = decodeURIComponent(pathParts[0]).split(':');
-    this.conf.TokenHost = labelParts[0];
-    this.conf.TokenUser = labelParts[1];
+    this.conf.TokenIssuer = labelParts[0];
+    this.conf.TokenName = labelParts[1];
 
     const parameters: Record<string, string> = {};
     const query = otp_url.href.split('?')[1].toLowerCase();
@@ -54,7 +54,7 @@ export struct SteamConfigDialog {
         parameters[kv[0]] = kv[1];
       });
     }
-    this.conf.TokenKey = parameters['secret'];
+    this.conf.TokenSecret = parameters['secret'];
     this.conf.TokenPeriod = parseInt(parameters['period'] ?? '30');
     this.conf.TokenDigits = parseInt(parameters['digits'] ?? '10');
   }
@@ -102,33 +102,33 @@ export struct SteamConfigDialog {
       .height(2)
       Column({ space: 10 }) {
         Row() {
-          Text($r('app.string.dialog_cfg_tk_key'))
+          Text($r("app.string.dialog_cfg_tk_secret"))
             .width('30%')
-          TextInput({ text: this.conf.TokenKey, placeholder: this.conf.TokenKey })
+          TextInput({ text: this.conf.TokenSecret, placeholder: this.conf.TokenSecret })
             .onChange((value) => {
-              this.conf.TokenKey = value
+              this.conf.TokenSecret = value
             })
             .width('70%')
         }
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)
         Row() {
-          Text($r('app.string.dialog_cfg_tk_host'))
+          Text($r("app.string.dialog_cfg_tk_issuer"))
             .width('30%')
-          TextInput({ text: this.conf.TokenHost, placeholder: this.conf.TokenHost })
+          TextInput({ text: this.conf.TokenIssuer, placeholder: this.conf.TokenIssuer })
             .onChange((value) => {
-              this.conf.TokenHost = value
+              this.conf.TokenIssuer = value
             })
             .width('70%')
         }
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)
         Row() {
-          Text($r('app.string.dialog_cfg_tk_user'))
+          Text($r("app.string.dialog_cfg_tk_name"))
             .width('30%')
-          TextInput({ text: this.conf.TokenUser, placeholder: this.conf.TokenUser })
+          TextInput({ text: this.conf.TokenName, placeholder: this.conf.TokenName })
             .onChange((value) => {
-              this.conf.TokenUser = value
+              this.conf.TokenName = value
             })
             .width('70%')
         }

@@ -1,6 +1,6 @@
-import { generateTOTP, generateHOTP } from 'libtotp_mcu.so'
 import { systemDateTime } from '@kit.BasicServicesKit';
-import { TokenConfig } from '../utils/CustomAppData';
+import { otpType, TokenConfig } from '../utils/CustomAppData';
+import { generateOTP } from '../utils/TokenUtils';
 
 @Preview
 @ComponentV2
@@ -17,23 +17,17 @@ export struct TokenItem {
   private steam_digits: number = 5;
 
   aboutToAppear(): void {
-    if (this.Config.TokenType == 2) {
+    if (this.Config.TokenType == otpType.HOTP) {
       this.updateHOTPToken();
     } else {
-      let timestamp = Math.floor(systemDateTime.getTime() / 1000)
-      this.refreshTOTPToken(timestamp);
+      let steps = Math.floor(systemDateTime.getTime() / 1000 / this.Config.TokenPeriod)
+      this.refreshTOTPToken(steps);
     }
   }
 
   updateHOTPToken() {
     this.TokenCounter = this.Config.TokenCounter.toString();
-    this.TokenNumber = generateHOTP(
-      this.Config.TokenKey.toUpperCase(),
-      this.Config.TokenKey.length,
-      this.Config.TokenDigits,
-      this.Config.TokenCounter,
-      0
-    ).toString().padStart(this.Config.TokenDigits, '0');
+    this.TokenNumber = generateOTP(this.Config, this.Config.TokenCounter).toString().padStart(this.Config.TokenDigits, '0');
   }
 
   updateTOTPToken() {
@@ -45,14 +39,9 @@ export struct TokenItem {
   }
 
   refreshTOTPToken(timestamp: number) {
-    if (this.Config.TokenType === 3) { // steam
-      let int_code = generateTOTP(
-        this.Config.TokenKey.toUpperCase(),
-        this.Config.TokenKey.length,
-        this.Config.TokenDigits,
-        this.Config.TokenPeriod,
-        timestamp
-      );
+    let steps = Math.floor(timestamp / this.Config.TokenPeriod);
+    if (this.Config.TokenType === otpType.Steam) {
+      let int_code = generateOTP(this.Config, steps);
       let total_chars = this.steam_chars.length;
       this.TokenNumber = '';
       for (let index = 0; index < this.steam_digits; index++) {
@@ -61,13 +50,7 @@ export struct TokenItem {
         int_code = Math.floor(int_code / total_chars);
       }
     } else {
-      this.TokenNumber = generateTOTP(
-        this.Config.TokenKey.toUpperCase(),
-        this.Config.TokenKey.length,
-        this.Config.TokenDigits,
-        this.Config.TokenPeriod,
-        timestamp
-      ).toString().padStart(this.Config.TokenDigits, '0');
+      this.TokenNumber = generateOTP(this.Config, steps).toString().padStart(this.Config.TokenDigits, '0');
     }
   }
 
@@ -77,12 +60,12 @@ export struct TokenItem {
         .fontColor([Color.Gray])
         .fontSize(40)
       Column() {
-        Text(this.Config.TokenHost)
+        Text(this.Config.TokenIssuer)
           .textOverflow({overflow: TextOverflow.Ellipsis})
           .maxLines(1)
           .fontSize(20)
           .fontColor($r('app.color.str_main'))
-        Text(this.Config.TokenUser)
+        Text(this.Config.TokenName)
           .textOverflow({overflow: TextOverflow.Ellipsis})
           .maxLines(1)
           .fontSize(10)
