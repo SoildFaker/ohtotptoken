@@ -4,6 +4,7 @@ import { AppStorageV2, window } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { AppRuntimeInfo } from '../utils/CustomAppData';
 import { MMKV } from '@tencent/mmkv';
+import { WindowUtil } from '../utils/WindowUtil';
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
@@ -11,6 +12,7 @@ export default class EntryAbility extends UIAbility {
     let mmkvRootDir = MMKV.initialize(appCtx);
     console.info('mmkv rootDir: ', mmkvRootDir);
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
+    WindowUtil.setMissionContinueActive(this.context, false);
   }
 
   onDestroy(): void {
@@ -20,7 +22,7 @@ export default class EntryAbility extends UIAbility {
   onWindowStageCreate(windowStage: window.WindowStage): void {
     // Main window is created, set main page for this ability
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
-
+    WindowUtil.requestFullScreen(windowStage, this.context);
     windowStage.loadContent('pages/SplashPage', (err) => {
       if (err.code) {
         hilog.error(0x0000, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err) ?? '');
@@ -51,7 +53,9 @@ export default class EntryAbility extends UIAbility {
       hilog.info(0x0000, 'testTag', 'Succeeded in loading the content.');
     });
   }
-
+  onWindowStageRestore(windowStage: window.WindowStage): void {
+    WindowUtil.requestFullScreen(windowStage, this.context);
+  }
   onWindowStageDestroy(): void {
     // Main window is destroyed, release UI related resources
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onWindowStageDestroy');

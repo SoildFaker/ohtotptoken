@@ -176,6 +176,14 @@
     {
       "name": "setting_backup_confirm",
       "value": "确认"
+    },
+    {
+      "name": "privacy_statement",
+      "value": "隐私协议"
+    },
+    {
+      "name": "user_agreement",
+      "value": "用户协议"
     }
   ]
 }
