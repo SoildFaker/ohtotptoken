@@ -94,25 +94,25 @@ struct Index {
   }
 
   addTokenConfig(conf: TokenConfig): void {
-    const idx = this.arrConf.findIndex(_ => _.TokenKey === conf.TokenKey)
+    const idx = this.arrConf.findIndex(_ => _.TokenSecret === conf.TokenSecret)
     if (idx !== -1) {
       this.arrConf[idx] = conf
-      mmkv.encodeString(`token_${conf.TokenKey}`, JSON.stringify(conf))
-      promptAction.showToast({message: `token ${conf.TokenKey} updated.`})
+      mmkv.encodeString(`token_${conf.TokenSecret}`, JSON.stringify(conf))
+      promptAction.showToast({message: `token ${conf.TokenSecret} updated.`})
     } else {
       this.arrConf.push(conf)
-      mmkv.encodeString(`token_${conf.TokenKey}`, JSON.stringify(conf))
-      this.token_keys.push(conf.TokenKey)
+      mmkv.encodeString(`token_${conf.TokenSecret}`, JSON.stringify(conf))
+      this.token_keys.push(conf.TokenSecret)
       mmkv.encodeStringSet('token_keys', this.token_keys)
-      promptAction.showToast({message: `token ${conf.TokenKey} added.`})
+      promptAction.showToast({message: `token ${conf.TokenSecret} added.`})
     }
   }
 
   updateTokenConfigs(confs: Array<TokenConfig>): void {
-    this.token_keys = confs.map(conf => conf.TokenKey);
+    this.token_keys = confs.map(conf => conf.TokenSecret);
     mmkv.encodeStringSet('token_keys', this.token_keys)
     confs.forEach(conf => {
-      mmkv.encodeString(`token_${conf.TokenKey}`, JSON.stringify(conf))
+      mmkv.encodeString(`token_${conf.TokenSecret}`, JSON.stringify(conf))
     });
     promptAction.showToast({message: `${confs.length} token(s) updated.`})
   }
@@ -162,10 +162,10 @@ struct Index {
   convertToken2URI(conf: TokenConfig): string {
     let prefix = 'otpauth://';
     let otp_type = conf.TokenType == otpType.HOTP ? 'hotp' : 'totp';
-    let label = conf.TokenHost + ':' + conf.TokenUser;
+    let label = conf.TokenIssuer + ':' + conf.TokenName;
     let period_or_counter = conf.TokenType == otpType.HOTP ? ('&counter=' + conf.TokenCounter) : ('&period=' + conf.TokenPeriod);
     return prefix + otp_type + '/' + label + '?'
-      + 'secret=' + conf.TokenKey + '&issuer=' + conf.TokenHost
+      + 'secret=' + conf.TokenSecret + '&issuer=' + conf.TokenIssuer
       + '&digits=' + conf.TokenDigits
       + period_or_counter;
   }
@@ -210,7 +210,7 @@ struct Index {
       .padding(10)
       .onClick(() => {
         AlertDialog.show({
-          message: util.format(this.alert_dialog_str, conf.TokenUser),
+          message: util.format(this.alert_dialog_str, conf.TokenName),
           autoCancel: true,
           alignment: DialogAlignment.Center,
           primaryButton: {
@@ -224,8 +224,8 @@ struct Index {
             value: $r('app.string.dialog_btn_confirm'),
             fontColor: Color.Red,
             action: () => {
-              this.arrConf = this.arrConf.filter(_ => _.TokenKey !== conf.TokenKey)
-              this.token_keys = this.token_keys.filter(_ => _ !== conf.TokenKey)
+              this.arrConf = this.arrConf.filter(_ => _.TokenSecret !== conf.TokenSecret)
+              this.token_keys = this.token_keys.filter(_ => _ !== conf.TokenSecret)
               mmkv.encodeStringSet('token_keys', this.token_keys)
             }
           }
@@ -312,17 +312,17 @@ struct Index {
                       Config: conf,
                       Update: (conf_new) => {
                         this.arrConf[index].TokenCounter = conf_new.TokenCounter;
-                        mmkv.encodeString(`token_${this.arrConf[index].TokenKey}`, JSON.stringify(this.arrConf[index]))
+                        mmkv.encodeString(`token_${this.arrConf[index].TokenSecret}`, JSON.stringify(this.arrConf[index]))
                       }
                     })
                   }
                   .padding({ left: 10, right: 10 })
                   .swipeAction({
                     start: {
-                      builder: () => { this.TokenItemStart(this.arrConf.find(_ => _.TokenKey === conf.TokenKey)) }
+                      builder: () => { this.TokenItemStart(this.arrConf.find(_ => _.TokenSecret === conf.TokenSecret)) }
                     },
                     end: {
-                      builder: () => { this.TokenItemEnd(this.arrConf.find(_ => _.TokenKey === conf.TokenKey)) },
+                      builder: () => { this.TokenItemEnd(this.arrConf.find(_ => _.TokenSecret === conf.TokenSecret)) },
                     }
                   })
                 }, (item: TokenConfig) => {

@@ -6,7 +6,6 @@
   "author": "",
   "license": "",
   "dependencies": {
-    "libtotp_mcu.so": "file:./src/main/cpp/types/libentry"
   }
 }
 

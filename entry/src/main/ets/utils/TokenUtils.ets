@@ -1,10 +1,13 @@
+import { cryptoFramework } from '@kit.CryptoArchitectureKit';
 import { buffer } from '@kit.ArkTS';
+import { TokenConfig } from './CustomAppData';
 
 const RFC4648 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 const RFC4648_HEX = '0123456789ABCDEFGHIJKLMNOPQRSTUV';
 const CROCKFORD = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 
-type Variant = 'RFC3548' | 'RFC4648' | 'RFC4648-HEX' | 'Crockford';
+export type Base32Variant = 'RFC3548' | 'RFC4648' | 'RFC4648-HEX' | 'Crockford';
+export type HMACAlgorithm = 'SHA1' | 'SHA224' | 'SHA256' | 'SHA384' | 'SHA512' | 'SM3' | 'MD5';
 
 function readChar(alphabet: string, char: string): number {
   const idx = alphabet.indexOf(char);
@@ -14,6 +17,45 @@ function readChar(alphabet: string, char: string): number {
   }
 
   return idx;
+}
+
+function genSymKeyByData(symKeyData: Uint8Array) {
+  let symKeyBlob: cryptoFramework.DataBlob = { data: symKeyData };
+  let aesGenerator = cryptoFramework.createSymKeyGenerator('HMAC');
+  let symKey =  aesGenerator.convertKeySync(symKeyBlob);
+  return symKey;
+}
+
+function doHmacBySync(steps: number, algorithm: HMACAlgorithm, message: string): Uint8Array {
+  const byteLen = 8;
+  let byteArray = new Uint8Array(byteLen);
+  let tmp = steps; // wired TS feature
+  for (let i = 0; i < byteLen; i++) {
+    byteArray[byteLen-i-1] = tmp & 0xff;
+    tmp = tmp >> 8;
+  }
+  let key = genSymKeyByData(base32Decode(message));
+  let mac = cryptoFramework.createMac(algorithm);
+  mac.initSync(key);
+  mac.updateSync({ data: byteArray });
+  let macResult = mac.doFinalSync();
+  return macResult.data;
+}
+
+export function generateOTP(conf: TokenConfig, steps: number): number {
+  try {
+    let hash = doHmacBySync(steps, conf.TokenAlgorithm, conf.TokenSecret);
+    const offset = hash[hash.length - 1] & 0xF;
+    let truncatedHash = 0;
+    for (let i = 0; i < 4; i++) {
+      truncatedHash <<= 8;
+      truncatedHash |= hash[offset + i];
+    }
+    truncatedHash &= 0x7FFFFFFF;
+    return truncatedHash % Math.pow(10, conf.TokenDigits);
+  } catch (err) {
+    return 0;
+  }
 }
 
 export function generateFileNameWithDate(): string {
@@ -39,7 +81,7 @@ export function stringToIntArray(input: string): Uint8Array {
 
 export function base32Encode(
   input: Uint8Array,
-  variant: Variant = 'RFC4648',
+  variant: Base32Variant = 'RFC4648',
 ): string {
   let alphabet: string;
   let defaultPadding: boolean;
@@ -94,7 +136,7 @@ export function base32Encode(
   return output;
 }
 
-export function base32Decode(input: string, variant: Variant = 'RFC4648'): Uint8Array {
+export function base32Decode(input: string, variant: Base32Variant = 'RFC4648'): Uint8Array {
   let alphabet: string;
   let cleanedInput: string;
 

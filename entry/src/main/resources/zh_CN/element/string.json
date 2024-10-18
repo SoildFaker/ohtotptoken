@@ -2,15 +2,15 @@
   "string": [
     {
       "name": "module_desc",
-      "value": "基于时间的一次性密码令牌"
+      "value": "一次性密码令牌管理软件"
     },
     {
       "name": "EntryAbility_desc",
-      "value": "基于时间的一次性密码令牌"
+      "value": "一次性密码令牌管理软件"
     },
     {
       "name": "EntryAbility_label",
-      "value": "TOTP令牌"
+      "value": "OTP令牌"
     },
     {
       "name": "tab_token",
@@ -22,7 +22,7 @@
     },
     {
       "name": "tab_token_add_key",
-      "value": "设置TOTP令牌"
+      "value": "TOTP令牌"
     },
     {
       "name": "tab_token_add_forti_scan",
@@ -30,15 +30,15 @@
     },
     {
       "name": "tab_token_add_forti_key",
-      "value": "设置Forti令牌"
+      "value": "Forti令牌"
     },
     {
       "name": "tab_token_add_hotp_key",
-      "value": "设置HOTP令牌"
+      "value": "HOTP令牌"
     },
     {
       "name": "tab_token_add_stream_key",
-      "value": "设置Steam令牌"
+      "value": "Steam令牌"
     },
     {
       "name": "tab_setting",
@@ -57,15 +57,15 @@
       "value": "取消"
     },
     {
-      "name": "dialog_cfg_tk_key",
+      "name": "dialog_cfg_tk_secret",
       "value": "密钥"
     },
     {
-      "name": "dialog_cfg_tk_host",
+      "name": "dialog_cfg_tk_issuer",
       "value": "主机名"
     },
     {
-      "name": "dialog_cfg_tk_user",
+      "name": "dialog_cfg_tk_name",
       "value": "用户名"
     },
     {

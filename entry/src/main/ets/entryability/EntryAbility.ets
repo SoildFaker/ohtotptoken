@@ -29,8 +29,8 @@ export default class EntryAbility extends UIAbility {
 
       let windowClass: window.Window = windowStage.getMainWindowSync();
       // 获取应用主窗口后存入AppStorage
-      AppStorage.setOrCreate("windowClass",windowClass);
-      AppStorage.setOrCreate("windowStage",windowStage);
+      AppStorage.setOrCreate("windowClass", windowClass);
+      AppStorage.setOrCreate("windowStage", windowStage);
 
       let isLayoutFullScreen = true;
       windowClass.setWindowLayoutFullScreen(isLayoutFullScreen)
