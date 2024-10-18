@@ -12,3 +12,4 @@ TOTP Token for HarmonyOS Next
 
 # Screenshot
 ![main](screenshot/main.jpeg)
+![settings](screenshot/settings.jpeg)

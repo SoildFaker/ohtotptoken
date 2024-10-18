@@ -1,6 +1,6 @@
 import { window } from '@kit.ArkUI';
 import { AppStorageV2 } from '@kit.ArkUI';
-import { AppRuntimeInfo, TokenConfig } from '../utils/CustomAppData';
+import { AppRuntimeInfo, TokenConfig, otpType } from '../utils/CustomAppData';
 import { TOTPConfigDialog } from '../utils/TOTPConfigDialog';
 import { FortiConfigDialog } from '../utils/FortiConfigDialog';
 import { TokenItem } from '../components/TokenItem';
@@ -9,11 +9,11 @@ import { util } from '@kit.ArkTS';
 import { fileIo as fs } from '@kit.CoreFileKit';
 import { MMKV } from '@tencent/mmkv';
 import { BusinessError } from '@kit.BasicServicesKit';
+import { router } from '@kit.ArkUI';
 import promptAction from '@ohos.promptAction'
 import { SteamConfigDialog } from '../utils/SteamConfigDialog';
 import { HOTPConfigDialog } from '../utils/HOTPConfigDialog';
-import { sendablePreferences } from '@kit.ArkData';
-import FaultLogger from '@ohos.faultLogger';
+import { QRCodeDialog } from '../utils/QRCodeDialog';
 
 let mmkv = MMKV.defaultMMKV();
 
@@ -37,15 +37,22 @@ struct Index {
   private dialog_forti_config?: CustomDialogController;
   private dialog_hotp_config?: CustomDialogController;
   private dialog_steam_config?: CustomDialogController;
+  private dialog_qrcode?: CustomDialogController;
   private alert_dialog_str: string =
     getContext(this).resourceManager.getStringSync($r('app.string.alert_remove_confirm_msg'))
 
-  //页面显示事件 Todo 如果启用了锁定检查要验证pin
-  onPageShow(): void {
-
+  // 如果启用了锁定检查要回到开屏验证pin
+  onPageHide(): void {
+    if (this.app_safety_lock_enable) {
+      setTimeout(() => {
+        router.pushUrl({ url: 'pages/SplashPage' });
+      }, 10);
+    }
   }
+
   //build()函数之前执行 如果启用了隐私防截屏 在这里设置为隐私模式
   aboutToAppear(): void {
+    router.clear();
     this.app_safety_privacy_enable = mmkv.decodeBool('app_safety_privacy_enable') ?? false;
     this.app_safety_lock_enable = mmkv.decodeBool('app_safety_lock_enable') ?? false;
     this.token_keys = mmkv.decodeStringSet('token_keys') ?? []
@@ -152,7 +159,44 @@ struct Index {
     }
   }
 
-  @Builder TokenItemEnd(conf: TokenConfig) {
+  convertToken2URI(conf: TokenConfig): string {
+    let prefix = 'otpauth://';
+    let otp_type = conf.TokenType == otpType.HOTP ? 'hotp' : 'totp';
+    let label = conf.TokenHost + ':' + conf.TokenUser;
+    let period_or_counter = conf.TokenType == otpType.HOTP ? ('&counter=' + conf.TokenCounter) : ('&period=' + conf.TokenPeriod);
+    return prefix + otp_type + '/' + label + '?'
+      + 'secret=' + conf.TokenKey + '&issuer=' + conf.TokenHost
+      + '&digits=' + conf.TokenDigits
+      + period_or_counter;
+  }
+
+  @Builder
+  TokenItemStart(conf: TokenConfig) {
+    Row({ space: 10 }) {
+      Button({ type: ButtonType.Circle }) {
+        Text() {
+          SymbolSpan($r('sys.symbol.qrcode'))
+            .fontSize(30)
+            .fontWeight(FontWeight.Medium)
+            .fontColor([Color.White])
+        }
+      }
+      .backgroundColor(Color.Orange)
+      .padding(10)
+      .onClick(() => {
+        this.dialog_qrcode = new CustomDialogController({
+          builder: QRCodeDialog({
+            content: this.convertToken2URI(conf)
+          })
+        });
+        this.dialog_qrcode.open();
+      })
+      .margin({ right: 10 })
+    }
+  }
+
+  @Builder
+  TokenItemEnd(conf: TokenConfig) {
     Row({ space: 10 }) {
       Button({ type: ButtonType.Circle }) {
         Text() {
@@ -241,7 +285,7 @@ struct Index {
         }
       })
     }
-    .margin({ left:10 })
+    .margin({ left: 10 })
   }
 
 
@@ -274,6 +318,9 @@ struct Index {
                   }
                   .padding({ left: 10, right: 10 })
                   .swipeAction({
+                    start: {
+                      builder: () => { this.TokenItemStart(this.arrConf.find(_ => _.TokenKey === conf.TokenKey)) }
+                    },
                     end: {
                       builder: () => { this.TokenItemEnd(this.arrConf.find(_ => _.TokenKey === conf.TokenKey)) },
                     }
@@ -324,13 +371,13 @@ struct Index {
               this.arrConf = conf;
               this.updateTokenConfigs(conf);
             },
-            safetyPrivacyUpdateEvent:(IsOn)=>
-            {
-              mmkv.encodeBool('app_safety_privacy_enable',IsOn);
+            safetyPrivacyUpdateEvent: (IsOn) => {
+              this.app_safety_privacy_enable = IsOn;
+              mmkv.encodeBool('app_safety_privacy_enable', IsOn);
             },
-            safetyLockUpdateEvent:(IsOn)=>
-            {
-              mmkv.encodeBool('app_safety_lock_enable',IsOn);
+            safetyLockUpdateEvent: (IsOn) => {
+              this.app_safety_lock_enable = IsOn;
+              mmkv.encodeBool('app_safety_lock_enable', IsOn);
             }
           })
             .height('100%')
