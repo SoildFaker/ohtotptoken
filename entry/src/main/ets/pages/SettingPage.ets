@@ -44,7 +44,10 @@ struct EncryptionPassWordDialog {
               this.cancel()
               this.controller.close()
             }
-          }).backgroundColor(Color.Transparent).width('100%')
+          })
+          .fontColor($r('app.color.item_fg'))
+          .backgroundColor(Color.Transparent)
+          .width('100%')
         Button($r('app.string.setting_backup_confirm'))
           .onClick(() => {
             if (this.controller != undefined) {
@@ -52,10 +55,11 @@ struct EncryptionPassWordDialog {
               this.confirm(this.inputValue)
               this.controller.close()
             }
-          }).backgroundColor(Color.Transparent).width('100%')
+          })
+          .fontColor($r('app.color.item_fg'))
+          .backgroundColor(Color.Transparent)
+          .width('100%')
       }.margin({ bottom: 10 })
-
-
     }
     .borderRadius(10)
   }
