@@ -38,9 +38,9 @@ struct Index {
 
   // 如果启用了锁定检查要回到开屏验证pin
   onPageHide(): void {
-    if (AppPreference.getSafetyLockEnable()) {
-      router.pushUrl({ url: 'pages/SplashPage' });
-    }
+    // if (AppPreference.getSafetyLockEnable()) {
+    //   router.pushUrl({ url: 'pages/SplashPage' });
+    // }
   }
 
   //build()函数之前执行 如果启用了隐私防截屏 在这里设置为隐私模式

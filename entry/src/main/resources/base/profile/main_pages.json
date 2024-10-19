@@ -3,6 +3,7 @@
     "pages/Index",
     "pages/SplashPage",
     "pages/PrivacyPage",
-    "pages/AgreementPage"
+    "pages/AgreementPage",
+    "pages/ShowCodePage"
   ]
 }

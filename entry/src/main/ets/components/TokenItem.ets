@@ -2,6 +2,7 @@ import { systemDateTime } from '@kit.BasicServicesKit';
 import { otpType, TokenConfig } from '../utils/TokenConfig';
 import { generateOTP } from '../utils/TokenUtils';
 import { TokenIcon } from './TokenIcon';
+import { router } from '@kit.ArkUI';
 
 @Preview
 @ComponentV2
@@ -128,6 +129,9 @@ export struct TokenItem {
           this.updateTOTPToken();
         }, 1000)
       }
+    })
+    .onClick(()=>{
+      //router.pushUrl({ url: 'pages/ShowCodePage' });
     })
   }
 }

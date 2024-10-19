@@ -1,10 +1,11 @@
-import { AbilityConstant, UIAbility, Want, Configuration } from '@kit.AbilityKit';
+import { AbilityConstant, UIAbility, Want, Configuration,ApplicationStateChangeCallback  } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { MMKV } from '@tencent/mmkv';
 import { WindowUtil } from '../utils/WindowUtil';
 import { AppPreference } from '../utils/AppPreference';
+import { router } from '@kit.ArkUI';
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
@@ -15,6 +16,29 @@ export default class EntryAbility extends UIAbility {
     AppStorage.setOrCreate('currentColorMode', this.context.config.colorMode);
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
     WindowUtil.setMissionContinueActive(this.context, false);
+
+    //监听前后台变化
+    let applicationStateChangeCallback: ApplicationStateChangeCallback = {
+      onApplicationForeground() {
+        console.info('applicationStateChangeCallback onApplicationForeground');
+      },
+      onApplicationBackground() {
+        console.info('applicationStateChangeCallback onApplicationBackground');
+        //如果启用了锁定检查要回到开屏验证pin
+        if (AppPreference.getSafetyLockEnable()) {
+          router.pushUrl({ url: 'pages/SplashPage' });
+        }
+      }
+    }
+
+    // 1.获取applicationContext
+    let applicationContext = this.context.getApplicationContext();
+    try {
+      // 2.通过applicationContext注册应用前后台状态监听
+      applicationContext.on('applicationStateChange', applicationStateChangeCallback);
+    } catch (paramError) {
+      console.error(`error: ${(paramError as BusinessError).code}, ${(paramError as BusinessError).message}`);
+    }
   }
 
   onDestroy(): void {
