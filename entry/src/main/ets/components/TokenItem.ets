@@ -56,9 +56,15 @@ export struct TokenItem {
 
   build() {
     Row({ space: 10 }) {
-      SymbolGlyph($r('sys.symbol.person_crop_circle_fill'))
-        .fontColor([Color.Gray])
-        .fontSize(40)
+      if(this.Config.TokenIcon==undefined||this.Config.TokenIcon==''){
+        SymbolGlyph($r('sys.symbol.person_crop_circle_fill'))
+          .fontColor([Color.Gray])
+          .fontSize(40)
+      }else {
+        Image($rawfile(this.Config.TokenIcon))
+          .width(40)
+          .height(40)
+      }
       Column() {
         Text(this.Config.TokenIssuer)
           .textOverflow({overflow: TextOverflow.Ellipsis})

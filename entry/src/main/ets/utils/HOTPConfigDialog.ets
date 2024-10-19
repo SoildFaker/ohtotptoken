@@ -44,7 +44,7 @@ export struct HOTPConfigDialog {
     }
     const pathParts = otp_url.pathname.slice(1).split('/');
     const labelParts = decodeURIComponent(pathParts[0]).split(':');
-    this.conf.TokenIssuer = labelParts[0];
+    this.conf.setTokenIssuer(labelParts[0]);
     this.conf.TokenName = labelParts[1];
 
     const parameters: Record<string, string> = {};
@@ -118,7 +118,7 @@ export struct HOTPConfigDialog {
             .width('30%')
           TextInput({ text: this.conf.TokenIssuer, placeholder: this.conf.TokenIssuer })
             .onChange((value) => {
-              this.conf.TokenIssuer = value
+              this.conf.setTokenIssuer(value)
             })
             .width('70%')
         }

@@ -50,7 +50,7 @@ export struct FortiConfigDialog {
 
   getRandDevID(): void {
     this.conf.FortiDevID = buffer.from(util.generateRandomBinaryUUID()).toString('hex').slice(0, 16);
-    this.conf.TokenIssuer = 'Forti';
+    this.conf.setTokenIssuer('Forti');
     this.conf.TokenPeriod = 60;
   }
 

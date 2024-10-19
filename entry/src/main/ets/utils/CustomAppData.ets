@@ -1,5 +1,5 @@
 import { common } from '@kit.AbilityKit';
-import { HMACAlgorithm } from './TokenUtils';
+import { HMACAlgorithm, getIconPathByIssuer } from './TokenUtils';
 
 @ObservedV2
 export class AppRuntimeInfo {
@@ -27,6 +27,7 @@ export class TokenConfig {
   TokenCounter: number;
   FortiToken: string;
   FortiDevID: string;
+  TokenIcon: string;
 
   constructor(
     secret: string = '',
@@ -48,6 +49,11 @@ export class TokenConfig {
     this.TokenCounter = counter;
     this.FortiToken = '';
     this.FortiDevID = '';
+    this.TokenIcon = getIconPathByIssuer(issuer);
   }
 
+  setTokenIssuer(issuer: string) {
+    this.TokenIssuer = issuer;
+    this.TokenIcon = getIconPathByIssuer(issuer);
+  }
 }
