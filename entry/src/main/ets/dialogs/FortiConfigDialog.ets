@@ -1,5 +1,5 @@
 import { TokenConfig } from '../utils/TokenConfig';
-import { base32Decode, base32Encode, stringToIntArray } from '../utils/TokenUtils'
+import { base32Decode, base32Encode, stringToIntArray, getIconPathByIssuer } from '../utils/TokenUtils'
 import { scanCore, scanBarcode } from '@kit.ScanKit';
 import { http } from '@kit.NetworkKit';
 import { BusinessError } from '@kit.BasicServicesKit';
@@ -50,7 +50,8 @@ export struct FortiConfigDialog {
 
   getRandDevID(): void {
     this.conf.FortiDevID = buffer.from(util.generateRandomBinaryUUID()).toString('hex').slice(0, 16);
-    this.conf.TokenIssuer = 'Forti';
+    this.conf.TokenIssuer='Forti';
+    this.conf.TokenIcon = getIconPathByIssuer('Forti')
     this.conf.TokenPeriod = 60;
   }
 

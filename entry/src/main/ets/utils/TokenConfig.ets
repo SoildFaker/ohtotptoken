@@ -1,4 +1,4 @@
-import { HMACAlgorithm } from './TokenUtils';
+import { HMACAlgorithm, getIconPathByIssuer } from './TokenUtils';
 import { util } from '@kit.ArkTS';
 
 export enum otpType {
@@ -20,6 +20,7 @@ export class TokenConfig {
   TokenCounter: number;
   FortiToken: string;
   FortiDevID: string;
+  TokenIcon: string;
 
   constructor(
     secret: string = '',
@@ -42,6 +43,7 @@ export class TokenConfig {
     this.FortiToken = '';
     this.FortiDevID = '';
     this.TokenUUID = util.generateRandomUUID();
+    this.TokenIcon = getIconPathByIssuer(issuer);
   }
 
 }
