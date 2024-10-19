@@ -1,41 +1,36 @@
 import { window } from '@kit.ArkUI';
 import { AppStorageV2 } from '@kit.ArkUI';
-import { AppRuntimeInfo, TokenConfig, otpType } from '../utils/CustomAppData';
-import { TOTPConfigDialog } from '../utils/TOTPConfigDialog';
-import { FortiConfigDialog } from '../utils/FortiConfigDialog';
+import { TokenConfig, otpType } from '../utils/TokenConfig';
+import { TOTPConfigDialog } from '../dialogs/OTPConfigDialog';
+import { FortiConfigDialog } from '../dialogs/FortiConfigDialog';
 import { TokenItem } from '../components/TokenItem';
 import { SettingPage } from '../pages/SettingPage'
 import { util } from '@kit.ArkTS';
 import { fileIo as fs } from '@kit.CoreFileKit';
-import { MMKV } from '@tencent/mmkv';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { router } from '@kit.ArkUI';
 import promptAction from '@ohos.promptAction'
-import { SteamConfigDialog } from '../utils/SteamConfigDialog';
-import { HOTPConfigDialog } from '../utils/HOTPConfigDialog';
-import { QRCodeDialog } from '../utils/QRCodeDialog';
+import { SteamConfigDialog } from '../dialogs/SteamConfigDialog';
+import { QRCodeDialog } from '../dialogs/QRCodeDialog';
+import { AppPreference } from '../utils/AppPreference';
+import { MMKV } from '@tencent/mmkv';
+import { hilog } from '@kit.PerformanceAnalysisKit';
 
 let mmkv = MMKV.defaultMMKV();
 
 @Entry
 @ComponentV2
 struct Index {
-  @Local appInfo: AppRuntimeInfo = AppStorageV2.connect(AppRuntimeInfo, () => new AppRuntimeInfo())!;
   @Local btn_token_add_clicked: number = 0;
   @Local arrConf: Array<TokenConfig> = [];
 
-  private windowStage = AppStorage.get("windowStage") as window.WindowStage
-  private windowClass = AppStorage.get("windowClass") as window.Window
+  private windowClass = AppStorage.get("windowClass") as window.Window;
+  private appBottomAvoidHeight = AppStorage.get("appBottomAvoidHeight") as number;
+  private appTopAvoidHeight = AppStorage.get("appTopAvoidHeight") as number;
 
-  //安全性——隐私模式设置
-  private app_safety_privacy_enable:boolean =false;
-  //安全性应用锁定设置
-  private app_safety_lock_enable:boolean =false;
-
-  private token_keys: string[] = []
+  private token_uuids: string[] = []
   private dialog_totp_config?: CustomDialogController;
   private dialog_forti_config?: CustomDialogController;
-  private dialog_hotp_config?: CustomDialogController;
   private dialog_steam_config?: CustomDialogController;
   private dialog_qrcode?: CustomDialogController;
   private alert_dialog_str: string =
@@ -43,21 +38,17 @@ struct Index {
 
   // 如果启用了锁定检查要回到开屏验证pin
   onPageHide(): void {
-    if (this.app_safety_lock_enable) {
-      setTimeout(() => {
-        router.pushUrl({ url: 'pages/SplashPage' });
-      }, 10);
+    if (AppPreference.getSafetyLockEnable()) {
+      router.pushUrl({ url: 'pages/SplashPage' });
     }
   }
 
   //build()函数之前执行 如果启用了隐私防截屏 在这里设置为隐私模式
   aboutToAppear(): void {
     router.clear();
-    this.app_safety_privacy_enable = mmkv.decodeBool('app_safety_privacy_enable') ?? false;
-    this.app_safety_lock_enable = mmkv.decodeBool('app_safety_lock_enable') ?? false;
-    this.token_keys = mmkv.decodeStringSet('token_keys') ?? []
+    this.token_uuids = mmkv.decodeStringSet('token_uuids') ?? []
     let token_str: string = JSON.stringify(new TokenConfig())
-    this.token_keys.forEach(key => {
+    this.token_uuids.forEach(key => {
       this.arrConf.push(JSON.parse(mmkv.decodeString(`token_${key}`) ?? token_str))
     })
     let cer_path = getContext(this).cacheDir + "/fmt.ks"
@@ -76,7 +67,7 @@ struct Index {
     })
 
     //设置隐私模式
-    if (this.app_safety_privacy_enable) {
+    if (AppPreference.getSafetyPrivacyEnable()) {
       try {
         this.windowClass.setWindowPrivacyMode(true, (err) => {
           const errCode = err.code;
@@ -94,25 +85,26 @@ struct Index {
   }
 
   addTokenConfig(conf: TokenConfig): void {
-    const idx = this.arrConf.findIndex(_ => _.TokenSecret === conf.TokenSecret)
+    const idx = this.arrConf.findIndex(_ => _.TokenUUID === conf.TokenUUID)
     if (idx !== -1) {
       this.arrConf[idx] = conf
-      mmkv.encodeString(`token_${conf.TokenSecret}`, JSON.stringify(conf))
-      promptAction.showToast({message: `token ${conf.TokenSecret} updated.`})
+      mmkv.encodeString(`token_${conf.TokenUUID}`, JSON.stringify(conf))
+      promptAction.showToast({message: `token ${conf.TokenIssuer}:${conf.TokenName} updated.`})
     } else {
       this.arrConf.push(conf)
-      mmkv.encodeString(`token_${conf.TokenSecret}`, JSON.stringify(conf))
-      this.token_keys.push(conf.TokenSecret)
-      mmkv.encodeStringSet('token_keys', this.token_keys)
-      promptAction.showToast({message: `token ${conf.TokenSecret} added.`})
+      mmkv.encodeString(`token_${conf.TokenUUID}`, JSON.stringify(conf))
+      this.token_uuids.push(conf.TokenUUID)
+      mmkv.encodeStringSet('token_uuids', this.token_uuids)
+      promptAction.showToast({message: `token ${conf.TokenIssuer}:${conf.TokenName} added.`})
     }
   }
 
   updateTokenConfigs(confs: Array<TokenConfig>): void {
-    this.token_keys = confs.map(conf => conf.TokenSecret);
-    mmkv.encodeStringSet('token_keys', this.token_keys)
     confs.forEach(conf => {
-      mmkv.encodeString(`token_${conf.TokenSecret}`, JSON.stringify(conf))
+      if (conf.TokenUUID === undefined || conf.TokenUUID === null) {
+        conf.TokenUUID = util.generateRandomUUID();
+      }
+      this.addTokenConfig(conf);
     });
     promptAction.showToast({message: `${confs.length} token(s) updated.`})
   }
@@ -137,15 +129,6 @@ struct Index {
             })
           })
           this.dialog_forti_config.open()
-        })
-      MenuItem({ content: $r('app.string.tab_token_add_hotp_key') })
-        .onClick(() => {
-          this.dialog_hotp_config = new CustomDialogController({
-            builder: HOTPConfigDialog({
-              confirm: (new_conf) => {this.addTokenConfig(JSON.parse(new_conf))}
-            })
-          })
-          this.dialog_hotp_config.open()
         })
       MenuItem({ content: $r('app.string.tab_token_add_stream_key') })
         .onClick(() => {
@@ -224,9 +207,9 @@ struct Index {
             value: $r('app.string.dialog_btn_confirm'),
             fontColor: Color.Red,
             action: () => {
-              this.arrConf = this.arrConf.filter(_ => _.TokenSecret !== conf.TokenSecret)
-              this.token_keys = this.token_keys.filter(_ => _ !== conf.TokenSecret)
-              mmkv.encodeStringSet('token_keys', this.token_keys)
+              this.arrConf = this.arrConf.filter(_ => _.TokenUUID !== conf.TokenUUID)
+              this.token_uuids = this.token_uuids.filter(_ => _ !== conf.TokenUUID)
+              mmkv.encodeStringSet('token_uuids', this.token_uuids)
             }
           }
         })
@@ -242,7 +225,7 @@ struct Index {
       .backgroundColor(Color.Gray)
       .padding(10)
       .onClick(() => {
-        if (conf.TokenType === 0 || conf.TokenType === undefined) { // totp default
+        if (conf.TokenType === otpType.TOTP || conf.TokenType === otpType.HOTP || conf.TokenType === undefined) { // default
           this.dialog_totp_config = new CustomDialogController({
             builder: TOTPConfigDialog({
               conf_json: JSON.stringify(conf),
@@ -252,7 +235,7 @@ struct Index {
             })
           })
           this.dialog_totp_config.open()
-        } else if (conf.TokenType === 1) { // forti
+        } else if (conf.TokenType === otpType.Forti) { // forti
           this.dialog_forti_config = new CustomDialogController({
             builder: FortiConfigDialog({
               conf_json: JSON.stringify(conf),
@@ -262,17 +245,7 @@ struct Index {
             })
           })
           this.dialog_forti_config.open()
-        } else if (conf.TokenType === 2) { // hotp
-          this.dialog_hotp_config = new CustomDialogController({
-            builder: HOTPConfigDialog({
-              conf_json: JSON.stringify(conf),
-              confirm: (new_conf) => {
-                this.addTokenConfig(JSON.parse(new_conf))
-              }
-            })
-          })
-          this.dialog_hotp_config.open()
-        } else if (conf.TokenType === 3) { // steam
+        } else if (conf.TokenType === otpType.Steam) { // steam
           this.dialog_steam_config = new CustomDialogController({
             builder: SteamConfigDialog({
               conf_json: JSON.stringify(conf),
@@ -288,13 +261,12 @@ struct Index {
     .margin({ left: 10 })
   }
 
-
   build() {
     Column() {
       Row()
         .backgroundColor($r('app.color.tab_bar_bg'))
         .width('100%')
-        .height(this.appInfo.appTopAvoidHeight)
+        .height(this.appTopAvoidHeight)
       Tabs() {
         TabContent() {
           Stack({ alignContent: Alignment.BottomEnd }) {
@@ -312,17 +284,17 @@ struct Index {
                       Config: conf,
                       Update: (conf_new) => {
                         this.arrConf[index].TokenCounter = conf_new.TokenCounter;
-                        mmkv.encodeString(`token_${this.arrConf[index].TokenSecret}`, JSON.stringify(this.arrConf[index]))
+                        mmkv.encodeString(`token_${this.arrConf[index].TokenUUID}`, JSON.stringify(this.arrConf[index]))
                       }
                     })
                   }
                   .padding({ left: 10, right: 10 })
                   .swipeAction({
                     start: {
-                      builder: () => { this.TokenItemStart(this.arrConf.find(_ => _.TokenSecret === conf.TokenSecret)) }
+                      builder: () => { this.TokenItemStart(this.arrConf.find(_ => _.TokenUUID === conf.TokenUUID)) }
                     },
                     end: {
-                      builder: () => { this.TokenItemEnd(this.arrConf.find(_ => _.TokenSecret === conf.TokenSecret)) },
+                      builder: () => { this.TokenItemEnd(this.arrConf.find(_ => _.TokenUUID === conf.TokenUUID)) },
                     }
                   })
                 }, (item: TokenConfig) => {
@@ -331,7 +303,7 @@ struct Index {
                 ListItem() {
                   Row()
                     .width('100%')
-                    .height(this.appInfo.appBottomAvoidHeight + 40)
+                    .height(this.appBottomAvoidHeight + 40)
                 }
               }
               .layoutWeight(1)
@@ -364,21 +336,10 @@ struct Index {
 
         TabContent() {
           SettingPage({
-            app_safety_privacy_enable:this.app_safety_privacy_enable,
-            app_safety_lock_enable:this.app_safety_lock_enable,
             arrConf: this.arrConf,
             backupReload: (conf) => {
-              this.arrConf = conf;
               this.updateTokenConfigs(conf);
             },
-            safetyPrivacyUpdateEvent: (IsOn) => {
-              this.app_safety_privacy_enable = IsOn;
-              mmkv.encodeBool('app_safety_privacy_enable', IsOn);
-            },
-            safetyLockUpdateEvent: (IsOn) => {
-              this.app_safety_lock_enable = IsOn;
-              mmkv.encodeBool('app_safety_lock_enable', IsOn);
-            }
           })
             .height('100%')
 

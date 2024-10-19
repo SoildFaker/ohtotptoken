@@ -1,21 +1,25 @@
-import { AbilityConstant, UIAbility, Want } from '@kit.AbilityKit';
+import { AbilityConstant, UIAbility, Want, Configuration } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
-import { AppStorageV2, window } from '@kit.ArkUI';
+import { window } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
-import { AppRuntimeInfo } from '../utils/CustomAppData';
 import { MMKV } from '@tencent/mmkv';
 import { WindowUtil } from '../utils/WindowUtil';
+import { AppPreference } from '../utils/AppPreference';
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     let appCtx = this.context.getApplicationContext();
     let mmkvRootDir = MMKV.initialize(appCtx);
     console.info('mmkv rootDir: ', mmkvRootDir);
+    AppStorage.setOrCreate("appContext", this.context);
+    AppStorage.setOrCreate('currentColorMode', this.context.config.colorMode);
+    AppPreference.loadSettings();
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
     WindowUtil.setMissionContinueActive(this.context, false);
   }
 
   onDestroy(): void {
+    AppPreference.saveSettings();
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onDestroy');
   }
 
@@ -42,19 +46,19 @@ export default class EntryAbility extends UIAbility {
         .catch((err: BusinessError) => {
           console.error('Failed to set the window layout to full-screen mode. Cause:' + JSON.stringify(err));
         });
-
-      let appInfo: AppRuntimeInfo = AppStorageV2.connect(AppRuntimeInfo, () => new AppRuntimeInfo())!
-
-      appInfo.appBottomAvoidHeight = px2vp(windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR).bottomRect.height);
-      appInfo.appTopAvoidHeight = px2vp(windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM).topRect.height);
-      appInfo.appContext = this.context;
-      console.info('top: %d, bottom: %d', appInfo.appTopAvoidHeight, appInfo.appBottomAvoidHeight)
+      // save window avoid area info
+      AppStorage.setOrCreate("appBottomAvoidHeight", px2vp(windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR).bottomRect.height));
+      AppStorage.setOrCreate("appTopAvoidHeight", px2vp(windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM).topRect.height));
 
       hilog.info(0x0000, 'testTag', 'Succeeded in loading the content.');
     });
   }
   onWindowStageRestore(windowStage: window.WindowStage): void {
     WindowUtil.requestFullScreen(windowStage, this.context);
+  }
+  onConfigurationUpdate(newConfig: Configuration): void {
+    AppStorage.setOrCreate('currentColorMode', newConfig.colorMode);
+    hilog.info(0x0000, 'testTag', 'the newConfig.colorMode is %{public}s', JSON.stringify(AppStorage.get('currentColorMode')) ?? '');
   }
   onWindowStageDestroy(): void {
     // Main window is destroyed, release UI related resources

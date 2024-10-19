@@ -22,7 +22,7 @@
     },
     {
       "name": "tab_token_add_key",
-      "value": "TOTP令牌"
+      "value": "通用令牌"
     },
     {
       "name": "tab_token_add_forti_scan",
@@ -167,8 +167,7 @@
     {
       "name": "setting_backup_type_enc",
       "value": "加密"
-    }
-  ,
+    },
     {
       "name": "setting_backup_cancel",
       "value": "取消"

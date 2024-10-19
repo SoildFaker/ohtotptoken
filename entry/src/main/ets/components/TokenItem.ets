@@ -1,6 +1,7 @@
 import { systemDateTime } from '@kit.BasicServicesKit';
-import { otpType, TokenConfig } from '../utils/CustomAppData';
+import { otpType, TokenConfig } from '../utils/TokenConfig';
 import { generateOTP } from '../utils/TokenUtils';
+import { TokenIcon } from './TokenIcon';
 
 @Preview
 @ComponentV2
@@ -56,9 +57,7 @@ export struct TokenItem {
 
   build() {
     Row({ space: 10 }) {
-      SymbolGlyph($r('sys.symbol.person_crop_circle_fill'))
-        .fontColor([Color.Gray])
-        .fontSize(40)
+      TokenIcon({ icon: this.Config.TokenIcon })
       Column() {
         Text(this.Config.TokenIssuer)
           .textOverflow({overflow: TextOverflow.Ellipsis})
@@ -81,7 +80,7 @@ export struct TokenItem {
           .maxLines(1)
           .fontColor($r('app.color.token_number'))
           .fontSize(30)
-        if (this.Config.TokenType == 2)  { // hotp
+        if (this.Config.TokenType == otpType.HOTP)  {
           Text(this.TokenCounter)
             .textAlign(TextAlign.End)
             .textOverflow({overflow: TextOverflow.MARQUEE})
@@ -90,7 +89,7 @@ export struct TokenItem {
             .fontSize(10)
         }
       }
-      if (this.Config.TokenType == 2)  { // hotp
+      if (this.Config.TokenType == otpType.HOTP)  {
         SymbolGlyph($r('sys.symbol.lock_filled_arrow_counterclockwise'))
           .fontColor([$r('app.color.token_number')])
           .fontSize(40)
@@ -121,8 +120,8 @@ export struct TokenItem {
     .height(60)
     .backgroundColor($r("app.color.item_bg"))
     .onAppear(() => {
-      if (this.Config.TokenType === 2) {
-        this.updateTOTPToken();
+      if (this.Config.TokenType === otpType.HOTP) {
+        this.updateHOTPToken();
       } else {
         this.updateTOTPToken();
         setInterval(() => {
