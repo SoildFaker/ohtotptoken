@@ -7,6 +7,7 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 import { cryptoFramework } from '@kit.CryptoArchitectureKit';
 import { buffer, util } from '@kit.ArkTS';
 import promptAction from '@ohos.promptAction'
+import { TokenIcon } from '../components/TokenIcon';
 
 //"{\"d\":{\"__type\":\"SoftToken.MobileProvisionResponse\",\"__version\":\"\",\"__device_version\":\"\",\"__device_build\":\"\",\"mobile_id_hash\":\"\",\"seed\":\"\",\"token\":\"\",\"image_file\":\"\",\"pin_required\":\"\",\"pin_require_type\":\"\",\"pin_length\":0,\"counter\":0,\"encryption_key\":\"\",\"issuer\":\"\",\"result\":0,\"error\":{\"error_code\":40,\"error_message\":\"FTM token Activation Code is invalid\"}}}"
 class forti_server_resp_err {
@@ -153,16 +154,7 @@ export struct FortiConfigDialog {
       }
       .height(10)
       Row() {
-        if (this.conf.TokenIcon == undefined || this.conf.TokenIcon == '') {
-          SymbolGlyph($r('sys.symbol.person_crop_circle_fill'))
-            .fontColor([Color.Gray])
-            .fontSize(40)
-        } else {
-          Image($rawfile(this.conf.TokenIcon))
-            .width(40)
-            .height(40)
-            .clipShape(new Circle({ width: 40, height: 40 }))
-        }
+        TokenIcon({ icon: this.conf.TokenIcon })
         Text($r('app.string.tab_token_add_forti_key'))
           .fontSize(30)
           .fontWeight(FontWeight.Bold)

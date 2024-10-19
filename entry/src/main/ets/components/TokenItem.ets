@@ -1,6 +1,7 @@
 import { systemDateTime } from '@kit.BasicServicesKit';
 import { otpType, TokenConfig } from '../utils/TokenConfig';
 import { generateOTP } from '../utils/TokenUtils';
+import { TokenIcon } from './TokenIcon';
 
 @Preview
 @ComponentV2
@@ -56,16 +57,7 @@ export struct TokenItem {
 
   build() {
     Row({ space: 10 }) {
-      if (this.Config.TokenIcon == undefined || this.Config.TokenIcon == '') {
-        SymbolGlyph($r('sys.symbol.person_crop_circle_fill'))
-          .fontColor([Color.Gray])
-          .fontSize(40)
-      } else {
-        Image($rawfile(this.Config.TokenIcon))
-          .width(40)
-          .height(40)
-          .clipShape(new Circle({ width: 40, height: 40 }))
-      }
+      TokenIcon({ icon: this.Config.TokenIcon })
       Column() {
         Text(this.Config.TokenIssuer)
           .textOverflow({overflow: TextOverflow.Ellipsis})

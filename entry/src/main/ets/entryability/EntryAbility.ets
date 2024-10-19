@@ -1,4 +1,4 @@
-import { AbilityConstant, UIAbility, Want } from '@kit.AbilityKit';
+import { AbilityConstant, UIAbility, Want, Configuration } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
@@ -11,6 +11,7 @@ export default class EntryAbility extends UIAbility {
     let mmkvRootDir = MMKV.initialize(appCtx);
     console.info('mmkv rootDir: ', mmkvRootDir);
     AppStorage.setOrCreate("appContext", this.context);
+    AppStorage.setOrCreate('currentColorMode', this.context.config.colorMode);
     AppPreference.loadSettings();
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
   }
@@ -49,6 +50,11 @@ export default class EntryAbility extends UIAbility {
 
       hilog.info(0x0000, 'testTag', 'Succeeded in loading the content.');
     });
+  }
+
+  onConfigurationUpdate(newConfig: Configuration): void {
+    AppStorage.setOrCreate('currentColorMode', newConfig.colorMode);
+    hilog.info(0x0000, 'testTag', 'the newConfig.colorMode is %{public}s', JSON.stringify(AppStorage.get('currentColorMode')) ?? '');
   }
 
   onWindowStageDestroy(): void {

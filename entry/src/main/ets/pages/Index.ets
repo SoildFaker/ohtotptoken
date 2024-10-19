@@ -14,6 +14,7 @@ import { SteamConfigDialog } from '../dialogs/SteamConfigDialog';
 import { QRCodeDialog } from '../dialogs/QRCodeDialog';
 import { AppPreference } from '../utils/AppPreference';
 import { MMKV } from '@tencent/mmkv';
+import { hilog } from '@kit.PerformanceAnalysisKit';
 
 let mmkv = MMKV.defaultMMKV();
 
@@ -30,7 +31,6 @@ struct Index {
   private token_uuids: string[] = []
   private dialog_totp_config?: CustomDialogController;
   private dialog_forti_config?: CustomDialogController;
-  private dialog_hotp_config?: CustomDialogController;
   private dialog_steam_config?: CustomDialogController;
   private dialog_qrcode?: CustomDialogController;
   private alert_dialog_str: string =

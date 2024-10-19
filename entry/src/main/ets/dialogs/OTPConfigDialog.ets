@@ -4,6 +4,7 @@ import { url } from '@kit.ArkTS';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { getIconPathByIssuer, HMACAlgorithm } from '../utils/TokenUtils';
+import { TokenIcon } from '../components/TokenIcon';
 
 @Preview
 @CustomDialog
@@ -74,16 +75,7 @@ export struct TOTPConfigDialog {
       }
       .height(10)
       Row() {
-        if (this.conf.TokenIcon == undefined || this.conf.TokenIcon == '') {
-          SymbolGlyph($r('sys.symbol.person_crop_circle_fill'))
-            .fontColor([Color.Gray])
-            .fontSize(40)
-        } else {
-          Image($rawfile(this.conf.TokenIcon))
-            .width(40)
-            .height(40)
-            .clipShape(new Circle({ width: 40, height: 40 }))
-        }
+        TokenIcon({ icon: this.conf.TokenIcon })
         Text($r('app.string.tab_token_add_key'))
           .fontSize(30)
           .fontWeight(FontWeight.Bold)
@@ -244,7 +236,9 @@ export struct TOTPConfigDialog {
             TextInput({ placeholder: this.conf.TokenCounter.toString() })
               .onChange((value) => {
                 let counter = parseInt(value);
-                this.conf.TokenCounter = isNaN(counter) ? 0 : counter;
+                if (!isNaN(counter)) {
+                  this.conf.TokenCounter = counter;
+                }
               })
               .width('70%')
           }
