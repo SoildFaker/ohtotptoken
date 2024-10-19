@@ -13,7 +13,6 @@ export default class EntryAbility extends UIAbility {
     console.info('mmkv rootDir: ', mmkvRootDir);
     AppStorage.setOrCreate("appContext", this.context);
     AppStorage.setOrCreate('currentColorMode', this.context.config.colorMode);
-    AppPreference.loadSettings();
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
     WindowUtil.setMissionContinueActive(this.context, false);
   }
@@ -27,31 +26,34 @@ export default class EntryAbility extends UIAbility {
     // Main window is created, set main page for this ability
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
     WindowUtil.requestFullScreen(windowStage, this.context);
-    windowStage.loadContent('pages/SplashPage', (err) => {
-      if (err.code) {
-        hilog.error(0x0000, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err) ?? '');
-        return;
-      }
+    AppPreference.loadSettings().then(()=>{
+      windowStage.loadContent('pages/SplashPage', (err) => {
+        if (err.code) {
+          hilog.error(0x0000, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err) ?? '');
+          return;
+        }
 
-      let windowClass: window.Window = windowStage.getMainWindowSync();
-      // 获取应用主窗口后存入AppStorage
-      AppStorage.setOrCreate("windowClass", windowClass);
-      AppStorage.setOrCreate("windowStage", windowStage);
+        let windowClass: window.Window = windowStage.getMainWindowSync();
+        // 获取应用主窗口后存入AppStorage
+        AppStorage.setOrCreate("windowClass", windowClass);
+        AppStorage.setOrCreate("windowStage", windowStage);
 
-      let isLayoutFullScreen = true;
-      windowClass.setWindowLayoutFullScreen(isLayoutFullScreen)
-        .then(() => {
-          console.info('Succeeded in setting the window layout to full-screen mode.');
-        })
-        .catch((err: BusinessError) => {
-          console.error('Failed to set the window layout to full-screen mode. Cause:' + JSON.stringify(err));
-        });
-      // save window avoid area info
-      AppStorage.setOrCreate("appBottomAvoidHeight", px2vp(windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR).bottomRect.height));
-      AppStorage.setOrCreate("appTopAvoidHeight", px2vp(windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM).topRect.height));
+        let isLayoutFullScreen = true;
+        windowClass.setWindowLayoutFullScreen(isLayoutFullScreen)
+          .then(() => {
+            console.info('Succeeded in setting the window layout to full-screen mode.');
+          })
+          .catch((err: BusinessError) => {
+            console.error('Failed to set the window layout to full-screen mode. Cause:' + JSON.stringify(err));
+          });
+        // save window avoid area info
+        AppStorage.setOrCreate("appBottomAvoidHeight", px2vp(windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR).bottomRect.height));
+        AppStorage.setOrCreate("appTopAvoidHeight", px2vp(windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM).topRect.height));
 
-      hilog.info(0x0000, 'testTag', 'Succeeded in loading the content.');
+        hilog.info(0x0000, 'testTag', 'Succeeded in loading the content.');
+      });
     });
+
   }
   onWindowStageRestore(windowStage: window.WindowStage): void {
     WindowUtil.requestFullScreen(windowStage, this.context);
