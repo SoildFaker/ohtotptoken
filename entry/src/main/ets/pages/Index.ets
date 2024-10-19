@@ -28,7 +28,7 @@ struct Index {
   private appBottomAvoidHeight = AppStorage.get("appBottomAvoidHeight") as number;
   private appTopAvoidHeight = AppStorage.get("appTopAvoidHeight") as number;
 
-  private token_keys: string[] = []
+  private token_uuids: string[] = []
   private dialog_totp_config?: CustomDialogController;
   private dialog_forti_config?: CustomDialogController;
   private dialog_hotp_config?: CustomDialogController;
@@ -47,9 +47,9 @@ struct Index {
   //build()函数之前执行 如果启用了隐私防截屏 在这里设置为隐私模式
   aboutToAppear(): void {
     router.clear();
-    this.token_keys = mmkv.decodeStringSet('token_keys') ?? []
+    this.token_uuids = mmkv.decodeStringSet('token_uuids') ?? []
     let token_str: string = JSON.stringify(new TokenConfig())
-    this.token_keys.forEach(key => {
+    this.token_uuids.forEach(key => {
       this.arrConf.push(JSON.parse(mmkv.decodeString(`token_${key}`) ?? token_str))
     })
     let cer_path = getContext(this).cacheDir + "/fmt.ks"
@@ -86,25 +86,26 @@ struct Index {
   }
 
   addTokenConfig(conf: TokenConfig): void {
-    const idx = this.arrConf.findIndex(_ => _.TokenSecret === conf.TokenSecret)
+    const idx = this.arrConf.findIndex(_ => _.TokenUUID === conf.TokenUUID)
     if (idx !== -1) {
       this.arrConf[idx] = conf
-      mmkv.encodeString(`token_${conf.TokenSecret}`, JSON.stringify(conf))
-      promptAction.showToast({message: `token ${conf.TokenSecret} updated.`})
+      mmkv.encodeString(`token_${conf.TokenUUID}`, JSON.stringify(conf))
+      promptAction.showToast({message: `token ${conf.TokenIssuer}:${conf.TokenName} updated.`})
     } else {
       this.arrConf.push(conf)
-      mmkv.encodeString(`token_${conf.TokenSecret}`, JSON.stringify(conf))
-      this.token_keys.push(conf.TokenSecret)
-      mmkv.encodeStringSet('token_keys', this.token_keys)
-      promptAction.showToast({message: `token ${conf.TokenSecret} added.`})
+      mmkv.encodeString(`token_${conf.TokenUUID}`, JSON.stringify(conf))
+      this.token_uuids.push(conf.TokenUUID)
+      mmkv.encodeStringSet('token_uuids', this.token_uuids)
+      promptAction.showToast({message: `token ${conf.TokenIssuer}:${conf.TokenName} added.`})
     }
   }
 
   updateTokenConfigs(confs: Array<TokenConfig>): void {
-    this.token_keys = confs.map(conf => conf.TokenSecret);
-    mmkv.encodeStringSet('token_keys', this.token_keys)
     confs.forEach(conf => {
-      mmkv.encodeString(`token_${conf.TokenSecret}`, JSON.stringify(conf))
+      if (conf.TokenUUID === undefined || conf.TokenUUID === null) {
+        conf.TokenUUID = util.generateRandomUUID();
+      }
+      this.addTokenConfig(conf);
     });
     promptAction.showToast({message: `${confs.length} token(s) updated.`})
   }
@@ -216,9 +217,9 @@ struct Index {
             value: $r('app.string.dialog_btn_confirm'),
             fontColor: Color.Red,
             action: () => {
-              this.arrConf = this.arrConf.filter(_ => _.TokenSecret !== conf.TokenSecret)
-              this.token_keys = this.token_keys.filter(_ => _ !== conf.TokenSecret)
-              mmkv.encodeStringSet('token_keys', this.token_keys)
+              this.arrConf = this.arrConf.filter(_ => _.TokenUUID !== conf.TokenUUID)
+              this.token_uuids = this.token_uuids.filter(_ => _ !== conf.TokenUUID)
+              mmkv.encodeStringSet('token_uuids', this.token_uuids)
             }
           }
         })
@@ -304,17 +305,17 @@ struct Index {
                       Config: conf,
                       Update: (conf_new) => {
                         this.arrConf[index].TokenCounter = conf_new.TokenCounter;
-                        mmkv.encodeString(`token_${this.arrConf[index].TokenSecret}`, JSON.stringify(this.arrConf[index]))
+                        mmkv.encodeString(`token_${this.arrConf[index].TokenUUID}`, JSON.stringify(this.arrConf[index]))
                       }
                     })
                   }
                   .padding({ left: 10, right: 10 })
                   .swipeAction({
                     start: {
-                      builder: () => { this.TokenItemStart(this.arrConf.find(_ => _.TokenSecret === conf.TokenSecret)) }
+                      builder: () => { this.TokenItemStart(this.arrConf.find(_ => _.TokenUUID === conf.TokenUUID)) }
                     },
                     end: {
-                      builder: () => { this.TokenItemEnd(this.arrConf.find(_ => _.TokenSecret === conf.TokenSecret)) },
+                      builder: () => { this.TokenItemEnd(this.arrConf.find(_ => _.TokenUUID === conf.TokenUUID)) },
                     }
                   })
                 }, (item: TokenConfig) => {
@@ -358,7 +359,6 @@ struct Index {
           SettingPage({
             arrConf: this.arrConf,
             backupReload: (conf) => {
-              this.arrConf = conf;
               this.updateTokenConfigs(conf);
             },
           })

@@ -50,7 +50,9 @@ struct SplashPage {
   }
 
   onPageShow(): void {
-
+    if (!AppPreference.getSafetyLockEnable()) {
+      router.replaceUrl({ url: 'pages/Index' });
+    }
   }
 
   build() {
