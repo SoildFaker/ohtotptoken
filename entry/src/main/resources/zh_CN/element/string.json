@@ -183,6 +183,17 @@
     {
       "name": "user_agreement",
       "value": "用户协议"
+    }, {
+      "name": "user_auth_prompt",
+      "value": "请进行用户验证"
+    },
+    {
+      "name": "app_locking",
+      "value": "应用已被锁定"
+    },
+    {
+      "name": "app_unlock",
+      "value": "解锁"
     }
   ]
 }

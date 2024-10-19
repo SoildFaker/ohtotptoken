@@ -1,8 +1,10 @@
 import { BusinessError } from '@kit.BasicServicesKit';
 import { router } from '@kit.ArkUI';
 import { cryptoFramework } from '@kit.CryptoArchitectureKit';
-import { userAuth } from '@kit.UserAuthenticationKit';
+import { userAuth} from '@kit.UserAuthenticationKit';
 import { AppPreference } from '../utils/AppPreference';
+import { CommonConstants } from '../utils/CommonConstants';
+import { common } from '@kit.AbilityKit';
 
 @Entry
 @Component
@@ -26,7 +28,7 @@ struct SplashPage {
       };
       // 配置认证界面
       const widgetParam: userAuth.WidgetParam = {
-        title: '请进行身份认证',
+        title: getContext(this).resourceManager.getStringSync($r('app.string.user_auth_prompt').id)
       };
       // 获取认证对象
       const userAuthInstance = userAuth.getUserAuthInstance(authParam, widgetParam);
@@ -36,8 +38,12 @@ struct SplashPage {
         onResult(result) {
           console.info(`userAuthInstance callback result: ${JSON.stringify(result)}`);
           // 可在认证结束或其他业务需要场景，取消订阅认证结果
+          //let rr:userAuth.UserAuthResult =result;
+          if (result.result==userAuth.UserAuthResultCode.SUCCESS) {
+            //判断验证结果是否正确 只有正确验证了才能跳跃到首页
+            router.pushUrl({ url: 'pages/Index' });
+          }
           userAuthInstance.off('result');
-          router.pushUrl({ url: 'pages/Index' });
         }
       });
       console.info('auth on success');
@@ -56,18 +62,43 @@ struct SplashPage {
   }
 
   build() {
-    RelativeContainer() {
-      SymbolGlyph($r('sys.symbol.lock_fill'))
-        .fontSize(50)
-        .fontWeight(FontWeight.Bold)
-        .fontColor([$r('app.color.str_main')])
-        .alignRules({
-          center: { anchor: '__container__', align: VerticalAlign.Center },
-          middle: { anchor: '__container__', align: HorizontalAlign.Center }
-        })
+    Row() {
+      RelativeContainer() {
+        Row(){
+          Column()
+          {
+            SymbolGlyph($r('sys.symbol.lock_fill'))
+              .fontSize(70)
+              .fontWeight(FontWeight.Bold)
+              .fontColor([$r('app.color.str_main')])
+              .alignRules({
+                center: { anchor: '__container__', align: VerticalAlign.Center },
+                middle: { anchor: '__container__', align: HorizontalAlign.Center }
+              })
+              .effectStrategy(2)
+            Divider().vertical(false).height(20)
+            Text($r('app.string.app_locking'))
+              .fontSize(20)
+            Text($r('app.string.app_unlock'))
+              .fontSize(20)
+              .fontColor('#3498db')
+              .offset({ top: '40%' })
+              .textAlign(TextAlign.Center)
+          }
+         }.width('80%')
+          .height('80%')
+          .alignRules({
+            top: {anchor: "__container__", align: VerticalAlign.Top},
+            bottom : {anchor : "__container__", align : VerticalAlign.Bottom},
+            left: {anchor: "__container__", align: HorizontalAlign.Start},
+            right : {anchor : "__container__", align: HorizontalAlign.End},
+            bias : {vertical : 0.3}
+          })
+      }
+      .margin({left: 0})
+      .border({width:2, color: "#6699FF"})
     }
     .height('100%')
-    .width('100%')
     .onClick(() => {
       if (AppPreference.getSafetyLockEnable()) {
         this.requireUserAuth();
@@ -75,5 +106,6 @@ struct SplashPage {
         router.replaceUrl({ url: 'pages/Index' });
       }
     })
+
   }
 }

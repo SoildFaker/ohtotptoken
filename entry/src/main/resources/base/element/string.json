@@ -184,6 +184,18 @@
     {
       "name": "user_agreement",
       "value": "User Agreement"
+    },
+    {
+      "name": "user_auth_prompt",
+      "value": "Please perform user verification"
+    },
+    {
+      "name": "app_locking",
+      "value": "App is locking"
+    },
+    {
+      "name": "app_unlock",
+      "value": "Unlock"
     }
   ]
 }
