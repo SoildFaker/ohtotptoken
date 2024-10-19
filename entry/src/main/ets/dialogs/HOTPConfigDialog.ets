@@ -1,19 +1,20 @@
-import { TokenConfig } from '../utils/CustomAppData';
+import { TokenConfig } from '../utils/TokenConfig';
 import { scanCore, scanBarcode } from '@kit.ScanKit';
 import { url } from '@kit.ArkTS';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
+import { HMACAlgorithm } from '../utils/TokenUtils';
+import { SelectOptions } from '@kit.ArkUI';
 
 @Preview
 @CustomDialog
-export struct SteamConfigDialog {
+export struct HOTPConfigDialog {
   controller?: CustomDialogController;
   @Prop conf_json?: string = '';
-  @State conf: TokenConfig = new TokenConfig('', 3, 'Steam', 'User', 'SHA1', 30, 10);
+  @State conf: TokenConfig = new TokenConfig('', 2);
   @State btn_camera_clicked: number = 0;
 
   cancel?: () => void;
-
   confirm: (new_conf: string) => void = () => {};
 
   aboutToAppear(): void {
@@ -37,7 +38,7 @@ export struct SteamConfigDialog {
     }
 
     const type = otp_url.host;
-    if (type.toLowerCase() !== 'totp') {
+    if (type.toLowerCase() !== 'hotp') {
       console.error('Invalid type');
       return;
     }
@@ -47,7 +48,7 @@ export struct SteamConfigDialog {
     this.conf.TokenName = labelParts[1];
 
     const parameters: Record<string, string> = {};
-    const query = otp_url.href.split('?')[1].toLowerCase();
+    const query = otp_url.href.split('?')[1];
     if (query) {
       query.split('&').forEach(part => {
         const kv: string[] = part.split('=');
@@ -55,8 +56,8 @@ export struct SteamConfigDialog {
       });
     }
     this.conf.TokenSecret = parameters['secret'];
-    this.conf.TokenPeriod = parseInt(parameters['period'] ?? '30');
-    this.conf.TokenDigits = parseInt(parameters['digits'] ?? '10');
+    this.conf.TokenPeriod = parseInt(parameters['counter'] ?? '0');
+    this.conf.TokenDigits = parseInt(parameters['digits'] ?? '6');
   }
 
   build() {
@@ -66,7 +67,7 @@ export struct SteamConfigDialog {
       }
       .height(10)
       Row() {
-        Text($r('app.string.tab_token_add_stream_key'))
+        Text($r('app.string.tab_token_add_hotp_key'))
           .fontSize(30)
           .fontWeight(FontWeight.Bold)
         SymbolGlyph($r('sys.symbol.camera'))
@@ -129,6 +130,78 @@ export struct SteamConfigDialog {
           TextInput({ text: this.conf.TokenName, placeholder: this.conf.TokenName })
             .onChange((value) => {
               this.conf.TokenName = value
+            })
+            .width('70%')
+        }
+        .width('100%')
+        .justifyContent(FlexAlign.SpaceBetween)
+        Row() {
+          Text($r('app.string.dialog_cfg_tk_alg'))
+            .width('30%')
+          Select([
+            {value: 'SHA1'},
+            {value: 'SHA224'},
+            {value: 'SHA256'},
+            {value: 'SHA384'},
+            {value: 'SHA512'},
+            {value: 'SM3'},
+            {value: 'MD5'},
+          ])
+            .value(this.conf.TokenAlgorithm)
+            .onSelect((_, value) => {
+              this.conf.TokenAlgorithm = value as HMACAlgorithm
+            })
+            .width('70%')
+        }
+        .width('100%')
+        .justifyContent(FlexAlign.SpaceBetween)
+        Row() {
+          Text($r('app.string.dialog_cfg_tk_digits'))
+            .width('30%')
+          Row() {
+            Text("4")
+            Radio({ value: '4', group: 'rg_cfg_digits' }).checked(this.conf.TokenDigits === 4)
+              .radioStyle({
+                checkedBackgroundColor: Color.Blue
+              })
+              .onChange((isChecked: boolean) => {
+                if (isChecked) {
+                  this.conf.TokenDigits = 4
+                }
+              })
+            Text("6")
+            Radio({ value: '6', group: 'rg_cfg_digits' }).checked(this.conf.TokenDigits === 6)
+              .radioStyle({
+                checkedBackgroundColor: Color.Blue
+              })
+              .onChange((isChecked: boolean) => {
+                if (isChecked) {
+                  this.conf.TokenDigits = 6
+                }
+              })
+            Text("8")
+            Radio({ value: '8', group: 'rg_cfg_digits' }).checked(this.conf.TokenDigits === 8)
+              .radioStyle({
+                checkedBackgroundColor: Color.Blue
+              })
+              .onChange((isChecked: boolean) => {
+                if (isChecked) {
+                  this.conf.TokenDigits = 8
+                }
+              })
+          }
+          .width('70%')
+          .justifyContent(FlexAlign.SpaceEvenly)
+        }
+        .width('100%')
+        .justifyContent(FlexAlign.SpaceBetween)
+        Row() {
+          Text($r('app.string.dialog_cfg_tk_counter'))
+            .width('30%')
+          TextInput({ text: this.conf.TokenCounter.toString(), placeholder: this.conf.TokenCounter.toString() })
+            .onChange((value) => {
+              let counter = parseInt(value);
+              this.conf.TokenCounter = isNaN(counter) ? 0 : counter;
             })
             .width('70%')
         }

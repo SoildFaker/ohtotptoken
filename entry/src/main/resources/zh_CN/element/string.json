@@ -167,8 +167,7 @@
     {
       "name": "setting_backup_type_enc",
       "value": "加密"
-    }
-  ,
+    },
     {
       "name": "setting_backup_cancel",
       "value": "取消"

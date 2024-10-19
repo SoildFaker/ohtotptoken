@@ -1,4 +1,4 @@
-import { TokenConfig } from '../utils/CustomAppData';
+import { TokenConfig } from '../utils/TokenConfig';
 import { base32Decode, base32Encode, stringToIntArray } from '../utils/TokenUtils'
 import { scanCore, scanBarcode } from '@kit.ScanKit';
 import { http } from '@kit.NetworkKit';

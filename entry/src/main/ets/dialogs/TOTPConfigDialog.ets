@@ -1,9 +1,9 @@
-import { TokenConfig } from '../utils/CustomAppData';
+import { TokenConfig } from '../utils/TokenConfig';
 import { scanCore, scanBarcode } from '@kit.ScanKit';
 import { url } from '@kit.ArkTS';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
-import { HMACAlgorithm } from './TokenUtils';
+import { HMACAlgorithm } from '../utils/TokenUtils';
 
 @Preview
 @CustomDialog

@@ -1,13 +1,4 @@
-import { common } from '@kit.AbilityKit';
 import { HMACAlgorithm } from './TokenUtils';
-
-@ObservedV2
-export class AppRuntimeInfo {
-  @Trace appBottomAvoidHeight: number = 0;
-  @Trace appTopAvoidHeight: number = 0;
-  @Trace appContext?: common.UIAbilityContext;
-  @Trace appConfigs: Array<TokenConfig> = [];
-}
 
 export enum otpType {
   TOTP,
