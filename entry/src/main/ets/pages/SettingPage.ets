@@ -439,7 +439,7 @@ export struct SettingPage {
             Text($r('app.string.setting_about'))
               .fontSize(20)
             Divider().vertical(false)
-            Text("Github: SoildFaker/ohtotptoken\nE-mail: enbinli@outlook.com")
+            Text("Github: SoildFaker/ohtotptoken\nE-mail: enbinli@outlook.com\nContributors: @Soildfaker, @eveloki, @lsxuan12138")
               .fontSize(10)
               .fontColor($r('app.color.str_gray'))
           }
@@ -458,7 +458,7 @@ export struct SettingPage {
             Text($r('app.string.setting_opensource_leg'))
               .fontSize(20)
             Divider().vertical(false)
-            Text("Github: paolostivanin/libcotp\nGithub: Netthaw/TOTP-MCU\nGithub: ss23/fortitoken-mobile-registration")
+            Text("Github: paolostivanin/libcotp\nGithub: Netthaw/TOTP-MCU\nGithub: ss23/fortitoken-mobile-registration\nGithub: andOTP/andOTP - Icons")
               .fontSize(10)
               .fontColor($r('app.color.str_gray'))
           }

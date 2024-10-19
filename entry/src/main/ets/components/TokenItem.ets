@@ -56,14 +56,15 @@ export struct TokenItem {
 
   build() {
     Row({ space: 10 }) {
-      if(this.Config.TokenIcon==undefined||this.Config.TokenIcon==''){
+      if (this.Config.TokenIcon == undefined || this.Config.TokenIcon == '') {
         SymbolGlyph($r('sys.symbol.person_crop_circle_fill'))
           .fontColor([Color.Gray])
           .fontSize(40)
-      }else {
+      } else {
         Image($rawfile(this.Config.TokenIcon))
           .width(40)
           .height(40)
+          .clipShape(new Circle({ width: 40, height: 40 }))
       }
       Column() {
         Text(this.Config.TokenIssuer)
@@ -87,7 +88,7 @@ export struct TokenItem {
           .maxLines(1)
           .fontColor($r('app.color.token_number'))
           .fontSize(30)
-        if (this.Config.TokenType == 2)  { // hotp
+        if (this.Config.TokenType == otpType.HOTP)  {
           Text(this.TokenCounter)
             .textAlign(TextAlign.End)
             .textOverflow({overflow: TextOverflow.MARQUEE})
@@ -96,7 +97,7 @@ export struct TokenItem {
             .fontSize(10)
         }
       }
-      if (this.Config.TokenType == 2)  { // hotp
+      if (this.Config.TokenType == otpType.HOTP)  {
         SymbolGlyph($r('sys.symbol.lock_filled_arrow_counterclockwise'))
           .fontColor([$r('app.color.token_number')])
           .fontSize(40)
@@ -127,8 +128,8 @@ export struct TokenItem {
     .height(60)
     .backgroundColor($r("app.color.item_bg"))
     .onAppear(() => {
-      if (this.Config.TokenType === 2) {
-        this.updateTOTPToken();
+      if (this.Config.TokenType === otpType.HOTP) {
+        this.updateHOTPToken();
       } else {
         this.updateTOTPToken();
         setInterval(() => {

@@ -43,8 +43,8 @@ export struct HOTPConfigDialog {
     }
     const pathParts = otp_url.pathname.slice(1).split('/');
     const labelParts = decodeURIComponent(pathParts[0]).split(':');
-    this.conf.TokenIssuer=labelParts[0];
-    this.conf.TokenIcon=getIconPathByIssuer(labelParts[0])
+    this.conf.TokenIssuer = labelParts[0];
+    this.conf.TokenIcon = getIconPathByIssuer(labelParts[0])
     this.conf.TokenName = labelParts[1];
 
     const parameters: Record<string, string> = {};
@@ -67,6 +67,16 @@ export struct HOTPConfigDialog {
       }
       .height(10)
       Row() {
+        if (this.conf.TokenIcon == undefined || this.conf.TokenIcon == '') {
+          SymbolGlyph($r('sys.symbol.person_crop_circle_fill'))
+            .fontColor([Color.Gray])
+            .fontSize(40)
+        } else {
+          Image($rawfile(this.conf.TokenIcon))
+            .width(40)
+            .height(40)
+            .clipShape(new Circle({ width: 40, height: 40 }))
+        }
         Text($r('app.string.tab_token_add_hotp_key'))
           .fontSize(30)
           .fontWeight(FontWeight.Bold)
