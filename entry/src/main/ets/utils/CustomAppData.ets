@@ -51,9 +51,4 @@ export class TokenConfig {
     this.FortiDevID = '';
     this.TokenIcon = getIconPathByIssuer(issuer);
   }
-
-  setTokenIssuer(issuer: string) {
-    this.TokenIssuer = issuer;
-    this.TokenIcon = getIconPathByIssuer(issuer);
-  }
 }

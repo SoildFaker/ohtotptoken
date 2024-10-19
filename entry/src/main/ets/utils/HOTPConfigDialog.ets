@@ -3,8 +3,7 @@ import { scanCore, scanBarcode } from '@kit.ScanKit';
 import { url } from '@kit.ArkTS';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
-import { HMACAlgorithm } from './TokenUtils';
-import { SelectOptions } from '@kit.ArkUI';
+import { getIconPathByIssuer, HMACAlgorithm } from './TokenUtils';
 
 @Preview
 @CustomDialog
@@ -44,7 +43,8 @@ export struct HOTPConfigDialog {
     }
     const pathParts = otp_url.pathname.slice(1).split('/');
     const labelParts = decodeURIComponent(pathParts[0]).split(':');
-    this.conf.setTokenIssuer(labelParts[0]);
+    this.conf.TokenIssuer=labelParts[0];
+    this.conf.TokenIcon=getIconPathByIssuer(labelParts[0])
     this.conf.TokenName = labelParts[1];
 
     const parameters: Record<string, string> = {};
@@ -118,7 +118,8 @@ export struct HOTPConfigDialog {
             .width('30%')
           TextInput({ text: this.conf.TokenIssuer, placeholder: this.conf.TokenIssuer })
             .onChange((value) => {
-              this.conf.setTokenIssuer(value)
+              this.conf.TokenIssuer=value
+              this.conf.TokenIcon = getIconPathByIssuer(value)
             })
             .width('70%')
         }
