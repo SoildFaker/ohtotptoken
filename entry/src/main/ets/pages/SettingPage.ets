@@ -1,4 +1,4 @@
-import { TokenConfig } from '../utils/CustomAppData';
+import { TokenConfig } from '../utils/TokenConfig';
 import { picker } from '@kit.CoreFileKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { bundleManager, common } from '@kit.AbilityKit';
@@ -11,6 +11,7 @@ import { buffer, util } from '@kit.ArkTS';
 import { SubItemToggle } from '../components/SubItemToggle'
 import { ItemDescription } from '../components/ItemDescription'
 import { router } from '@kit.ArkUI';
+import { AppPreference } from '../utils/AppPreference';
 
 class backup_file {
   magic!: number;
@@ -69,14 +70,8 @@ struct EncryptionPassWordDialog {
 @Preview
 @ComponentV2
 export struct SettingPage {
-  //安全性——隐私模式设置
-  @Param app_safety_privacy_enable:boolean =false;
-  //安全性应用锁定设置
-  @Param app_safety_lock_enable:boolean =false;
   @Require @Param arrConf: Array<TokenConfig> = [];
   @Event backupReload: (conf: Array<TokenConfig>) => void = () => {};
-  @Event safetyPrivacyUpdateEvent: (conf: boolean) => void = () => {};
-  @Event safetyLockUpdateEvent: (conf: boolean) => void = () => {};
 
   //备份时是否为导出模式
   private backup_is_input:boolean = true;
@@ -407,9 +402,9 @@ export struct SettingPage {
             Text($r('app.string.setting_safety'))
               .fontSize(20)
             Divider().vertical(false)
-            SubItemToggle({title: $r('app.string.setting_safety_privacy'),isOn:this.app_safety_privacy_enable,
+            SubItemToggle({title: $r('app.string.setting_safety_privacy'), isOn: AppPreference.getSafetyPrivacyEnable(),
               onChange:(IsOn:boolean)=>{
-                this.safetyPrivacyUpdateEvent(IsOn);
+                AppPreference.setSafetyPrivacyEnable(IsOn);
               }})
             ItemDescription({description: $r('app.string.setting_safety_privacy_des')})
               .margin({
@@ -418,9 +413,9 @@ export struct SettingPage {
                 left: 12,
                 right: 12
               })
-            SubItemToggle({ title: $r('app.string.setting_safety_lock'),isOn:this.app_safety_lock_enable,
+            SubItemToggle({ title: $r('app.string.setting_safety_lock'), isOn: AppPreference.getSafetyLockEnable(),
               onChange: (IsOn: boolean) => {
-                this.safetyLockUpdateEvent(IsOn);
+                AppPreference.setSafetyLockEnable(IsOn);
             } })
             ItemDescription({description: $r('app.string.setting_safety_lock_des')})
               .margin({
@@ -445,7 +440,7 @@ export struct SettingPage {
             Text($r('app.string.setting_about'))
               .fontSize(20)
             Divider().vertical(false)
-            Text("Github: SoildFaker/ohtotptoken\nE-mail: enbinli@outlook.com")
+            Text("Github: SoildFaker/ohtotptoken\nE-mail: enbinli@outlook.com\nContributors: @Soildfaker, @eveloki, @lsxuan12138")
               .fontSize(10)
               .fontColor($r('app.color.str_gray'))
             Divider().vertical(false)
@@ -475,7 +470,7 @@ export struct SettingPage {
             Text($r('app.string.setting_opensource_leg'))
               .fontSize(20)
             Divider().vertical(false)
-            Text("Github: paolostivanin/libcotp\nGithub: Netthaw/TOTP-MCU\nGithub: ss23/fortitoken-mobile-registration")
+            Text("Github: paolostivanin/libcotp\nGithub: Netthaw/TOTP-MCU\nGithub: ss23/fortitoken-mobile-registration\nGithub: andOTP/andOTP - Icons")
               .fontSize(10)
               .fontColor($r('app.color.str_gray'))
           }

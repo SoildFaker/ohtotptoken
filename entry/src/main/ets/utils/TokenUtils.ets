@@ -1,12 +1,13 @@
 import { cryptoFramework } from '@kit.CryptoArchitectureKit';
-import { buffer } from '@kit.ArkTS';
-import { TokenConfig } from './CustomAppData';
+import { buffer, HashSet } from '@kit.ArkTS';
+import { TokenConfig } from './TokenConfig';
 
 const RFC4648 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 const RFC4648_HEX = '0123456789ABCDEFGHIJKLMNOPQRSTUV';
 const CROCKFORD = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 
 export type Base32Variant = 'RFC3548' | 'RFC4648' | 'RFC4648-HEX' | 'Crockford';
+
 export type HMACAlgorithm = 'SHA1' | 'SHA224' | 'SHA256' | 'SHA384' | 'SHA512' | 'SM3' | 'MD5';
 
 function readChar(alphabet: string, char: string): number {
@@ -22,7 +23,7 @@ function readChar(alphabet: string, char: string): number {
 function genSymKeyByData(symKeyData: Uint8Array) {
   let symKeyBlob: cryptoFramework.DataBlob = { data: symKeyData };
   let aesGenerator = cryptoFramework.createSymKeyGenerator('HMAC');
-  let symKey =  aesGenerator.convertKeySync(symKeyBlob);
+  let symKey = aesGenerator.convertKeySync(symKeyBlob);
   return symKey;
 }
 
@@ -31,7 +32,7 @@ function doHmacBySync(steps: number, algorithm: HMACAlgorithm, message: string):
   let byteArray = new Uint8Array(byteLen);
   let tmp = steps; // wired TS feature
   for (let i = 0; i < byteLen; i++) {
-    byteArray[byteLen-i-1] = tmp & 0xff;
+    byteArray[byteLen - i-1] = tmp & 0xff;
     tmp = tmp >> 8;
   }
   let key = genSymKeyByData(base32Decode(message));
@@ -178,4 +179,45 @@ export function base32Decode(input: string, variant: Base32Variant = 'RFC4648'):
   }
 
   return output;
+}
+
+const iconsArray: Array<string> =
+  ['1and1', '1password', '23andme', 'adafruit', 'adguard', 'adobe', 'airbnb', 'airbrake', 'airtable', 'allegropl',
+    'alwaysdata', 'amazon', 'amazonwebservices', 'angellist', 'animebytes', 'anonaddy', 'apache', 'apple', 'appveyor',
+    'arenanet', 'atlantic_net', 'atlassian', 'avm', 'backblaze', 'battlenet', 'betterment', 'binance', 'bitbucket',
+    'bitcoin', 'bitdefender', 'bitfinex', 'bitmex', 'bitpanda', 'bitstamp', 'bittrex', 'bitwala', 'bitwarden',
+    'blockchain_info', 'bugcrowd', 'cexio', 'church_tools', 'cisco', 'cloudflare', 'cloud_download', 'cobranded',
+    'codegiant', 'coinbase', 'coinjar', 'computerbase', 'connectwise_manage', 'cozycloud', 'crowdin', 'dashlane',
+    'debian', 'degiro', 'denic', 'deutsche_bahn', 'diaspora', 'digidentity', 'digital_ocean', 'discord', 'discourse',
+    'disroot', 'docker', 'docusign', 'dreamhost', 'dropbox', 'drupal', 'electronic_arts', 'email', 'epic_games', 'etsy',
+    'eveonline', 'evernote', 'facebook', 'faceit', 'fanatical', 'fastmail', 'figma', 'fingerprint', 'finnair',
+    'firefox', 'flight_takeoff', 'floatplane', 'forti', 'friendica', 'fritz', 'gamepad', 'gandi', 'git', 'gitea', 'github',
+    'gitlab', 'gmx', 'godaddy', 'gogs', 'google', 'govuk', 'grav', 'greenhost', 'hackerone', 'heroku', 'hetzner',
+    'hitbtc', 'hmrc', 'home_assistant', 'hover', 'humblebundle', 'hurricane_electric', 'ibm', 'iconomi', 'ifttt', 'ing',
+    'instagram', 'inwx', 'itchio', 'jagex', 'jetbrains', 'joomla', 'keeper', 'kickstarter', 'kraken', 'kucoin',
+    'lastpass', 'librenms', 'lichess', 'linkedin', 'linode', 'liqui', 'livelyme', 'lobsters', 'localbitcoins',
+    'localmonero', 'login_gov', 'logmein', 'mailbox', 'mailchimp', 'mailcow', 'mailgun', 'mailru', 'mapbox', 'mastodon',
+    'matomo', 'mega', 'mercadolibre', 'microsoft', 'microsoft_teams', 'migadu', 'miles_and_more', 'mint', 'miraheze',
+    'mixer', 'mongodb', 'mvpsnet', 'namecheap', 'namecom', 'nas', 'netcup', 'nextcloud', 'nintendo', 'no_starch_press',
+    'npm', 'oculus', 'office', 'okta', 'online', 'openvz', 'opnsense', 'orcid', 'origin', 'ovh', 'packet',
+    'parsecgaming', 'passwordstate', 'patreon', 'paypal', 'paysafecard', 'paywithprivacy', 'pcloud', 'phabricator',
+    'phpmyadmin', 'pluralsight', 'plurk', 'posteo', 'pretix', 'prey', 'private_internet_access', 'protonmail',
+    'proxmox', 'pushover', 'pypi', 'python_anywhere', 'rackspace', 'reddit', 'revolt', 'ripe_ncc', 'ripio', 'robinhood',
+    'rocketbeanstv', 'rockstar', 'rss', 'sap', 'scaleway', 'school', 'sciebo', 'sentry', 'sevdesk', 'skrill', 'slack',
+    'snapchat', 'sophos', 'sourceforge', 'squarespace', 'standardnotes', 'starcitizen', 'steam', 'stripe', 'sync',
+    'synology', 'teahub', 'teamviewer', 'terminal', 'todoalojamiento', 'transip', 'trello', 'tumblr', 'turbotax',
+    'tutanota', 'tuwien_ac_at', 'twilio', 'twitch', 'twitter', 'uber', 'ubisoft', 'ubnt', 'ubuntu_one', 'unity',
+    'uphold', 'usaa', 'vagrant_cloud', 'vexxhost', 'vk', 'vultr', 'wallabag', 'wallet', 'wargaming', 'wasabi',
+    'weclapp', 'wikimedia', 'wordpress', 'workplace', 'xero', 'xerox', 'xing', 'yandex_money', 'zapier', 'zendesk',
+    'zoho', 'zoom'];
+const iconsSet: HashSet<string> = new HashSet();
+for (let item of iconsArray) {
+  iconsSet.add(item);
+}
+
+export function getIconPathByIssuer(issuer: string): string {
+  if (iconsSet.has(issuer.toLowerCase())) {
+    return 'icons/token_image_' + issuer.toLowerCase() + '.svg';
+  }
+  return '';
 }
