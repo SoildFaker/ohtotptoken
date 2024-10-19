@@ -1,4 +1,5 @@
 import { HMACAlgorithm } from './TokenUtils';
+import { util } from '@kit.ArkTS';
 
 export enum otpType {
   TOTP,
@@ -8,6 +9,7 @@ export enum otpType {
 }
 
 export class TokenConfig {
+  TokenUUID: string;
   TokenType: otpType;
   TokenSecret: string;
   TokenIssuer: string;
@@ -39,6 +41,7 @@ export class TokenConfig {
     this.TokenCounter = counter;
     this.FortiToken = '';
     this.FortiDevID = '';
+    this.TokenUUID = util.generateRandomUUID();
   }
 
 }
