@@ -1,4 +1,4 @@
-import { TokenConfig } from '../utils/TokenConfig';
+import { otpType, TokenConfig } from '../utils/TokenConfig';
 import { scanCore, scanBarcode } from '@kit.ScanKit';
 import { url } from '@kit.ArkTS';
 import { BusinessError } from '@kit.BasicServicesKit';
@@ -36,11 +36,17 @@ export struct TOTPConfigDialog {
       return;
     }
 
-    const type = otp_url.host;
-    if (type.toLowerCase() !== 'totp') {
+    const type = otp_url.host.toLowerCase();
+
+    if (type === 'totp') {
+      this.conf.TokenType = otpType.TOTP;
+    } else if (type == 'hotp') {
+      this.conf.TokenType = otpType.HOTP;
+    } else {
       console.error('Invalid type');
       return;
     }
+
     const pathParts = otp_url.pathname.slice(1).split('/');
     const labelParts = decodeURIComponent(pathParts[0]).split(':');
     this.conf.TokenIssuer=labelParts[0];
@@ -57,6 +63,7 @@ export struct TOTPConfigDialog {
     }
     this.conf.TokenSecret = parameters['secret'];
     this.conf.TokenPeriod = parseInt(parameters['period'] ?? '30');
+    this.conf.TokenCounter = parseInt(parameters['counter'] ?? '0');
     this.conf.TokenDigits = parseInt(parameters['digits'] ?? '6');
   }
 
@@ -207,28 +214,43 @@ export struct TOTPConfigDialog {
         }
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)
-        Row() {
-          Text($r('app.string.dialog_cfg_tk_timeout'))
-            .width('30%')
+        if (this.conf.TokenType == otpType.TOTP) {
           Row() {
-            Slider({
-              min: 1,
-              max: 60,
-              value: this.conf.TokenPeriod,
-              step: 1,
-              style: SliderStyle.InSet
-            })
-              .blockColor('#191970')
-              .selectedColor('#4169E1')
-              .onChange((value: number, mode: SliderChangeMode) => {
-                this.conf.TokenPeriod = value
+            Text($r('app.string.dialog_cfg_tk_timeout'))
+              .width('30%')
+            Row() {
+              Slider({
+                min: 1,
+                max: 60,
+                value: this.conf.TokenPeriod,
+                step: 1,
+                style: SliderStyle.InSet
               })
-            Text(this.conf.TokenPeriod.toFixed(0)).fontSize(12)
+                .blockColor('#191970')
+                .selectedColor('#4169E1')
+                .onChange((value: number, mode: SliderChangeMode) => {
+                  this.conf.TokenPeriod = value
+                })
+              Text(this.conf.TokenPeriod.toFixed(0)).fontSize(12)
+            }
+            .width('70%')
           }
-          .width('70%')
+          .width('100%')
+          .justifyContent(FlexAlign.SpaceBetween)
+        } else if (this.conf.TokenType == otpType.HOTP) {
+          Row() {
+            Text($r('app.string.dialog_cfg_tk_counter'))
+              .width('30%')
+            TextInput({ placeholder: this.conf.TokenCounter.toString() })
+              .onChange((value) => {
+                let counter = parseInt(value);
+                this.conf.TokenCounter = isNaN(counter) ? 0 : counter;
+              })
+              .width('70%')
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.SpaceBetween)
         }
-        .width('100%')
-        .justifyContent(FlexAlign.SpaceBetween)
       }
       .padding({left: 10, right: 10})
 

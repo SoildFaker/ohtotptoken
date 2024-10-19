@@ -1,7 +1,7 @@
 import { window } from '@kit.ArkUI';
 import { AppStorageV2 } from '@kit.ArkUI';
 import { TokenConfig, otpType } from '../utils/TokenConfig';
-import { TOTPConfigDialog } from '../dialogs/TOTPConfigDialog';
+import { TOTPConfigDialog } from '../dialogs/OTPConfigDialog';
 import { FortiConfigDialog } from '../dialogs/FortiConfigDialog';
 import { TokenItem } from '../components/TokenItem';
 import { SettingPage } from '../pages/SettingPage'
@@ -11,7 +11,6 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import { router } from '@kit.ArkUI';
 import promptAction from '@ohos.promptAction'
 import { SteamConfigDialog } from '../dialogs/SteamConfigDialog';
-import { HOTPConfigDialog } from '../dialogs/HOTPConfigDialog';
 import { QRCodeDialog } from '../dialogs/QRCodeDialog';
 import { AppPreference } from '../utils/AppPreference';
 import { MMKV } from '@tencent/mmkv';
@@ -131,15 +130,6 @@ struct Index {
           })
           this.dialog_forti_config.open()
         })
-      MenuItem({ content: $r('app.string.tab_token_add_hotp_key') })
-        .onClick(() => {
-          this.dialog_hotp_config = new CustomDialogController({
-            builder: HOTPConfigDialog({
-              confirm: (new_conf) => {this.addTokenConfig(JSON.parse(new_conf))}
-            })
-          })
-          this.dialog_hotp_config.open()
-        })
       MenuItem({ content: $r('app.string.tab_token_add_stream_key') })
         .onClick(() => {
           this.dialog_steam_config = new CustomDialogController({
@@ -235,7 +225,7 @@ struct Index {
       .backgroundColor(Color.Gray)
       .padding(10)
       .onClick(() => {
-        if (conf.TokenType === 0 || conf.TokenType === undefined) { // totp default
+        if (conf.TokenType === otpType.TOTP || conf.TokenType === otpType.HOTP || conf.TokenType === undefined) { // default
           this.dialog_totp_config = new CustomDialogController({
             builder: TOTPConfigDialog({
               conf_json: JSON.stringify(conf),
@@ -245,7 +235,7 @@ struct Index {
             })
           })
           this.dialog_totp_config.open()
-        } else if (conf.TokenType === 1) { // forti
+        } else if (conf.TokenType === otpType.Forti) { // forti
           this.dialog_forti_config = new CustomDialogController({
             builder: FortiConfigDialog({
               conf_json: JSON.stringify(conf),
@@ -255,17 +245,7 @@ struct Index {
             })
           })
           this.dialog_forti_config.open()
-        } else if (conf.TokenType === 2) { // hotp
-          this.dialog_hotp_config = new CustomDialogController({
-            builder: HOTPConfigDialog({
-              conf_json: JSON.stringify(conf),
-              confirm: (new_conf) => {
-                this.addTokenConfig(JSON.parse(new_conf))
-              }
-            })
-          })
-          this.dialog_hotp_config.open()
-        } else if (conf.TokenType === 3) { // steam
+        } else if (conf.TokenType === otpType.Steam) { // steam
           this.dialog_steam_config = new CustomDialogController({
             builder: SteamConfigDialog({
               conf_json: JSON.stringify(conf),
@@ -280,7 +260,6 @@ struct Index {
     }
     .margin({ left: 10 })
   }
-
 
   build() {
     Column() {
