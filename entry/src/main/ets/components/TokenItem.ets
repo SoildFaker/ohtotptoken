@@ -1,5 +1,5 @@
 import { systemDateTime } from '@kit.BasicServicesKit';
-import { otpType, TokenConfig } from '../utils/CustomAppData';
+import { otpType, TokenConfig } from '../utils/TokenConfig';
 import { generateOTP } from '../utils/TokenUtils';
 
 @Preview

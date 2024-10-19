@@ -1,6 +1,6 @@
 import { cryptoFramework } from '@kit.CryptoArchitectureKit';
 import { buffer, HashSet } from '@kit.ArkTS';
-import { TokenConfig } from './CustomAppData';
+import { TokenConfig } from './TokenConfig';
 
 const RFC4648 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 const RFC4648_HEX = '0123456789ABCDEFGHIJKLMNOPQRSTUV';

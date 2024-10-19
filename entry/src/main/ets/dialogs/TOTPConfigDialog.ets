@@ -1,16 +1,16 @@
-import { TokenConfig } from '../utils/CustomAppData';
+import { TokenConfig } from '../utils/TokenConfig';
 import { scanCore, scanBarcode } from '@kit.ScanKit';
 import { url } from '@kit.ArkTS';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
-import { getIconPathByIssuer, HMACAlgorithm } from './TokenUtils';
+import { getIconPathByIssuer, HMACAlgorithm } from '../utils/TokenUtils';
 
 @Preview
 @CustomDialog
-export struct HOTPConfigDialog {
+export struct TOTPConfigDialog {
   controller?: CustomDialogController;
   @Prop conf_json?: string = '';
-  @State conf: TokenConfig = new TokenConfig('', 2);
+  @State conf: TokenConfig = new TokenConfig();
   @State btn_camera_clicked: number = 0;
 
   cancel?: () => void;
@@ -37,18 +37,18 @@ export struct HOTPConfigDialog {
     }
 
     const type = otp_url.host;
-    if (type.toLowerCase() !== 'hotp') {
+    if (type.toLowerCase() !== 'totp') {
       console.error('Invalid type');
       return;
     }
     const pathParts = otp_url.pathname.slice(1).split('/');
     const labelParts = decodeURIComponent(pathParts[0]).split(':');
     this.conf.TokenIssuer=labelParts[0];
-    this.conf.TokenIcon=getIconPathByIssuer(labelParts[0])
+    this.conf.TokenIcon = getIconPathByIssuer(labelParts[0])
     this.conf.TokenName = labelParts[1];
 
     const parameters: Record<string, string> = {};
-    const query = otp_url.href.split('?')[1];
+    const query = otp_url.href.split('?')[1].toLowerCase();
     if (query) {
       query.split('&').forEach(part => {
         const kv: string[] = part.split('=');
@@ -56,7 +56,7 @@ export struct HOTPConfigDialog {
       });
     }
     this.conf.TokenSecret = parameters['secret'];
-    this.conf.TokenPeriod = parseInt(parameters['counter'] ?? '0');
+    this.conf.TokenPeriod = parseInt(parameters['period'] ?? '30');
     this.conf.TokenDigits = parseInt(parameters['digits'] ?? '6');
   }
 
@@ -67,7 +67,7 @@ export struct HOTPConfigDialog {
       }
       .height(10)
       Row() {
-        Text($r('app.string.tab_token_add_hotp_key'))
+        Text($r('app.string.tab_token_add_key'))
           .fontSize(30)
           .fontWeight(FontWeight.Bold)
         SymbolGlyph($r('sys.symbol.camera'))
@@ -118,8 +118,8 @@ export struct HOTPConfigDialog {
             .width('30%')
           TextInput({ text: this.conf.TokenIssuer, placeholder: this.conf.TokenIssuer })
             .onChange((value) => {
-              this.conf.TokenIssuer=value
-              this.conf.TokenIcon = getIconPathByIssuer(value)
+              this.conf.TokenIssuer=value;
+              this.conf.TokenIcon=getIconPathByIssuer(value)
             })
             .width('70%')
         }
@@ -148,6 +148,7 @@ export struct HOTPConfigDialog {
             {value: 'SM3'},
             {value: 'MD5'},
           ])
+            .selected(0)
             .value(this.conf.TokenAlgorithm)
             .onSelect((_, value) => {
               this.conf.TokenAlgorithm = value as HMACAlgorithm
@@ -197,14 +198,24 @@ export struct HOTPConfigDialog {
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)
         Row() {
-          Text($r('app.string.dialog_cfg_tk_counter'))
+          Text($r('app.string.dialog_cfg_tk_timeout'))
             .width('30%')
-          TextInput({ text: this.conf.TokenCounter.toString(), placeholder: this.conf.TokenCounter.toString() })
-            .onChange((value) => {
-              let counter = parseInt(value);
-              this.conf.TokenCounter = isNaN(counter) ? 0 : counter;
+          Row() {
+            Slider({
+              min: 1,
+              max: 60,
+              value: this.conf.TokenPeriod,
+              step: 1,
+              style: SliderStyle.InSet
             })
-            .width('70%')
+              .blockColor('#191970')
+              .selectedColor('#4169E1')
+              .onChange((value: number, mode: SliderChangeMode) => {
+                this.conf.TokenPeriod = value
+              })
+            Text(this.conf.TokenPeriod.toFixed(0)).fontSize(12)
+          }
+          .width('70%')
         }
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)
