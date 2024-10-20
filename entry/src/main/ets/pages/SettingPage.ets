@@ -10,6 +10,7 @@ import { cryptoFramework } from '@kit.CryptoArchitectureKit';
 import { buffer, util } from '@kit.ArkTS';
 import { SubItemToggle } from '../components/SubItemToggle'
 import { ItemDescription } from '../components/ItemDescription'
+import { router } from '@kit.ArkUI';
 import { AppPreference } from '../utils/AppPreference';
 
 class backup_file {
@@ -442,6 +443,17 @@ export struct SettingPage {
             Text("Github: SoildFaker/ohtotptoken\nE-mail: enbinli@outlook.com\nContributors: @Soildfaker, @eveloki, @lsxuan12138")
               .fontSize(10)
               .fontColor($r('app.color.str_gray'))
+            Divider().vertical(false)
+            Menu() {
+              MenuItem({ startIcon: $r("app.media.person_shield"), content: $r('app.string.privacy_statement') })
+                .onClick(()=>{
+                  router.pushUrl({ url: 'pages/PrivacyPage' });
+                })
+              MenuItem({ startIcon: $r("app.media.doc_plaintext_and_pencil"), content:$r('app.string.user_agreement')})
+                .onClick(()=>{
+                  router.pushUrl({ url: 'pages/AgreementPage' });
+                })
+            }.width('100%').padding({ left:0})
           }
           .alignItems(HorizontalAlign.Start)
         }
