@@ -19,11 +19,11 @@ import { CommonConstants } from '../utils/CommonConstants';
 function DefaultBuilder() {
 }
 
-@Component
+@ComponentV2
 export struct TopNavigationView {
-  title?: ResourceStr;
+  @Param title?: ResourceStr = '';
   @BuilderParam menuView?: CustomBuilder = DefaultBuilder;
-  onBackClick?: Function;
+  @Param onBackClick?: Function = () => {};
 
   build() {
     Row() {

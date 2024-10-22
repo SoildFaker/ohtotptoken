@@ -12,6 +12,9 @@ import { SubItemToggle } from '../components/SubItemToggle'
 import { ItemDescription } from '../components/ItemDescription'
 import { router } from '@kit.ArkUI';
 import { AppPreference } from '../utils/AppPreference';
+import { trustedAppService } from '@kit.DeviceSecurityKit';
+import { SubItemButton } from '../components/SubItemButton';
+import { SettingItem } from '../components/SettingItem';
 
 class backup_file {
   magic!: number;
@@ -71,6 +74,8 @@ struct EncryptionPassWordDialog {
 @ComponentV2
 export struct SettingPage {
   @Require @Param arrConf: Array<TokenConfig> = [];
+  @Require @Param appBottomAvoidHeight: number = 0;
+  @Require @Param appTopAvoidHeight: number = 0;
   @Event backupReload: (conf: Array<TokenConfig>) => void = () => {};
 
   //备份时是否为导出模式
@@ -339,155 +344,83 @@ export struct SettingPage {
       ListItem(){
 
       }
-      .height(0)
+      .height(50 + this.appTopAvoidHeight)
 
       ListItem() {
-        Row() {
-          Column({ space: 5 }) {
-            Text($r('app.string.setting_backup'))
-              .fontSize(20)
-            Divider().vertical(false)
-            Row({ space: 5 }) {
-              Button({ type: ButtonType.Capsule }) {
-                Row() {
-                  Text($r('app.string.setting_backup_export'))
-                  Blank()
-                    .width(10)
-                  SymbolGlyph($r('sys.symbol.save_fill'))
-                    .fontColor([$r('app.color.str_main')])
-                }
-                .justifyContent(FlexAlign.SpaceAround)
-              }
-              .layoutWeight(1)
-              .height(30)
-              .backgroundColor($r('app.color.item_bg'))
-              .onClick(() => {
-                this.backup_is_input = true;
-                this.callFilePickerSaveFile()
-              })
-              Divider().vertical(true)
-              Button({ type: ButtonType.Capsule }) {
-                Row() {
-                  Text($r('app.string.setting_backup_import'))
-                  Blank()
-                    .width(10)
-                  SymbolGlyph($r('sys.symbol.folder_fill'))
-                    .fontColor([$r('app.color.str_main')])
-                }
-                .justifyContent(FlexAlign.SpaceBetween)
-              }
-              .layoutWeight(1)
-              .height(30)
-              .backgroundColor($r('app.color.item_bg'))
-              .onClick(() => {
-                this.backup_is_input = false;
-                this.callFilePickerSelectFile()
-              })
-            }
-            .height(30)
-            .width('100%')
-          }
-          .alignItems(HorizontalAlign.Start)
+        SettingItem({ title: $r('app.string.setting_backup') }){
+          SubItemButton({ symbol: $r('sys.symbol.save'), text: $r('app.string.setting_backup_export') })
+            //.layoutWeight(1)
+            .onClick(() => {
+              this.backup_is_input = true;
+              this.callFilePickerSaveFile()
+            })
+          SubItemButton({ symbol: $r('sys.symbol.folder'), text: $r('app.string.setting_backup_import') })
+            //.layoutWeight(1)
+            .onClick(() => {
+              this.backup_is_input = false;
+              this.callFilePickerSelectFile()
+            })
         }
-        .backgroundColor($r('app.color.item_bg'))
-        .borderRadius(10)
-        .shadow({ radius: 10, color: $r('app.color.shadow'), offsetX: 10, offsetY: 10 })
-        .padding(10)
       }
       .padding({ left: 10, right: 10})
 
       ListItem() {
-        Row() {
-          Column({ space: 5 }) {
-            Text($r('app.string.setting_safety'))
-              .fontSize(20)
-            Divider().vertical(false)
-            SubItemToggle({title: $r('app.string.setting_safety_privacy'), isOn: AppPreference.getSafetyPrivacyEnable(),
-              onChange:(IsOn:boolean)=>{
-                AppPreference.setSafetyPrivacyEnable(IsOn);
-              }})
-            ItemDescription({description: $r('app.string.setting_safety_privacy_des')})
-              .margin({
-                top: 0,
-                bottom: 2,
-                left: 12,
-                right: 12
-              })
-            SubItemToggle({ title: $r('app.string.setting_safety_lock'), isOn: AppPreference.getSafetyLockEnable(),
-              onChange: (IsOn: boolean) => {
-                AppPreference.setSafetyLockEnable(IsOn);
+        SettingItem({ title: $r('app.string.setting_safety') }){
+          SubItemToggle({title: $r('app.string.setting_safety_privacy'), isOn: AppPreference.getSafetyPrivacyEnable(),
+            onChange:(IsOn:boolean)=>{
+              AppPreference.setSafetyPrivacyEnable(IsOn);
+            }})
+          ItemDescription({description: $r('app.string.setting_safety_privacy_des')})
+          SubItemToggle({ title: $r('app.string.setting_safety_lock'), isOn: AppPreference.getSafetyLockEnable(),
+            onChange: (IsOn: boolean) => {
+              AppPreference.setSafetyLockEnable(IsOn);
             } })
-            ItemDescription({description: $r('app.string.setting_safety_lock_des')})
-              .margin({
-                top: 0,
-                bottom: 2,
-                left: 12,
-                right: 12
-              })
-          }
-          .alignItems(HorizontalAlign.Start)
+          ItemDescription({description: $r('app.string.setting_safety_lock_des')})
         }
-        .backgroundColor($r('app.color.item_bg'))
-        .borderRadius(10)
-        .shadow({ radius: 10, color: $r('app.color.shadow'), offsetX: 10, offsetY: 10 })
-        .padding(10)
+      }
+      .padding({ left: 10, right: 10})
+
+
+      ListItem() {
+        SettingItem({ title: $r('app.string.setting_agreement_statement') }) {
+          SubItemButton({ symbol: $r("sys.symbol.person_shield"), text: $r('app.string.privacy_statement') })
+            .onClick(() => {
+              router.pushUrl({ url: 'pages/PrivacyPage' });
+            })
+          SubItemButton({ symbol: $r("sys.symbol.doc_plaintext_and_pencil"), text: $r('app.string.user_agreement') })
+            .onClick(() => {
+              router.pushUrl({ url: 'pages/AgreementPage' });
+            })
+        }
       }
       .padding({ left: 10, right: 10})
 
       ListItem() {
-        Row() {
-          Column({ space: 5 }) {
-            Text($r('app.string.setting_about'))
-              .fontSize(20)
-            Divider().vertical(false)
-            Text("Github: SoildFaker/ohtotptoken\nE-mail: enbinli@outlook.com\nContributors: @Soildfaker, @eveloki, @lsxuan12138")
-              .fontSize(10)
-              .fontColor($r('app.color.str_gray'))
-            Divider().vertical(false)
-            Menu() {
-              MenuItem({ startIcon: $r("app.media.person_shield"), content: $r('app.string.privacy_statement') })
-                .onClick(()=>{
-                  router.pushUrl({ url: 'pages/PrivacyPage' });
-                })
-              MenuItem({ startIcon: $r("app.media.doc_plaintext_and_pencil"), content:$r('app.string.user_agreement')})
-                .onClick(()=>{
-                  router.pushUrl({ url: 'pages/AgreementPage' });
-                })
-            }.width('100%').padding({ left:0})
-          }
-          .alignItems(HorizontalAlign.Start)
+        SettingItem({ title: $r('app.string.setting_about') }) {
+          Text("Github: SoildFaker/ohtotptoken\nE-mail: enbinli@outlook.com\nContributors: @Soildfaker, @eveloki, @lsxuan12138")
+            .fontSize(10)
+            .fontColor($r('app.color.str_gray'))
         }
-        .backgroundColor($r('app.color.item_bg'))
-        .borderRadius(10)
-        .shadow({ radius: 10, color: $r('app.color.shadow'), offsetX: 10, offsetY: 10 })
-        .padding(10)
       }
       .padding({ left: 10, right: 10})
 
       ListItem() {
-        Row() {
-          Column({ space: 5 }) {
-            Text($r('app.string.setting_opensource_leg'))
-              .fontSize(20)
-            Divider().vertical(false)
-            Text("Github: paolostivanin/libcotp\nGithub: Netthaw/TOTP-MCU\nGithub: ss23/fortitoken-mobile-registration\nGithub: andOTP/andOTP - Icons")
-              .fontSize(10)
-              .fontColor($r('app.color.str_gray'))
-          }
-          .alignItems(HorizontalAlign.Start)
+        SettingItem({ title: $r('app.string.setting_opensource_leg') }) {
+          Text("Github: paolostivanin/libcotp\nGithub: Netthaw/TOTP-MCU\nGithub: ss23/fortitoken-mobile-registration\nGithub: andOTP/andOTP - Icons")
+            .fontSize(10)
+            .fontColor($r('app.color.str_gray'))
         }
-        .backgroundColor($r('app.color.item_bg'))
-        .borderRadius(10)
-        .shadow({ radius: 10, color: $r('app.color.shadow'), offsetX: 10, offsetY: 10 })
-        .padding(10)
       }
       .padding({ left: 10, right: 10})
 
-      ListItem(){
-
+      ListItem() {
+        Row()
+          .width('100%')
+          .height(this.appBottomAvoidHeight)
       }
-      .height(0)
     }
+    .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true })
+    .scrollBar(BarState.Off)
     .backgroundColor($r('app.color.window_background'))
   }
 }

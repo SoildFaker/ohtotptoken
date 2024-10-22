@@ -122,11 +122,11 @@
     },
     {
       "name": "setting_backup_export",
-      "value": "导出"
+      "value": "导出备份"
     },
     {
       "name": "setting_backup_import",
-      "value": "导入"
+      "value": "导入备份"
     },
     {
       "name": "setting_safety",
@@ -177,13 +177,22 @@
       "value": "确认"
     },
     {
+      "name": "setting_agreement_statement",
+      "value": "协议与声明"
+    },
+    {
       "name": "privacy_statement",
-      "value": "隐私协议"
+      "value": "隐私声明"
     },
     {
       "name": "user_agreement",
       "value": "用户协议"
-    }, {
+    },
+    {
+      "name": "opensource_license",
+      "value": "开放源代码许可"
+    },
+    {
       "name": "user_auth_prompt",
       "value": "请进行用户验证"
     },

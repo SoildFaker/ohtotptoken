@@ -39,7 +39,7 @@ struct SplashPage {
           console.info(`userAuthInstance callback result: ${JSON.stringify(result)}`);
           // 可在认证结束或其他业务需要场景，取消订阅认证结果
           //let rr:userAuth.UserAuthResult =result;
-          if (result.result==userAuth.UserAuthResultCode.SUCCESS) {
+          if (result.result == userAuth.UserAuthResultCode.SUCCESS) {
             //判断验证结果是否正确 只有正确验证了才能跳跃到首页
             router.pushUrl({ url: 'pages/Index' });
           }
@@ -95,8 +95,6 @@ struct SplashPage {
             bias : {vertical : 0.3}
           })
       }
-      .margin({left: 0})
-      .border({width:2, color: "#6699FF"})
     }
     .height('100%')
     .onClick(() => {

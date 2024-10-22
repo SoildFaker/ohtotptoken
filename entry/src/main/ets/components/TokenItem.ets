@@ -22,7 +22,7 @@ export struct TokenItem {
     if (this.Config.TokenType == otpType.HOTP) {
       this.updateHOTPToken();
     } else {
-      let steps = Math.floor(systemDateTime.getTime() / 1000 / this.Config.TokenPeriod)
+      let steps = Math.floor(systemDateTime.getTime() / 1000)
       this.refreshTOTPToken(steps);
     }
   }

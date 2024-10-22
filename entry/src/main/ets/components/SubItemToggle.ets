@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-@Component
+@ComponentV2
 export struct SubItemToggle {
-  @LocalStorageProp('currentBreakpoint') curBp: string = 'sm';
-  onChange: (isOn: boolean) => void = () => {};
-  private title: string | Resource = '';
-  private isOn: boolean = false;
+  @Require @Param onChange: (isOn: boolean) => void = () => {};
+  @Require @Param title: string | Resource = '';
+  @Param isOn: boolean = false;
+
   build() {
     Row() {
       Text(this.title)
@@ -39,7 +39,5 @@ export struct SubItemToggle {
     }
     .height(48)
     .width('100%')
-    .padding({left: 8, right: 8})
-    .borderRadius(24)
   }
 }
