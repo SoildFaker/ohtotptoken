@@ -17,7 +17,7 @@
 export struct SubItemToggle {
   @Require @Param onChange: (isOn: boolean) => void = () => {};
   @Require @Param title: string | Resource = '';
-  @Param isOn: boolean = false;
+  @Require @Param isOn: boolean = false;
 
   build() {
     Row() {

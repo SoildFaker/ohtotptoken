@@ -1,5 +1,4 @@
 import { window } from '@kit.ArkUI';
-import { AppStorageV2 } from '@kit.ArkUI';
 import { TokenConfig, otpType } from '../utils/TokenConfig';
 import { TOTPConfigDialog } from '../dialogs/OTPConfigDialog';
 import { FortiConfigDialog } from '../dialogs/FortiConfigDialog';
@@ -14,8 +13,6 @@ import { SteamConfigDialog } from '../dialogs/SteamConfigDialog';
 import { QRCodeDialog } from '../dialogs/QRCodeDialog';
 import { AppPreference } from '../utils/AppPreference';
 import { MMKV } from '@tencent/mmkv';
-import { hilog } from '@kit.PerformanceAnalysisKit';
-import { trustedAppService } from '@kit.DeviceSecurityKit';
 
 let mmkv = MMKV.defaultMMKV();
 
@@ -312,6 +309,7 @@ struct Index {
               .layoutWeight(1)
               .width('100%')
               .height('100%')
+              .scrollBar(BarState.Off)
               .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true })
 
             }

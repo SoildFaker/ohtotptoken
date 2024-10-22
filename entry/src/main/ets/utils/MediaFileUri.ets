@@ -93,8 +93,13 @@ export default class MediaFileUri {
     if (isRead) {
       try {
         let buffer = new ArrayBuffer(BUFFER_SIZE);
-        let readOut = fileIo.readSync(this.commonFd, buffer, { offset: 0 });
-        content = intArrayToString(buffer);
+        let offset = 0;
+        let readOut = 0;
+        do {
+          readOut = fileIo.readSync(this.commonFd, buffer, { offset: offset });
+          content += intArrayToString(buffer.slice(0, readOut));
+          offset += BUFFER_SIZE;
+        } while (readOut == BUFFER_SIZE)
       } catch (err) {
         Logger.error(TAG, 'myReadSync: read error: ' + err);
         return content;

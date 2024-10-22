@@ -12,9 +12,9 @@ import { SubItemToggle } from '../components/SubItemToggle'
 import { ItemDescription } from '../components/ItemDescription'
 import { router } from '@kit.ArkUI';
 import { AppPreference } from '../utils/AppPreference';
-import { trustedAppService } from '@kit.DeviceSecurityKit';
 import { SubItemButton } from '../components/SubItemButton';
 import { SettingItem } from '../components/SettingItem';
+import { userAuth } from '@kit.UserAuthenticationKit';
 
 class backup_file {
   magic!: number;
@@ -373,6 +373,15 @@ export struct SettingPage {
           ItemDescription({description: $r('app.string.setting_safety_privacy_des')})
           SubItemToggle({ title: $r('app.string.setting_safety_lock'), isOn: AppPreference.getSafetyLockEnable(),
             onChange: (IsOn: boolean) => {
+              if (IsOn) {
+                try {
+                  userAuth.getAvailableStatus(userAuth.UserAuthType.PIN, userAuth.AuthTrustLevel.ATL1);
+                } catch (err) {
+                  const error = err as BusinessError;
+                  promptAction.showToast({ message: error.message });
+                  return;
+                }
+              }
               AppPreference.setSafetyLockEnable(IsOn);
             } })
           ItemDescription({description: $r('app.string.setting_safety_lock_des')})
