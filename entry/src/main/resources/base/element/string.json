@@ -203,6 +203,10 @@
     {
       "name": "app_unlock",
       "value": "Unlock"
+    },
+    {
+      "name": "distributed_data_sync",
+      "value": "Used for free flow of multiple devices."
     }
   ]
 }

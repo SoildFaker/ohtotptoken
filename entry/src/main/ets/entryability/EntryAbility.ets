@@ -6,8 +6,17 @@ import { MMKV } from '@tencent/mmkv';
 import { WindowUtil } from '../utils/WindowUtil';
 import { AppPreference } from '../utils/AppPreference';
 import { router } from '@kit.ArkUI';
+import { distributedKVStore } from '@kit.ArkData';
+import { relationalStore  } from '@kit.ArkData';
+import { cloudData } from '@kit.ArkData';
+
+//单版本分布式键值数据库
+let kvManager: distributedKVStore.KVManager;
+let kvStore: distributedKVStore.SingleKVStore | null = null;
+let rdbStore: relationalStore.RdbStore | null = null;
 
 export default class EntryAbility extends UIAbility {
+
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     let appCtx = this.context.getApplicationContext();
     let mmkvRootDir = MMKV.initialize(appCtx);
@@ -39,6 +48,8 @@ export default class EntryAbility extends UIAbility {
     } catch (paramError) {
       console.error(`error: ${(paramError as BusinessError).code}, ${(paramError as BusinessError).message}`);
     }
+
+    this.initKvStore();
   }
 
   onDestroy(): void {
@@ -99,5 +110,86 @@ export default class EntryAbility extends UIAbility {
   onBackground(): void {
     // Ability has back to background
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onBackground');
+  }
+  //初始化RDB数据库
+  initRdbStore(): void{
+    const STORE_CONFIG: relationalStore.StoreConfig = {
+      name: "main_rdb_store.db",
+      securityLevel: relationalStore.SecurityLevel.S3
+    };
+    relationalStore.getRdbStore(this.context, STORE_CONFIG, (err: BusinessError, __rdbStore: relationalStore.RdbStore) => {
+      rdbStore = __rdbStore;
+      if (err) {
+        console.error(`Get RdbStore failed, code is ${err.code},message is ${err.message}`);
+        return;
+      }
+      console.info('Get RdbStore successfully.');
+    })
+    //端云同步
+    //仅WIFI同步
+    cloudData.setCloudStrategy(cloudData.StrategyType.NETWORK, [cloudData.NetWorkStrategy.WIFI]).then(() => {
+      console.info('Succeeded in setting the cloud strategy');
+    }).catch((err: BusinessError) => {
+      console.error(`Failed to set cloud strategy. Code: ${err.code}, message: ${err.message}`);
+    });
+    //同步按照时间策略
+    rdbStore?.cloudSync(relationalStore.SyncMode.SYNC_MODE_TIME_FIRST, (progressDetails) => {
+      console.info(`Progess: ${progressDetails}`);
+    }, (err) => {
+      if (err) {
+        console.error(`Cloud sync failed, code is ${err.code},message is ${err.message}`);
+        return;
+      }
+      console.info('Cloud sync succeeded');
+    });
+  }
+  //初始化键值对数据库
+  initKvStore() :void{
+    //初始化键值数据库
+    let bundleName=this.context.resourceManager.getStringSync($r('app.string.app_name').id)
+    const kvManagerConfig: distributedKVStore.KVManagerConfig = {
+      context: this.context,
+      bundleName: bundleName,
+    }
+    try {
+      kvManager = distributedKVStore.createKVManager(kvManagerConfig);
+      console.info("Succeeded in creating KVManager");
+      const options: distributedKVStore.Options = {
+        createIfMissing: true,
+        encrypt: false,//不加密
+        backup: false,//设置数据库文件是否备份
+        autoSync: true,//自动同步
+        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,//表示单版本数据库。 数据不分设备，设备之间修改相同的Key会覆盖。
+        securityLevel: distributedKVStore.SecurityLevel.S3, //对于token密钥采菊表示数据库的安全级别为高级别，数据的泄露、篡改、破坏、销毁可能会给个人或组织导致严峻的不利影响。
+      };
+      kvManager.getKVStore('main_store', options, (err: BusinessError, store: distributedKVStore.SingleKVStore) => {
+        if (err) {
+          console.error(`Failed to get KVStore.code is ${err.code},message is ${err.message}`);
+          return;
+        }
+        console.info("Succeeded in getting KVStore");
+        kvStore = store;
+        //缓存对象
+        AppStorage.setOrCreate('kvManager', kvManager);
+        AppStorage.setOrCreate('kvStore', kvStore);
+        // const KEY_TEST_STRING_ELEMENT = 'app_laster_runtime';
+        // const VALUE_TEST_STRING_ELEMENT = new Date().toString();
+        // kvStore.put(KEY_TEST_STRING_ELEMENT, VALUE_TEST_STRING_ELEMENT, (err: BusinessError) => {
+        //   if (err != undefined) {
+        //     console.error(`Failed to put.code is ${err.code},message is ${err.message}`);
+        //     return;
+        //   }
+        //   console.info("Succeeded in putting");
+        // });
+      });
+      // kvStore.enableSync(true).then(() => {
+      //   console.info('Succeeded in enabling sync');
+      // }).catch((err: BusinessError) => {
+      //   console.error(`Failed to enable sync.code is ${err.code},message is ${err.message}`);
+      // });
+    } catch (e) {
+      let error = e as BusinessError;
+      console.error(`Failed to create KVManager.code is ${error.code},message is ${error.message}`);
+    }
   }
 }

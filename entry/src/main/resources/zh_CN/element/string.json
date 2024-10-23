@@ -203,6 +203,10 @@
     {
       "name": "app_unlock",
       "value": "解锁"
+    },
+    {
+      "name": "distributed_data_sync",
+      "value": "用于多设备自由流转."
     }
   ]
 }
