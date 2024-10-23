@@ -28,10 +28,10 @@ export class AppPreference {
 
   public static async loadSettings(): Promise<void> {
     await AppPreference.prefMgr.getValue<boolean>('app_safety_privacy_enable').then((val) => {
-      AppPreference.setSafetyPrivacyEnable(val ?? false);
+      AppPreference.app_safety_privacy_enable = val ?? false;
     })
     await AppPreference.prefMgr.getValue<boolean>('app_safety_lock_enable').then((val) => {
-      AppPreference.setSafetyLockEnable(val ?? false);
+      AppPreference.app_safety_lock_enable = val ?? false;
     })
   }
 

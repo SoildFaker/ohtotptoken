@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-@Component
+@ComponentV2
 export struct ItemDescription {
-  private description: string  | Resource = '';
+  @Require @Param description: string  | Resource = '';
 
   build() {
     Text(this.description)

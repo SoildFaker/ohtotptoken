@@ -122,11 +122,11 @@
     },
     {
       "name": "setting_backup_export",
-      "value": "Export"
+      "value": "Export Backup"
     },
     {
       "name": "setting_backup_import",
-      "value": "Import"
+      "value": "Import Backup"
     },
     {
       "name": "setting_safety",
@@ -167,8 +167,7 @@
     {
       "name": "setting_backup_type_enc",
       "value": "加密"
-    }
-  ,
+    },
     {
       "name": "setting_backup_cancel",
       "value": "取消"
@@ -178,12 +177,20 @@
       "value": "确认"
     },
     {
+      "name": "setting_agreement_statement",
+      "value": "Agreement & Statement"
+    },
+    {
       "name": "privacy_statement",
       "value": "Privacy Statement"
     },
     {
       "name": "user_agreement",
       "value": "User Agreement"
+    },
+    {
+      "name": "opensource_license",
+      "value": "Opensource License"
     },
     {
       "name": "user_auth_prompt",

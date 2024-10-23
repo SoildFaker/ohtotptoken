@@ -1,5 +1,4 @@
 import { window } from '@kit.ArkUI';
-import { AppStorageV2 } from '@kit.ArkUI';
 import { TokenConfig, otpType } from '../utils/TokenConfig';
 import { TOTPConfigDialog } from '../dialogs/OTPConfigDialog';
 import { FortiConfigDialog } from '../dialogs/FortiConfigDialog';
@@ -15,7 +14,6 @@ import { QRCodeDialog } from '../dialogs/QRCodeDialog';
 import { AppPreference } from '../utils/AppPreference';
 import { KvManager } from "../utils/KvManager";
 import { MMKV } from '@tencent/mmkv';
-import { hilog } from '@kit.PerformanceAnalysisKit';
 
 let mmkv = MMKV.defaultMMKV();
 let kvMgr = KvManager.getInstance();
@@ -25,6 +23,7 @@ let kvMgr = KvManager.getInstance();
 struct Index {
   @Local btn_token_add_clicked: number = 0;
   @Local arrConf: Array<TokenConfig> = [];
+  @Local tabBarIndex: number = 0;
 
 
 
@@ -40,13 +39,6 @@ struct Index {
   private dialog_qrcode?: CustomDialogController;
   private alert_dialog_str: string =
     getContext(this).resourceManager.getStringSync($r('app.string.alert_remove_confirm_msg'))
-
-  // 如果启用了锁定检查要回到开屏验证pin
-  onPageHide(): void {
-    // if (AppPreference.getSafetyLockEnable()) {
-    //   router.pushUrl({ url: 'pages/SplashPage' });
-    // }
-  }
 
   //build()函数之前执行 如果启用了隐私防截屏 在这里设置为隐私模式
   aboutToAppear(): void {
@@ -308,12 +300,20 @@ struct Index {
     .margin({ left: 10 })
   }
 
-  build() {
-    Column() {
-      Row()
-        .backgroundColor($r('app.color.tab_bar_bg'))
+  @Builder
+  tabBar(text: ResourceStr | string, id: number) {
+    Column(){
+      Blank()
         .width('100%')
         .height(this.appTopAvoidHeight)
+      Text(text)
+        .fontWeight(this.tabBarIndex === id ? 500 : 400)
+        .fontColor(this.tabBarIndex === id ? $r('app.color.token_number') : $r('app.color.str_main'))
+    }
+  }
+
+  build() {
+    Column() {
       Tabs() {
         TabContent() {
           Stack({ alignContent: Alignment.BottomEnd }) {
@@ -322,7 +322,7 @@ struct Index {
               List({ space: 10, initialIndex: 0 }) {
                 ListItem() {
                   Row()
-                    .height(5)
+                    .height(50 + this.appTopAvoidHeight)
                     .width('100%')
                 }
                 ForEach(this.arrConf, (conf: TokenConfig, index: number) => {
@@ -358,6 +358,7 @@ struct Index {
               .width('100%')
               .height('100%')
               .scrollBar(BarState.Off)
+              .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true })
 
             }
             Button({ type: ButtonType.Circle }) {
@@ -380,11 +381,14 @@ struct Index {
 
         }
         .backgroundColor($r('app.color.window_background'))
-        .tabBar($r('app.string.tab_token'))
+        .tabBar(this.tabBar($r('app.string.tab_token'), 0))
+        .tabIndex(0)
 
         TabContent() {
           SettingPage({
             arrConf: this.arrConf,
+            appTopAvoidHeight: this.appTopAvoidHeight,
+            appBottomAvoidHeight: this.appBottomAvoidHeight,
             backupReload: (conf) => {
               this.updateTokenConfigs(conf);
             },
@@ -393,11 +397,20 @@ struct Index {
 
         }
         .backgroundColor($r('app.color.window_background'))
-        .tabBar($r('app.string.tab_setting'))
+        .tabBar(this.tabBar($r('app.string.tab_setting'), 1))
       }
       .barBackgroundColor($r('app.color.tab_bar_bg'))
       .backgroundColor($r('app.color.window_background'))
       .layoutWeight(1)
+      .barOverlap(true)
+      .barBackgroundColor(Color.Transparent)
+      .barBackgroundBlurStyle(BlurStyle.Thin)
+      .barHeight(50 + this.appTopAvoidHeight)
+      .barMode(BarMode.Fixed)
+      .onChange((index) => {
+        this.tabBarIndex = index;
+      })
+
     }
   }
 }

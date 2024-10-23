@@ -11,6 +11,54 @@
     {
       "name": "EntryAbility_label",
       "value": "TOTP Token"
+    },
+    {
+      "name": "EntryFormAbility_desc",
+      "value": "form_description"
+    },
+    {
+      "name": "EntryFormAbility_label",
+      "value": "form_label"
+    },
+    {
+      "name": "widget_desc",
+      "value": "This is a service widget."
+    },
+    {
+      "name": "widget_display_name",
+      "value": "widget"
+    },
+    {
+      "name": "card_list_title",
+      "value": "Title"
+    },
+    {
+      "name": "card_list_content",
+      "value": "Introduction"
+    },
+    {
+      "name": "widget_search",
+      "value": "discover more"
+    },
+    {
+      "name": "widget_explored",
+      "value": "explored"
+    },
+    {
+      "name": "widget_study",
+      "value": "study"
+    },
+    {
+      "name": "widget_activity",
+      "value": "activity"
+    },
+    {
+      "name": "widget_mine",
+      "value": "mine"
+    },
+    {
+      "name": "widget_more",
+      "value": "more Info"
     }
   ]
 }
