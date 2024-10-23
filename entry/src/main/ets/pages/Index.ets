@@ -83,9 +83,9 @@ struct Index {
   //初始化加载token
   async loadTokenConfig(): Promise<void> {
     this.token_uuids = await kvMgr.getValue<string[]>('token_uuids') ?? []
-    if (this.token_uuids.length==0) {//尝试找一下旧版本mmkv有没有数据 如果有就恢复
+    if (this.token_uuids.length == 0) {//尝试找一下旧版本mmkv有没有数据 如果有就恢复
       let mmkv_token_uuids = mmkv.decodeStringSet('token_uuids') ?? []
-      if (mmkv_token_uuids.length!=0) {
+      if (mmkv_token_uuids.length != 0) {
         await kvMgr.setValue<string[]>('token_uuids',mmkv_token_uuids)
         this.token_uuids = mmkv_token_uuids;
         let mmkv_token_str: string = JSON.stringify(new TokenConfig())
@@ -97,10 +97,7 @@ struct Index {
           this.arrConf.push(JSON.parse(tsts ?? mmkv_token_str))
         })
       }
-
-    }
-    else
-    {
+    } else {
       let token_str: string = JSON.stringify(new TokenConfig())
       this.token_uuids.forEach(key => {
         kvMgr.getString(`token_${key}`).then((val)=>{
@@ -347,7 +344,7 @@ struct Index {
                           Update: async  (conf_new) => {
                             this.arrConf[index].TokenCounter = conf_new.TokenCounter;
                             //mmkv.encodeString(`token_${this.arrConf[index].TokenUUID}`, JSON.stringify(this.arrConf[index]))
-                            await await kvMgr.setString(`token_${this.arrConf[index].TokenUUID}`, JSON.stringify(this.arrConf[index]))
+                            await kvMgr.setString(`token_${this.arrConf[index].TokenUUID}`, JSON.stringify(this.arrConf[index]))
                           }
                         })
                       }

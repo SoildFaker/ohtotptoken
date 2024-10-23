@@ -15,6 +15,7 @@
 
 import { common } from '@kit.AbilityKit';
 import { distributedKVStore } from '@kit.ArkData';
+import { BusinessError } from '@kit.BasicServicesKit';
 
 
 export class KvManager {
@@ -61,6 +62,8 @@ export class KvManager {
           value = JSON.parse(data as string) as T;
         }
         return value;
+      }).catch(() => {
+        return null;
       });
     }
     return null;
@@ -68,7 +71,7 @@ export class KvManager {
 
   async setString(key: string, value: string): Promise<void> {
     if (this._kvStore) {
-     await this._kvStore.put(key, value,(err) => {
+     this._kvStore.put(key, value, (err) => {
           if (err != undefined) {
             console.error(`Failed to put.code is ${err.code},message is ${err.message}`);
             return;
@@ -95,6 +98,8 @@ export class KvManager {
           value = data as string;
         }
         return value;
+      }).catch(() => {
+        return null;
       });
     }
     return null;
@@ -104,7 +109,7 @@ export class KvManager {
   async deleteValue(key: string): Promise<void> {
     if (this._kvStore) {
       this._kvStore.delete(key).then(() => {
-               return;
+        return;
       });
     }
   }
