@@ -30,6 +30,7 @@ export struct TokenItem {
   updateHOTPToken() {
     this.TokenCounter = this.Config.TokenCounter.toString();
     this.TokenNumber = generateOTP(this.Config, this.Config.TokenCounter).toString().padStart(this.Config.TokenDigits, '0');
+    getContext(this).eventHub.emit('updateHOTPToken'+this.Config.TokenUUID,this.TokenCounter,this.TokenNumber)
   }
 
   updateTOTPToken() {
@@ -38,6 +39,7 @@ export struct TokenItem {
     if (this.TokenLeftPeriod == this.Config.TokenPeriod) {
       this.refreshTOTPToken(timestamp);
     }
+    getContext(this).eventHub.emit('updateTOTPToken'+this.Config.TokenUUID,this.TokenLeftPeriod,this.TokenNumber)
   }
 
   refreshTOTPToken(timestamp: number) {

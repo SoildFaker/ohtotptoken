@@ -1,10 +1,18 @@
 import { router } from '@kit.ArkUI';
 import { CommonConstants } from '../utils/CommonConstants';
 import { TopNavigationView } from '../components/TopNavigationView';
+import { otpType, TokenConfig } from '../utils/TokenConfig';
 
 @Entry
 @ComponentV2
 struct ShowCodePage {
+  @Local TokenNumber: string = '000000';
+  @Local TokenCounter: string = '0';
+  @Local TokenLeftPeriod: number = 0;
+  @Local btn_hotp_clicked: number = 0;
+  @Local Config: TokenConfig = new TokenConfig();
+
+
   build() {
     Column() {
       TopNavigationView({
