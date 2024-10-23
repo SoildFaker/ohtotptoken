@@ -24,10 +24,9 @@ struct Index {
   @Local btn_token_add_clicked: number = 0;
   @Local arrConf: Array<TokenConfig> = [];
   @Local tabBarIndex: number = 0;
-
-
-
   @Local isLoading: Boolean = true;
+
+
   private windowClass = AppStorage.get("windowClass") as window.Window;
   private appBottomAvoidHeight = AppStorage.get("appBottomAvoidHeight") as number;
   private appTopAvoidHeight = AppStorage.get("appTopAvoidHeight") as number;
@@ -313,104 +312,124 @@ struct Index {
   }
 
   build() {
-    Column() {
-      Tabs() {
-        TabContent() {
-          Stack({ alignContent: Alignment.BottomEnd }) {
-            Column() {
+    Stack() {
+      if (this.isLoading) {
+        Column() {
+          LoadingProgress()
+            .color(Color.White)
+            .width(80).height(80)
+          Text('Loading..')
+            .fontSize(16)
+            .fontColor(Color.White)
+        }
+        .width('100%')
+        .height('100%')
+        .backgroundColor('#40000000')
+        .justifyContent(FlexAlign.Center)
+      } else {
 
-              List({ space: 10, initialIndex: 0 }) {
-                ListItem() {
-                  Row()
-                    .height(50 + this.appTopAvoidHeight)
-                    .width('100%')
-                }
-                ForEach(this.arrConf, (conf: TokenConfig, index: number) => {
-                  ListItem() {
-                    TokenItem({
-                      Config: conf,
-                      Update: async  (conf_new) => {
-                        this.arrConf[index].TokenCounter = conf_new.TokenCounter;
-                        //mmkv.encodeString(`token_${this.arrConf[index].TokenUUID}`, JSON.stringify(this.arrConf[index]))
-                        await await kvMgr.setString(`token_${this.arrConf[index].TokenUUID}`, JSON.stringify(this.arrConf[index]))
-                      }
-                    })
-                  }
-                  .padding({ left: 10, right: 10 })
-                  .swipeAction({
-                    start: {
-                      builder: () => { this.TokenItemStart(this.arrConf.find(_ => _.TokenUUID === conf.TokenUUID)) }
-                    },
-                    end: {
-                      builder: () => { this.TokenItemEnd(this.arrConf.find(_ => _.TokenUUID === conf.TokenUUID)) },
+        Column() {
+          Tabs() {
+            TabContent() {
+              Stack({ alignContent: Alignment.BottomEnd }) {
+                Column() {
+
+                  List({ space: 10, initialIndex: 0 }) {
+                    ListItem() {
+                      Row()
+                        .height(50 + this.appTopAvoidHeight)
+                        .width('100%')
                     }
-                  })
-                }, (item: TokenConfig) => {
-                  return JSON.stringify(item)
-                })
-                ListItem() {
-                  Row()
-                    .width('100%')
-                    .height(this.appBottomAvoidHeight + 40)
+                    ForEach(this.arrConf, (conf: TokenConfig, index: number) => {
+                      ListItem() {
+                        TokenItem({
+                          Config: conf,
+                          Update: async  (conf_new) => {
+                            this.arrConf[index].TokenCounter = conf_new.TokenCounter;
+                            //mmkv.encodeString(`token_${this.arrConf[index].TokenUUID}`, JSON.stringify(this.arrConf[index]))
+                            await await kvMgr.setString(`token_${this.arrConf[index].TokenUUID}`, JSON.stringify(this.arrConf[index]))
+                          }
+                        })
+                      }
+                      .padding({ left: 10, right: 10 })
+                      .swipeAction({
+                        start: {
+                          builder: () => { this.TokenItemStart(this.arrConf.find(_ => _.TokenUUID === conf.TokenUUID)) }
+                        },
+                        end: {
+                          builder: () => { this.TokenItemEnd(this.arrConf.find(_ => _.TokenUUID === conf.TokenUUID)) },
+                        }
+                      })
+                    }, (item: TokenConfig) => {
+                      return JSON.stringify(item)
+                    })
+                    ListItem() {
+                      Row()
+                        .width('100%')
+                        .height(this.appBottomAvoidHeight + 40)
+                    }
+                  }
+                  .layoutWeight(1)
+                  .width('100%')
+                  .height('100%')
+                  .scrollBar(BarState.Off)
+                  .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true })
+
                 }
+                Button({ type: ButtonType.Circle }) {
+                  SymbolGlyph($r('sys.symbol.plus'))
+                    .fontSize(40)
+                    .fontWeight(FontWeight.Bold)
+                    .fontColor([Color.White])
+                    .symbolEffect(new BounceSymbolEffect(EffectScope.WHOLE, EffectDirection.UP),
+                      this.btn_token_add_clicked)
+                }
+                .backgroundColor($r('app.color.token_number'))
+                .shadow({ radius: 10, color: $r('app.color.shadow') })
+                .margin({ bottom: 10, right: 10 })
+                .padding(10)
+                .bindMenu(this.TokenAddMenu())
+                .onClick(() => {
+                  this.btn_token_add_clicked += 1
+                })
               }
-              .layoutWeight(1)
-              .width('100%')
-              .height('100%')
-              .scrollBar(BarState.Off)
-              .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true })
 
             }
-            Button({ type: ButtonType.Circle }) {
-              SymbolGlyph($r('sys.symbol.plus'))
-                .fontSize(40)
-                .fontWeight(FontWeight.Bold)
-                .fontColor([Color.White])
-                .symbolEffect(new BounceSymbolEffect(EffectScope.WHOLE, EffectDirection.UP),
-                  this.btn_token_add_clicked)
+            .backgroundColor($r('app.color.window_background'))
+            .tabBar(this.tabBar($r('app.string.tab_token'), 0))
+            .tabIndex(0)
+
+            TabContent() {
+              SettingPage({
+                arrConf: this.arrConf,
+                appTopAvoidHeight: this.appTopAvoidHeight,
+                appBottomAvoidHeight: this.appBottomAvoidHeight,
+                backupReload: (conf) => {
+                  this.updateTokenConfigs(conf);
+                },
+              })
+                .height('100%')
+
             }
-            .backgroundColor($r('app.color.token_number'))
-            .shadow({ radius: 10, color: $r('app.color.shadow') })
-            .margin({ bottom: 10, right: 10 })
-            .padding(10)
-            .bindMenu(this.TokenAddMenu())
-            .onClick(() => {
-              this.btn_token_add_clicked += 1
-            })
+            .backgroundColor($r('app.color.window_background'))
+            .tabBar(this.tabBar($r('app.string.tab_setting'), 1))
           }
-
-        }
-        .backgroundColor($r('app.color.window_background'))
-        .tabBar(this.tabBar($r('app.string.tab_token'), 0))
-        .tabIndex(0)
-
-        TabContent() {
-          SettingPage({
-            arrConf: this.arrConf,
-            appTopAvoidHeight: this.appTopAvoidHeight,
-            appBottomAvoidHeight: this.appBottomAvoidHeight,
-            backupReload: (conf) => {
-              this.updateTokenConfigs(conf);
-            },
+          .barBackgroundColor($r('app.color.tab_bar_bg'))
+          .backgroundColor($r('app.color.window_background'))
+          .layoutWeight(1)
+          .barOverlap(true)
+          .barBackgroundColor(Color.Transparent)
+          .barBackgroundBlurStyle(BlurStyle.Thin)
+          .barHeight(50 + this.appTopAvoidHeight)
+          .barMode(BarMode.Fixed)
+          .onChange((index) => {
+            this.tabBarIndex = index;
           })
-            .height('100%')
 
         }
-        .backgroundColor($r('app.color.window_background'))
-        .tabBar(this.tabBar($r('app.string.tab_setting'), 1))
       }
-      .barBackgroundColor($r('app.color.tab_bar_bg'))
-      .backgroundColor($r('app.color.window_background'))
-      .layoutWeight(1)
-      .barOverlap(true)
-      .barBackgroundColor(Color.Transparent)
-      .barBackgroundBlurStyle(BlurStyle.Thin)
-      .barHeight(50 + this.appTopAvoidHeight)
-      .barMode(BarMode.Fixed)
-      .onChange((index) => {
-        this.tabBarIndex = index;
-      })
-
     }
+    .width('100%')
+    .height('100%')
   }
 }
