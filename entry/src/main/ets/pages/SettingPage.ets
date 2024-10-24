@@ -428,6 +428,7 @@ export struct SettingPage {
           .height(this.appBottomAvoidHeight)
       }
     }
+    .chainAnimation(true)
     .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true })
     .scrollBar(BarState.Off)
     .backgroundColor($r('app.color.window_background'))
