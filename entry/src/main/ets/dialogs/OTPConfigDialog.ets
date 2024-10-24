@@ -50,7 +50,7 @@ export struct TOTPConfigDialog {
 
     const pathParts = otp_url.pathname.slice(1).split('/');
     const labelParts = decodeURIComponent(pathParts[0]).split(':');
-    this.conf.TokenIssuer=labelParts[0];
+    this.conf.TokenIssuer = labelParts[0];
     this.conf.TokenIcon = getIconPathByIssuer(labelParts[0])
     this.conf.TokenName = labelParts[1];
 
