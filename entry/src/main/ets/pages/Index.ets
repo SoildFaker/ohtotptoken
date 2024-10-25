@@ -14,6 +14,11 @@ import { QRCodeDialog } from '../dialogs/QRCodeDialog';
 import { AppPreference } from '../utils/AppPreference';
 import { KvManager } from "../utils/KvManager";
 import { MMKV } from '@tencent/mmkv';
+import { privacyManager } from '@kit.StoreKit';
+import { hilog } from '@kit.PerformanceAnalysisKit';
+import CommonEventManager from '@ohos.commonEventManager';
+
+const TAG = 'PrivacySubscribe';
 
 let mmkv = MMKV.defaultMMKV();
 let kvMgr = KvManager.getInstance();
@@ -39,6 +44,14 @@ struct Index {
   private alert_dialog_str: string =
     getContext(this).resourceManager.getStringSync($r('app.string.alert_remove_confirm_msg'))
 
+  private readonly eventId = 'usual.event.PRIVACY_STATE_CHANGED';
+  // 订阅者信息, 用于保存创建成功的订阅者对象，后续使用其完成订阅及退订的动作
+  private subscriber: CommonEventManager.CommonEventSubscriber | undefined = undefined;
+  // 事件列表
+  private subscribeInfo: CommonEventManager.CommonEventSubscribeInfo = {
+    events: [this.eventId]
+  };
+
   //build()函数之前执行 如果启用了隐私防截屏 在这里设置为隐私模式
   aboutToAppear(): void {
     router.clear();
@@ -47,6 +60,8 @@ struct Index {
     // this.token_uuids.forEach(key => {
     //   this.arrConf.push(JSON.parse(mmkv.decodeString(`token_${key}`) ?? token_str))
     // })
+    AppStorage.setOrCreate("AppPrivacyManageInfoUrl", 'https://www.duan.red/yylx/opt/privacy-statement-zh-cn.htm');
+
     this.loadTokenConfig();
     let cer_path = getContext(this).cacheDir + "/fmt.ks"
     fs.access(cer_path, fs.AccessModeType.EXIST).then((exist) => {
@@ -79,6 +94,7 @@ struct Index {
       }
     }
 
+    this.GetPrivacyManageInfo();
   }
   //初始化加载token
   async loadTokenConfig(): Promise<void> {
@@ -135,6 +151,48 @@ struct Index {
         console.error(`Failed to addTokenConfig.code is ${err.code},message is ${err.message}`);
     };
 
+  }
+
+  //准备接入标准化隐私托管
+  async GetPrivacyManageInfo():Promise<void>
+  {
+    try {
+      let appPrivacyManageInfo: privacyManager.AppPrivacyMgmtInfo = privacyManager.getAppPrivacyMgmtInfo();
+      hilog.info(0, 'TAG', "Succeeded in getting AppPrivacyManageInfo type: " + appPrivacyManageInfo["type"]);
+      let privacyLinkInfoArray : privacyManager.AppPrivacyLink[] = appPrivacyManageInfo.privacyInfo;
+      hilog.info(0, 'TAG', "Succeeded in getting AppPrivacyManageInfo size = " + privacyLinkInfoArray.length);
+      for (let i = 0; i < privacyLinkInfoArray.length; i++) {
+        hilog.info(0, 'TAG', "Succeeded in getting AppPrivacyManageInfo type = " + privacyLinkInfoArray[i]["type"] + ", version = " + privacyLinkInfoArray[i]["versionCode"] + ", url = " + privacyLinkInfoArray[i]["url"]);
+
+      }
+      AppStorage.setOrCreate("AppPrivacyManageInfoUrl", privacyLinkInfoArray[privacyLinkInfoArray.length-1]["url"]);
+    } catch (error) {
+      hilog.error(0, 'TAG', "GetAppPrivacyManageInfoPublic exception code: " + error.code + ", exception message: " + error.message);
+    }
+
+    hilog.info(0, TAG, "subscribe");
+    // 创建订阅者
+    CommonEventManager.createSubscriber(this.subscribeInfo).then((commonEventSubscriber) => {
+      hilog.info(0, TAG, "createSubscriber");
+      this.subscriber = commonEventSubscriber;
+
+      // 订阅公共事件
+      try {
+        CommonEventManager.subscribe(this.subscriber, (err, data) => {
+          if (err) {
+            hilog.error(0, TAG, `subscribe failed, code is ${err?.code}, message is ${err?.message}`);
+            return;
+          }
+
+          let result = JSON.parse(data?.data ?? '{}')?.resultType as number;
+          if (result === 1) {
+            // 隐私同意处理
+          }
+        });
+      } catch (error) {
+        hilog.error(0, TAG, "init createSubscriber failed, exception code: " + error.code + ", exception message: " + error.message);
+      }
+    });
   }
 
   updateTokenConfigs(confs: Array<TokenConfig>): void {

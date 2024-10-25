@@ -22,6 +22,10 @@ import { TopNavigationView } from '../components/TopNavigationView';
 @Component
 struct PrivacyPage {
   @State webViewController: webview.WebviewController = new webview.WebviewController();
+  @State AppPrivacyManageInfoUrl:string ='';
+  aboutToAppear(): void {
+     this.AppPrivacyManageInfoUrl=AppStorage.get("AppPrivacyManageInfoUrl") as string;
+  }
 
   build() {
     Column() {
@@ -32,7 +36,7 @@ struct PrivacyPage {
         }
       })
       Stack() {
-        Web({ controller: this.webViewController, src: $rawfile('privacy-statement-zh-cn.htm') })
+        Web({ controller: this.webViewController, src: this.AppPrivacyManageInfoUrl})
           .darkMode(WebDarkMode.Auto)
           .domStorageAccess(true)
           .zoomAccess(true)
