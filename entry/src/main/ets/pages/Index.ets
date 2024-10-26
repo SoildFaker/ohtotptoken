@@ -165,7 +165,7 @@ struct Index {
         hilog.info(0, 'TAG', "Succeeded in getting AppPrivacyManageInfo type = " + privacyLinkInfoArray[i]["type"] + ", version = " + privacyLinkInfoArray[i]["versionCode"] + ", url = " + privacyLinkInfoArray[i]["url"]);
 
       }
-      AppStorage.setOrCreate("AppPrivacyManageInfoUrl", privacyLinkInfoArray[privacyLinkInfoArray.length-1]["url"]);
+      AppStorage.setOrCreate("AppPrivacyManageInfoUrl", privacyLinkInfoArray[0]["url"]);
     } catch (error) {
       hilog.error(0, 'TAG', "GetAppPrivacyManageInfoPublic exception code: " + error.code + ", exception message: " + error.message);
     }
