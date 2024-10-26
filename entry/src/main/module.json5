@@ -15,7 +15,7 @@
       },
       {
         "name": "appgallery_privacy_link_user_agreement",
-        "value": 'https://www.duan.red/yylx/opt/privacy-statement-zh-cn.htm' // 必须是https网址
+        "value": 'https://www.duan.red/yylx/opt/user-agreement-zh-cn.htm' // 必须是https网址
       }
     ],
     "deviceTypes": [
