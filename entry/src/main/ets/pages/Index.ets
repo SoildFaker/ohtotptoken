@@ -18,6 +18,7 @@ import { privacyManager } from '@kit.StoreKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import CommonEventManager from '@ohos.commonEventManager';
 
+
 const TAG = 'PrivacySubscribe';
 
 let mmkv = MMKV.defaultMMKV();
@@ -95,6 +96,7 @@ struct Index {
     }
 
     this.GetPrivacyManageInfo();
+
   }
   //初始化加载token
   async loadTokenConfig(): Promise<void> {
