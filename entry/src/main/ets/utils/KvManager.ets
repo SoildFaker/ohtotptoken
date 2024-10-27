@@ -15,6 +15,7 @@
 
 import { bundleManager, common } from '@kit.AbilityKit';
 import { distributedKVStore } from '@kit.ArkData';
+import { BusinessError } from '@kit.BasicServicesKit';
 
 export class KvManager {
   //单版本分布式键值数据库
@@ -42,7 +43,6 @@ export class KvManager {
       bundleName: bundleName,
     }
     this._kvMgr = distributedKVStore.createKVManager(kvManagerConfig);
-    console.info("Succeeded in creating KVManager");
     const options: distributedKVStore.Options = {
       createIfMissing: true,
       encrypt: true,//加密
@@ -63,6 +63,8 @@ export class KvManager {
         console.info(`syncComplete ${data}`);
         ctx.eventHub.emit('KVStoreSyncComplete');
       });
+    }).catch((reason: BusinessError) => {
+      console.error(reason.message);
     });
   }
 

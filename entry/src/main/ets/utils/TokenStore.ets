@@ -33,7 +33,8 @@ export class TokenStore {
     this.token_uuids = await this.kvMgr.getValue<string[]>('token_uuids') ?? [];
     this.appCtx = AppStorage.get<common.UIAbilityContext>('appContext') as common.UIAbilityContext;
     for (let i = 0; i < this.token_uuids.length; i++) {
-      this.token_array.push(await this.queryToken(this.token_uuids[i]));
+      let token = await this.queryToken(this.token_uuids[i]);
+      this.token_array.push(token);
     }
   }
 
@@ -51,7 +52,7 @@ export class TokenStore {
   }
 
   public async updateToken(token: TokenConfig): Promise<void> {
-    await this.kvMgr.setValue<string>(`token_${token.TokenUUID}`, JSON.stringify(token));
+    await this.kvMgr.setValue<TokenConfig>(`token_${token.TokenUUID}`, token);
     if (!this.token_uuids.includes(token.TokenUUID)) {
       this.token_uuids.push(token.TokenUUID);
       this.token_array.push(token);

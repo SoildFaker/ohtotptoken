@@ -17,6 +17,7 @@ import { privacyManager } from '@kit.StoreKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import CommonEventManager from '@ohos.commonEventManager';
 import { TokenStore } from '../utils/TokenStore';
+import { PermissionManager } from '../utils/PermissionManager';
 
 const TAG = 'PrivacySubscribe';
 
@@ -26,11 +27,11 @@ let tkStore = TokenStore.getInstance();
 @ComponentV2
 struct Index {
   @Local btn_token_add_clicked: number = 0;
-  @Local allTokens: TokenConfig[] = [];
-  @Local tabBarIndex: number = 0;
-  @Local isLoading: Boolean = true;
+  @Local all_tokens: TokenConfig[] = [];
+  @Local tab_bar_index: number = 0;
+  @Local token_loaded: Boolean = true;
 
-
+  private appCtx = AppStorage.get<common.UIAbilityContext>('appContext') as common.UIAbilityContext;
   private windowClass = AppStorage.get("windowClass") as window.Window;
   private appBottomAvoidHeight = AppStorage.get("appBottomAvoidHeight") as number;
   private appTopAvoidHeight = AppStorage.get("appTopAvoidHeight") as number;
@@ -59,8 +60,8 @@ struct Index {
     tkStore.initTokenStore().then(() => {
       getContext(this).eventHub.on('onTokenChanged', () => this.onTokenChanged());
       tkStore.getTokens().then((tokens) => {
-        this.allTokens = tokens;
-        this.isLoading = false;
+        this.all_tokens = tokens;
+        this.token_loaded = false;
       });
     });
 
@@ -107,7 +108,7 @@ struct Index {
   }
 
   async onTokenChanged(): Promise<void> {
-    this.allTokens = await tkStore.getTokens();
+    this.all_tokens = await tkStore.getTokens();
   }
 
   async updateTokenConfig(conf: TokenConfig): Promise<void> {
@@ -126,8 +127,7 @@ struct Index {
   }
 
   //准备接入标准化隐私托管
-  async GetPrivacyManageInfo():Promise<void>
-  {
+  async GetPrivacyManageInfo(): Promise<void> {
     try {
       let appPrivacyManageInfo: privacyManager.AppPrivacyMgmtInfo = privacyManager.getAppPrivacyMgmtInfo();
       hilog.info(0, 'TAG', "Succeeded in getting AppPrivacyManageInfo type: " + appPrivacyManageInfo["type"]);
@@ -158,7 +158,8 @@ struct Index {
 
           let result = JSON.parse(data?.data ?? '{}')?.resultType as number;
           if (result === 1) {
-            // 隐私同意处理
+            //向用户申请权限
+            PermissionManager.reqPermissionsFromUser(this.appCtx);
           }
         });
       } catch (error) {
@@ -168,7 +169,7 @@ struct Index {
   }
 
   @Builder
-  TokenAddMenu(){
+  TokenAddMenu() {
     Menu() {
       MenuItem({ content: $r('app.string.tab_token_add_key') })
         .onClick(() => {
@@ -265,7 +266,7 @@ struct Index {
             value: $r('app.string.dialog_btn_confirm'),
             fontColor: Color.Red,
             action: async () => {
-              this.allTokens = this.allTokens.filter(_ => _.TokenUUID !== conf.TokenUUID);
+              this.all_tokens = this.all_tokens.filter(_ => _.TokenUUID !== conf.TokenUUID);
               tkStore.deleteToken(conf.TokenUUID);
             }
           }
@@ -325,14 +326,14 @@ struct Index {
         .width('100%')
         .height(this.appTopAvoidHeight)
       Text(text)
-        .fontWeight(this.tabBarIndex === id ? 500 : 400)
-        .fontColor(this.tabBarIndex === id ? $r('app.color.token_number') : $r('app.color.str_main'))
+        .fontWeight(this.tab_bar_index === id ? 500 : 400)
+        .fontColor(this.tab_bar_index === id ? $r('app.color.token_number') : $r('app.color.str_main'))
     }
   }
 
   build() {
     Stack() {
-      if (this.isLoading) {
+      if (this.token_loaded) {
         Column() {
           LoadingProgress()
             .color(Color.White)
@@ -359,7 +360,7 @@ struct Index {
                         .height(50 + this.appTopAvoidHeight)
                         .width('100%')
                     }
-                    ForEach(this.allTokens, (token: TokenConfig, index: number) => {
+                    ForEach(this.all_tokens, (token: TokenConfig, index: number) => {
                       ListItem() {
                         TokenItem({
                           Config: token,
@@ -418,7 +419,7 @@ struct Index {
 
             TabContent() {
               SettingPage({
-                arrConf: this.allTokens,
+                arrConf: this.all_tokens,
                 appTopAvoidHeight: this.appTopAvoidHeight,
                 appBottomAvoidHeight: this.appBottomAvoidHeight,
                 backupReload: (conf) => {
@@ -440,7 +441,7 @@ struct Index {
           .barHeight(50 + this.appTopAvoidHeight)
           .barMode(BarMode.Fixed)
           .onChange((index) => {
-            this.tabBarIndex = index;
+            this.tab_bar_index = index;
           })
 
         }

@@ -5,10 +5,8 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import { WindowUtil } from '../utils/WindowUtil';
 import { AppPreference } from '../utils/AppPreference';
 import { router } from '@kit.ArkUI';
-import { distributedKVStore } from '@kit.ArkData';
 import { relationalStore  } from '@kit.ArkData';
 import { cloudData } from '@kit.ArkData';
-import {PermissionManager}  from '../utils/PermissionManager';
 
 //单版本分布式键值数据库
 let rdbStore: relationalStore.RdbStore | null = null;
@@ -81,8 +79,6 @@ export default class EntryAbility extends UIAbility {
         hilog.info(0x0000, 'testTag', 'Succeeded in loading the content.');
       });
     });
-    //向用户申请权限
-    PermissionManager.reqPermissionsFromUser(this.context);
   }
   onWindowStageRestore(windowStage: window.WindowStage): void {
     WindowUtil.requestFullScreen(windowStage, this.context);

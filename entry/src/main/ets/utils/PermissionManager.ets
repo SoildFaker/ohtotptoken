@@ -21,7 +21,6 @@ import { BusinessError } from '@kit.BasicServicesKit';
 export class PermissionManager {
    private static permissions: Array<Permissions> = ['ohos.permission.DISTRIBUTED_DATASYNC','ohos.permission.STORE_PERSISTENT_DATA'];
 
-
    public async checkPermissionGrant(permission: Permissions): Promise<abilityAccessCtrl.GrantStatus> {
     let atManager: abilityAccessCtrl.AtManager = abilityAccessCtrl.createAtManager();
     let grantStatus: abilityAccessCtrl.GrantStatus = abilityAccessCtrl.GrantStatus.PERMISSION_DENIED;
