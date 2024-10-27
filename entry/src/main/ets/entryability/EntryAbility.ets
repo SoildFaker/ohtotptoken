@@ -128,25 +128,43 @@ export default class EntryAbility extends UIAbility {
       }
       console.info('Get RdbStore successfully.');
     })
+    let predicates = new relationalStore.RdbPredicates("EMPLOYEE");
+    predicates.inAllDevices();
+    rdbStore?.sync(relationalStore.SyncMode.SYNC_MODE_TIME_FIRST,predicates, (err, result) => {
+      if (err) {
+        console.error(`Sync failed, code is ${err.code},message is ${err.message}`);
+        return;
+      }
+      console.info('Sync done.');
+      for (let i = 0; i < result.length; i++) {
+        console.info(`device= ${result[i][0]}, status= ${result[i][1]}`);
+      }
+      this.context.eventHub.emit("RDBStoreSyncComplete")
+    })
     //端云同步 暂时屏蔽 等待实现
     //todo 实现设置是否开启云同步 默认开启本地设备同步
     //todo 同步完成前台刷新数据
-    // //仅WIFI同步
-    // cloudData.setCloudStrategy(cloudData.StrategyType.NETWORK, [cloudData.NetWorkStrategy.WIFI]).then(() => {
-    //   console.info('Succeeded in setting the cloud strategy');
-    // }).catch((err: BusinessError) => {
-    //   console.error(`Failed to set cloud strategy. Code: ${err.code}, message: ${err.message}`);
-    // });
-    // //同步按照时间策略
-    // rdbStore?.cloudSync(relationalStore.SyncMode.SYNC_MODE_TIME_FIRST, (progressDetails) => {
-    //   console.info(`Progess: ${progressDetails}`);
-    // }, (err) => {
-    //   if (err) {
-    //     console.error(`Cloud sync failed, code is ${err.code},message is ${err.message}`);
-    //     return;
-    //   }
-    //   console.info('Cloud sync succeeded');
-    // });
+    if (AppPreference.getSRdbCloudSyncEnable())
+    {
+      //仅WIFI同步
+      cloudData.setCloudStrategy(cloudData.StrategyType.NETWORK, [cloudData.NetWorkStrategy.WIFI]).then(() => {
+        console.info('Succeeded in setting the cloud strategy');
+      }).catch((err: BusinessError) => {
+        console.error(`Failed to set cloud strategy. Code: ${err.code}, message: ${err.message}`);
+      });
+      //同步按照时间策略
+      rdbStore?.cloudSync(relationalStore.SyncMode.SYNC_MODE_TIME_FIRST, (progressDetails) => {
+        console.info(`Progess: ${progressDetails}`);
+      }, (err) => {
+        if (err) {
+          console.error(`Cloud sync failed, code is ${err.code},message is ${err.message}`);
+          return;
+        }
+        console.info('Cloud sync succeeded');
+        this.context.eventHub.emit("RDBStoreSyncComplete")
+      });
+    }
+
   }
   //初始化键值对数据库
   initKvStore() :void{

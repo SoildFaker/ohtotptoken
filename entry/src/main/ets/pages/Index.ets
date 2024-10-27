@@ -97,9 +97,13 @@ struct Index {
     }
 
     this.GetPrivacyManageInfo();
-    //订阅KV数据库同步完成事件 等待
+    //订阅KV数据库同步完成事件
     getContext(this).eventHub.on('KVStoreSyncComplete',()=>{
 //todo 接收同步完成后刷新数据
+    })
+    //订阅RDB数据库同步完成事件
+    getContext(this).eventHub.on('RDBStoreSyncComplete',()=>{
+      //todo 接收同步完成后刷新数据
     })
   }
   //初始化加载token
