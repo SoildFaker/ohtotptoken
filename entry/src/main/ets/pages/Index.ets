@@ -1,5 +1,5 @@
 import { window } from '@kit.ArkUI';
-import { common } from '@kit.AbilityKit';
+import { bundleManager,common } from '@kit.AbilityKit';
 import { TokenConfig, otpType } from '../utils/TokenConfig';
 import { TOTPConfigDialog } from '../dialogs/OTPConfigDialog';
 import { FortiConfigDialog } from '../dialogs/FortiConfigDialog';
@@ -54,7 +54,10 @@ struct Index {
   //build()函数之前执行 如果启用了隐私防截屏 在这里设置为隐私模式
   aboutToAppear(): void {
     router.clear();
-
+    PermissionManager.getInstance().verifyPermissionsAndPushEvent();
+    bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION).then((bundleInfo) => {
+      AppStorage.setOrCreate("BundleInfo",bundleInfo);
+    });
     AppStorage.setOrCreate("AppPrivacyManageInfoUrl", 'https://www.duan.red/yylx/opt/privacy-statement-zh-cn.htm');
 
     tkStore.initTokenStore().then(() => {
@@ -104,6 +107,14 @@ struct Index {
     //订阅RDB数据库同步完成事件
     getContext(this).eventHub.on('RDBStoreSyncComplete',() => {
       //todo 接收同步完成后刷新数据
+    })
+    //订阅权限变更 主页面不需要取消订阅 没有意义
+    this.appCtx.eventHub.on('DATASYNCPermissionsUpdate', (isAccess: boolean) => {
+      if (!isAccess) {
+        //如果数据同步权限被关闭 则需要将两个同步都关闭
+        AppPreference.setRdbSyncEnable(false);
+        AppPreference.setRdbCloudSyncEnable(false);
+      }
     })
   }
 
@@ -159,7 +170,7 @@ struct Index {
           let result = JSON.parse(data?.data ?? '{}')?.resultType as number;
           if (result === 1) {
             //向用户申请权限
-            PermissionManager.reqPermissionsFromUser(this.appCtx);
+            //PermissionManager.reqPermissionsFromUser(this.appCtx);
           }
         });
       } catch (error) {

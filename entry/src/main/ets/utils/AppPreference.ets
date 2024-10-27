@@ -9,8 +9,15 @@ export class AppPreference {
   private static app_safety_lock_enable: boolean = false;
   // 数据库是否启用云同步
   private static app_db_rds_cloud_sync_enable: boolean = false;
+  // 数据库是否启用跨设备流转
+  private static app_db_rds_sync_enable: boolean = false;
 
-  public static getSRdbCloudSyncEnable(): boolean {
+  //获取是否启用跨设备流转
+  public static getRdbSyncEnable(): boolean {
+    return AppPreference.app_db_rds_sync_enable;
+  }
+
+  public static getRdbCloudSyncEnable(): boolean {
     return AppPreference.app_db_rds_cloud_sync_enable;
   }
   public static getSafetyPrivacyEnable(): boolean {
@@ -21,7 +28,11 @@ export class AppPreference {
     return AppPreference.app_safety_lock_enable;
   }
 
-  public static setSRdbCloudSyncEnable(enable: boolean): void {
+  public static setRdbSyncEnable(enable: boolean): void {
+    AppPreference.app_db_rds_sync_enable = enable;
+    AppPreference.prefMgr.setValue<boolean>('app_db_rds_sync_enable', enable);
+  }
+  public static setRdbCloudSyncEnable(enable: boolean): void {
     AppPreference.app_db_rds_cloud_sync_enable = enable;
     AppPreference.prefMgr.setValue<boolean>('app_db_rds_cloud_sync_enable', enable);
   }
@@ -44,6 +55,9 @@ export class AppPreference {
     })
     await AppPreference.prefMgr.getValue<boolean>('app_db_rds_cloud_sync_enable').then((val) => {
       AppPreference.app_db_rds_cloud_sync_enable = val ?? false;
+    })
+    await AppPreference.prefMgr.getValue<boolean>('app_db_rds_sync_enable').then((val) => {
+      AppPreference.app_db_rds_sync_enable = val ?? false;
     })
   }
 

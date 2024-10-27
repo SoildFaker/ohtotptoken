@@ -207,6 +207,26 @@
     {
       "name": "distributed_data_sync",
       "value": "用于多设备自由流转."
+    },
+    {
+      "name": "data_sync",
+      "value": "数据同步"
+    },
+    {
+      "name": "data_rdb_sync",
+      "value": "跨设备数据流转"
+    },
+    {
+      "name": "data_rdb_sync_des",
+      "value": "数据将会同步到一个组网环境中您华为账户登录的其他设备。"
+    },
+    {
+      "name": "data_rdb_cloud_sync",
+      "value": "云同步"
+    },
+    {
+      "name": "data_rdb_cloud_sync_des",
+      "value": "数据将会通过华为云同步至您华为账户登录的其他设备上."
     }
   ]
 }

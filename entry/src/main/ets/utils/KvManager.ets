@@ -16,6 +16,8 @@
 import { bundleManager, common } from '@kit.AbilityKit';
 import { distributedKVStore } from '@kit.ArkData';
 import { BusinessError } from '@kit.BasicServicesKit';
+import { AppPreference } from './AppPreference';
+import { distributedDeviceManager } from '@kit.DistributedServiceKit';
 
 export class KvManager {
   //单版本分布式键值数据库
@@ -124,5 +126,35 @@ export class KvManager {
       });
     }
   }
+  //手动同步
+  async DataSync(): Promise<void> {
+    if (AppPreference.getRdbSyncEnable()) {
+      try {
+        let bundleInfo = AppStorage.get<bundleManager.BundleInfo>("BundleInfo");
+        let dmInstance = distributedDeviceManager.createDeviceManager(bundleInfo?.name);
+        let deviceInfoList: Array<distributedDeviceManager.DeviceBasicInfo> = dmInstance.getAvailableDeviceListSync();
+        if (deviceInfoList.length>0) {
+          let deviceNetWorkIDList:string[] = [];
+          deviceInfoList.forEach(dev => {
+            //目前仅同步
+            // -14: PHONE。
+            // -17: PAD。
+            // -2607: 2in1。
+            if (dev.deviceType === "14" ||dev.deviceType === "17"||dev.deviceType === "2607") {
+              if (dev.networkId!=null) {
+                deviceNetWorkIDList.push(dev.networkId);
+              }
+            }
+          });
+          if (deviceNetWorkIDList.length>0) {
+            this._kvStore?.sync(deviceNetWorkIDList,distributedKVStore.SyncMode.PUSH_PULL,1000*10)
+          }
+        }
+      } catch (err) {
+        let e: BusinessError = err as BusinessError;
+        console.error('getAvailableDeviceListSync errCode:' + e.code + ',errMessage:' + e.message);
+      }
 
+    }
+  }
 }

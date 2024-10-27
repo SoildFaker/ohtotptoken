@@ -70,4 +70,9 @@ export class TokenStore {
     this.kvMgr.deleteValue(token_uuid);
     this.emitTokenChanged();
   }
+  //手动同步
+  async DataSync(): Promise<void> {
+    // 警告KV数据库同步会存在覆盖问题 因为目前token_uuids用的是一个key 多设备会有问题
+    await this.kvMgr.DataSync();
+  }
 }

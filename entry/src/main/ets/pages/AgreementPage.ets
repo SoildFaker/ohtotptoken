@@ -41,11 +41,13 @@ struct AgreementPage {
           .cacheMode(CacheMode.Default)
           .javaScriptAccess(true)
           .width(CommonConstants.FULL_PERCENT)
+          .height(500)
       }
     }
     .width('100%')
     .height('100%')
     .backgroundColor($r('sys.color.ohos_id_color_sub_background'))
     .padding({ top: AppStorage.get<number>('statusBarHeight'), bottom: 24 })
+
   }
 }

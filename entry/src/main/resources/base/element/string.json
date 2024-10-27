@@ -150,31 +150,31 @@
     },
     {
       "name": "setting_backup_output",
-      "value": "导出密码？"
+      "value": "Export password？"
     },
     {
       "name": "setting_backup_output_des",
-      "value": "如果您选择普通导出方式，密码将以纯文本形式显示给有权访问该文件的任何人。是否确实要导出密码？"
+      "value": "If you choose the normal export method, the password will be displayed in plain text to anyone who has access to the file. Do you really want to export the password？"
     },
     {
       "name": "setting_backup_output_msg",
-      "value": "请选择导出方式"
+      "value": "Please choose the export method"
     },
     {
       "name": "setting_backup_type_default",
-      "value": "默认"
+      "value": "default"
     },
     {
       "name": "setting_backup_type_enc",
-      "value": "加密"
+      "value": "Encryption"
     },
     {
       "name": "setting_backup_cancel",
-      "value": "取消"
+      "value": "Cancel"
     },
     {
       "name": "setting_backup_confirm",
-      "value": "确认"
+      "value": "Confirm"
     },
     {
       "name": "setting_agreement_statement",
@@ -207,6 +207,26 @@
     {
       "name": "distributed_data_sync",
       "value": "Used for free flow of multiple devices."
+    },
+    {
+      "name": "data_sync",
+      "value": "Data Sync."
+    },
+    {
+      "name": "data_rdb_sync",
+      "value": "Distributed Application Data Sync."
+    },
+    {
+      "name": "data_rdb_sync_des",
+      "value": "The distributed application data sync allows the data of an application to be synced with other devices that are connected to form a Virtual Device.."
+    },
+    {
+      "name": "data_rdb_cloud_sync",
+      "value": "Huawei Cloud Application Data Sync."
+    },
+    {
+      "name": "data_rdb_cloud_sync_des",
+      "value": "Use Huawei Cloud Data sync"
     }
   ]
 }
