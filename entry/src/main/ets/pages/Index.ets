@@ -1,4 +1,5 @@
 import { window } from '@kit.ArkUI';
+import { common } from '@kit.AbilityKit';
 import { TokenConfig, otpType } from '../utils/TokenConfig';
 import { TOTPConfigDialog } from '../dialogs/OTPConfigDialog';
 import { FortiConfigDialog } from '../dialogs/FortiConfigDialog';
@@ -96,7 +97,10 @@ struct Index {
     }
 
     this.GetPrivacyManageInfo();
-
+    //订阅KV数据库同步完成事件 等待
+    getContext(this).eventHub.on('KVStoreSyncComplete',()=>{
+//todo 接收同步完成后刷新数据
+    })
   }
   //初始化加载token
   async loadTokenConfig(): Promise<void> {

@@ -117,6 +117,7 @@ export default class EntryAbility extends UIAbility {
   initRdbStore(): void{
     const STORE_CONFIG: relationalStore.StoreConfig = {
       name: "main_rdb_store.db",
+      encrypt: true,//加密
       securityLevel: relationalStore.SecurityLevel.S3
     };
     relationalStore.getRdbStore(this.context, STORE_CONFIG, (err: BusinessError, __rdbStore: relationalStore.RdbStore) => {
@@ -127,23 +128,25 @@ export default class EntryAbility extends UIAbility {
       }
       console.info('Get RdbStore successfully.');
     })
-    //端云同步
-    //仅WIFI同步
-    cloudData.setCloudStrategy(cloudData.StrategyType.NETWORK, [cloudData.NetWorkStrategy.WIFI]).then(() => {
-      console.info('Succeeded in setting the cloud strategy');
-    }).catch((err: BusinessError) => {
-      console.error(`Failed to set cloud strategy. Code: ${err.code}, message: ${err.message}`);
-    });
-    //同步按照时间策略
-    rdbStore?.cloudSync(relationalStore.SyncMode.SYNC_MODE_TIME_FIRST, (progressDetails) => {
-      console.info(`Progess: ${progressDetails}`);
-    }, (err) => {
-      if (err) {
-        console.error(`Cloud sync failed, code is ${err.code},message is ${err.message}`);
-        return;
-      }
-      console.info('Cloud sync succeeded');
-    });
+    //端云同步 暂时屏蔽 等待实现
+    //todo 实现设置是否开启云同步 默认开启本地设备同步
+    //todo 同步完成前台刷新数据
+    // //仅WIFI同步
+    // cloudData.setCloudStrategy(cloudData.StrategyType.NETWORK, [cloudData.NetWorkStrategy.WIFI]).then(() => {
+    //   console.info('Succeeded in setting the cloud strategy');
+    // }).catch((err: BusinessError) => {
+    //   console.error(`Failed to set cloud strategy. Code: ${err.code}, message: ${err.message}`);
+    // });
+    // //同步按照时间策略
+    // rdbStore?.cloudSync(relationalStore.SyncMode.SYNC_MODE_TIME_FIRST, (progressDetails) => {
+    //   console.info(`Progess: ${progressDetails}`);
+    // }, (err) => {
+    //   if (err) {
+    //     console.error(`Cloud sync failed, code is ${err.code},message is ${err.message}`);
+    //     return;
+    //   }
+    //   console.info('Cloud sync succeeded');
+    // });
   }
   //初始化键值对数据库
   initKvStore() :void{
@@ -158,7 +161,7 @@ export default class EntryAbility extends UIAbility {
       console.info("Succeeded in creating KVManager");
       const options: distributedKVStore.Options = {
         createIfMissing: true,
-        encrypt: false,//不加密
+        encrypt: true,//加密
         backup: false,//设置数据库文件是否备份
         autoSync: true,//自动同步
         kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,//表示单版本数据库。 数据不分设备，设备之间修改相同的Key会覆盖。
