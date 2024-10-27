@@ -13,19 +13,18 @@
  * limitations under the License.
  */
 
-import { common } from '@kit.AbilityKit';
+import { bundleManager, common } from '@kit.AbilityKit';
 import { distributedKVStore } from '@kit.ArkData';
-import { BusinessError } from '@kit.BasicServicesKit';
-
 
 export class KvManager {
   //单版本分布式键值数据库
+  private _kvMgr: distributedKVStore.KVManager | undefined = undefined;
   private _kvStore: distributedKVStore.SingleKVStore | undefined = undefined;
 
   private static instance: KvManager;
 
   private constructor() {
-    this.initPreference();
+
   }
 
   public static getInstance(): KvManager {
@@ -35,13 +34,35 @@ export class KvManager {
     return KvManager.instance;
   }
 
-  async initPreference(): Promise<void> {
-    this._kvStore = AppStorage.get<distributedKVStore.SingleKVStore>('kvStore');
-    let Context = AppStorage.get<common.UIAbilityContext>('appContext')
-    //订阅同步完成事件
-    this._kvStore?.on('syncComplete', (data: [string, number][]) => {
-      console.info(`syncComplete ${data}`);
-      Context?.eventHub.emit('KVStoreSyncComplete');
+  private async initKvStore(ctx: common.UIAbilityContext): Promise<distributedKVStore.SingleKVStore> {
+    //初始化键值数据库
+    let bundleName = bundleManager.getBundleInfoForSelfSync(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION).name;
+    const kvManagerConfig: distributedKVStore.KVManagerConfig = {
+      context: ctx,
+      bundleName: bundleName,
+    }
+    this._kvMgr = distributedKVStore.createKVManager(kvManagerConfig);
+    console.info("Succeeded in creating KVManager");
+    const options: distributedKVStore.Options = {
+      createIfMissing: true,
+      encrypt: true,//加密
+      backup: true,//设置数据库文件是否备份
+      autoSync: true,//自动同步
+      kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,//表示单版本数据库。 数据不分设备，设备之间修改相同的Key会覆盖。
+      securityLevel: distributedKVStore.SecurityLevel.S3, //对于token密钥采菊表示数据库的安全级别为高级别，数据的泄露、篡改、破坏、销毁可能会给个人或组织导致严峻的不利影响。
+    };
+    return this._kvMgr.getKVStore('main_store', options);
+  }
+
+  async initKvManager(): Promise<void> {
+    let ctx = AppStorage.get<common.UIAbilityContext>('appContext') as common.UIAbilityContext;
+    await this.initKvStore(ctx).then((store) => {
+      this._kvStore = store;
+      //订阅同步完成事件
+      this._kvStore.on('syncComplete', (data: [string, number][]) => {
+        console.info(`syncComplete ${data}`);
+        ctx.eventHub.emit('KVStoreSyncComplete');
+      });
     });
   }
 
@@ -53,15 +74,6 @@ export class KvManager {
 
   async getValue<T>(key: string): Promise<T | null> {
     if (this._kvStore) {
-      // await this._kvStore.get(key, (err, data: boolean | string | number | Uint8Array) => {
-      //   let value: T | null = null;
-      //   if (err != undefined) {
-      //     console.error(`Failed to get.code is ${err.code},message is ${err.message}`);
-      //     return;
-      //   }
-      //   value = JSON.parse(data as string) as T;
-      //   return value;
-      // });
       return this._kvStore.get(key).then((data: boolean | string | number | Uint8Array) => {
         let value: T | null = null;
         if (data) {
@@ -89,15 +101,6 @@ export class KvManager {
 
   async getString(key: string): Promise<string|null> {
     if (this._kvStore) {
-      // this._kvStore.get(key, (err, data: boolean | string | number | Uint8Array) => {
-      //   let value: string|null = null;
-      //   if (err != undefined) {
-      //     console.error(`Failed to get.code is ${err.code},message is ${err.message}`);
-      //     return;
-      //   }
-      //   value = data as string;
-      //   return value;
-      // });
       return this._kvStore.get(key).then((data: boolean | string | number | Uint8Array) => {
         let value: string | null = null;
         if (data) {

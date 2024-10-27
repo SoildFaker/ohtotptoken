@@ -5,7 +5,7 @@ import { TOTPConfigDialog } from '../dialogs/OTPConfigDialog';
 import { FortiConfigDialog } from '../dialogs/FortiConfigDialog';
 import { TokenItem } from '../components/TokenItem';
 import { SettingPage } from '../pages/SettingPage'
-import { util } from '@kit.ArkTS';
+import { HashMap, util } from '@kit.ArkTS';
 import { fileIo as fs } from '@kit.CoreFileKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { router } from '@kit.ArkUI';
@@ -13,23 +13,20 @@ import promptAction from '@ohos.promptAction'
 import { SteamConfigDialog } from '../dialogs/SteamConfigDialog';
 import { QRCodeDialog } from '../dialogs/QRCodeDialog';
 import { AppPreference } from '../utils/AppPreference';
-import { KvManager } from "../utils/KvManager";
-import { MMKV } from '@tencent/mmkv';
 import { privacyManager } from '@kit.StoreKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import CommonEventManager from '@ohos.commonEventManager';
-
+import { TokenStore } from '../utils/TokenStore';
 
 const TAG = 'PrivacySubscribe';
 
-let mmkv = MMKV.defaultMMKV();
-let kvMgr = KvManager.getInstance();
+let tkStore = TokenStore.getInstance();
 
 @Entry
 @ComponentV2
 struct Index {
   @Local btn_token_add_clicked: number = 0;
-  @Local arrConf: Array<TokenConfig> = [];
+  @Local allTokens: TokenConfig[] = [];
   @Local tabBarIndex: number = 0;
   @Local isLoading: Boolean = true;
 
@@ -38,7 +35,6 @@ struct Index {
   private appBottomAvoidHeight = AppStorage.get("appBottomAvoidHeight") as number;
   private appTopAvoidHeight = AppStorage.get("appTopAvoidHeight") as number;
 
-  private token_uuids: string[] = []
   private dialog_totp_config?: CustomDialogController;
   private dialog_forti_config?: CustomDialogController;
   private dialog_steam_config?: CustomDialogController;
@@ -57,14 +53,17 @@ struct Index {
   //build()函数之前执行 如果启用了隐私防截屏 在这里设置为隐私模式
   aboutToAppear(): void {
     router.clear();
-    // this.token_uuids = mmkv.decodeStringSet('token_uuids') ?? []
-    // let token_str: string = JSON.stringify(new TokenConfig())
-    // this.token_uuids.forEach(key => {
-    //   this.arrConf.push(JSON.parse(mmkv.decodeString(`token_${key}`) ?? token_str))
-    // })
+
     AppStorage.setOrCreate("AppPrivacyManageInfoUrl", 'https://www.duan.red/yylx/opt/privacy-statement-zh-cn.htm');
 
-    this.loadTokenConfig();
+    tkStore.initTokenStore().then(() => {
+      getContext(this).eventHub.on('onTokenChanged', () => this.onTokenChanged());
+      tkStore.getTokens().then((tokens) => {
+        this.allTokens = tokens;
+        this.isLoading = false;
+      });
+    });
+
     let cer_path = getContext(this).cacheDir + "/fmt.ks"
     fs.access(cer_path, fs.AccessModeType.EXIST).then((exist) => {
       if (!exist) {
@@ -98,69 +97,32 @@ struct Index {
 
     this.GetPrivacyManageInfo();
     //订阅KV数据库同步完成事件
-    getContext(this).eventHub.on('KVStoreSyncComplete',()=>{
-//todo 接收同步完成后刷新数据
+    getContext(this).eventHub.on('KVStoreSyncComplete',() => {
+      //todo 接收同步完成后刷新数据
     })
     //订阅RDB数据库同步完成事件
-    getContext(this).eventHub.on('RDBStoreSyncComplete',()=>{
+    getContext(this).eventHub.on('RDBStoreSyncComplete',() => {
       //todo 接收同步完成后刷新数据
     })
   }
-  //初始化加载token
-  async loadTokenConfig(): Promise<void> {
-    this.token_uuids = await kvMgr.getValue<string[]>('token_uuids') ?? []
-    if (this.token_uuids.length === 0) { // 尝试找一下旧版本mmkv有没有数据 如果有就恢复
-      let mmkv_token_uuids = mmkv.decodeStringSet('token_uuids') ?? []
-      if (mmkv_token_uuids.length != 0) {
-        await kvMgr.setValue<string[]>('token_uuids', mmkv_token_uuids)
-        this.token_uuids = mmkv_token_uuids;
-        let mmkv_token_str: string = JSON.stringify(new TokenConfig())
-        mmkv_token_uuids.forEach(uuid => {
-          let tsts = mmkv.decodeString(`token_${uuid}`);
-          if (tsts != undefined) {
-            kvMgr.setString(`token_${uuid}`, tsts)
-          }
-          this.arrConf.push(JSON.parse(tsts ?? mmkv_token_str))
-        })
-      }
-    } else {
-      let token_str: string = JSON.stringify(new TokenConfig())
-      this.token_uuids.forEach((uuid, index) => {
-        kvMgr.getString(`token_${uuid}`).then((val) => {
-          if (index > this.arrConf.length) {
-            this.arrConf.push(JSON.parse( val ?? token_str));
-          } else {
-            this.arrConf.splice(index, 0, JSON.parse( val ?? token_str));
-          }
-        });
-      })
-    }
-    this.isLoading = false;
+
+  async onTokenChanged(): Promise<void> {
+    this.allTokens = await tkStore.getTokens();
   }
 
-  async addTokenConfig(conf: TokenConfig): Promise<void> {
-    try {
-      const idx = this.arrConf.findIndex(_ => _.TokenUUID === conf.TokenUUID)
-      if (idx !== -1) {
-        this.arrConf[idx] = conf
-        //mmkv.encodeString(`token_${conf.TokenUUID}`, JSON.stringify(conf))
-        await kvMgr.setString(`token_${conf.TokenUUID}`,JSON.stringify(conf))
-        promptAction.showToast({message: `token ${conf.TokenIssuer}:${conf.TokenName} updated.`})
-      } else {
-        this.arrConf.push(conf)
-        //mmkv.encodeString(`token_${conf.TokenUUID}`, JSON.stringify(conf))
-        await kvMgr.setString(`token_${conf.TokenUUID}`,JSON.stringify(conf))
-        this.token_uuids.push(conf.TokenUUID)
-        //mmkv.encodeStringSet('token_uuids', this.token_uuids)
-        await kvMgr.setValue<string[]>('token_uuids', this.token_uuids)
-        promptAction.showToast({message: `token ${conf.TokenIssuer}:${conf.TokenName} added.`})
-      }
-    }
-    catch(err)
-    {
-        console.error(`Failed to addTokenConfig.code is ${err.code},message is ${err.message}`);
-    };
+  async updateTokenConfig(conf: TokenConfig): Promise<void> {
+    tkStore.updateToken(conf);
+    promptAction.showToast({message: `token ${conf.TokenIssuer}:${conf.TokenName} updated.`})
+  }
 
+  updateTokenConfigs(tokens: Array<TokenConfig>): void {
+    tokens.forEach(token => {
+      if (token.TokenUUID === undefined || token.TokenUUID === null) {
+        token.TokenUUID = util.generateRandomUUID();
+      }
+      this.updateTokenConfig(token);
+    });
+    promptAction.showToast({message: `${tokens.length} token(s) updated.`})
   }
 
   //准备接入标准化隐私托管
@@ -205,16 +167,6 @@ struct Index {
     });
   }
 
-  updateTokenConfigs(confs: Array<TokenConfig>): void {
-    confs.forEach(conf => {
-      if (conf.TokenUUID === undefined || conf.TokenUUID === null) {
-        conf.TokenUUID = util.generateRandomUUID();
-      }
-      this.addTokenConfig(conf);
-    });
-    promptAction.showToast({message: `${confs.length} token(s) updated.`})
-  }
-
   @Builder
   TokenAddMenu(){
     Menu() {
@@ -222,7 +174,7 @@ struct Index {
         .onClick(() => {
           this.dialog_totp_config = new CustomDialogController({
             builder: TOTPConfigDialog({
-              confirm: (new_conf) => {this.addTokenConfig(JSON.parse(new_conf))}
+              confirm: (new_conf) => {this.updateTokenConfig(JSON.parse(new_conf))}
             })
           })
           this.dialog_totp_config.open()
@@ -231,7 +183,7 @@ struct Index {
         .onClick(() => {
           this.dialog_forti_config = new CustomDialogController({
             builder: FortiConfigDialog({
-              confirm: (new_conf) => {this.addTokenConfig(JSON.parse(new_conf))}
+              confirm: (new_conf) => {this.updateTokenConfig(JSON.parse(new_conf))}
             })
           })
           this.dialog_forti_config.open()
@@ -240,7 +192,7 @@ struct Index {
         .onClick(() => {
           this.dialog_steam_config = new CustomDialogController({
             builder: SteamConfigDialog({
-              confirm: (new_conf) => {this.addTokenConfig(JSON.parse(new_conf))}
+              confirm: (new_conf) => {this.updateTokenConfig(JSON.parse(new_conf))}
             })
           })
           this.dialog_steam_config.open()
@@ -313,10 +265,8 @@ struct Index {
             value: $r('app.string.dialog_btn_confirm'),
             fontColor: Color.Red,
             action: async () => {
-              this.arrConf = this.arrConf.filter(_ => _.TokenUUID !== conf.TokenUUID)
-              this.token_uuids = this.token_uuids.filter(_ => _ !== conf.TokenUUID)
-              //mmkv.encodeStringSet('token_uuids', this.token_uuids)
-              await kvMgr.setValue<string[]>('token_uuids', this.token_uuids)
+              this.allTokens = this.allTokens.filter(_ => _.TokenUUID !== conf.TokenUUID);
+              tkStore.deleteToken(conf.TokenUUID);
             }
           }
         })
@@ -337,7 +287,7 @@ struct Index {
             builder: TOTPConfigDialog({
               conf_json: JSON.stringify(conf),
               confirm: (new_conf) => {
-                this.addTokenConfig(JSON.parse(new_conf))
+                this.updateTokenConfig(JSON.parse(new_conf))
               }
             })
           })
@@ -347,7 +297,7 @@ struct Index {
             builder: FortiConfigDialog({
               conf_json: JSON.stringify(conf),
               confirm: (new_conf) => {
-                this.addTokenConfig(JSON.parse(new_conf))
+                this.updateTokenConfig(JSON.parse(new_conf))
               }
             })
           })
@@ -357,7 +307,7 @@ struct Index {
             builder: SteamConfigDialog({
               conf_json: JSON.stringify(conf),
               confirm: (new_conf) => {
-                this.addTokenConfig(JSON.parse(new_conf))
+                this.updateTokenConfig(JSON.parse(new_conf))
               }
             })
           })
@@ -409,24 +359,22 @@ struct Index {
                         .height(50 + this.appTopAvoidHeight)
                         .width('100%')
                     }
-                    ForEach(this.arrConf, (conf: TokenConfig, index: number) => {
+                    ForEach(this.allTokens, (token: TokenConfig, index: number) => {
                       ListItem() {
                         TokenItem({
-                          Config: conf,
-                          Update: async  (conf_new) => {
-                            this.arrConf[index].TokenCounter = conf_new.TokenCounter;
-                            //mmkv.encodeString(`token_${this.arrConf[index].TokenUUID}`, JSON.stringify(this.arrConf[index]))
-                            await kvMgr.setString(`token_${this.arrConf[index].TokenUUID}`, JSON.stringify(this.arrConf[index]))
+                          Config: token,
+                          Update: async (conf_new) => {
+                            this.updateTokenConfig(conf_new);
                           }
                         })
                       }
                       .padding({ left: 10, right: 10 })
                       .swipeAction({
                         start: {
-                          builder: () => { this.TokenItemStart(this.arrConf.find(_ => _.TokenUUID === conf.TokenUUID)) }
+                          builder: () => { this.TokenItemStart(token) }
                         },
                         end: {
-                          builder: () => { this.TokenItemEnd(this.arrConf.find(_ => _.TokenUUID === conf.TokenUUID)) },
+                          builder: () => { this.TokenItemEnd(token) },
                         }
                       })
                     }, (item: TokenConfig) => {
@@ -470,7 +418,7 @@ struct Index {
 
             TabContent() {
               SettingPage({
-                arrConf: this.arrConf,
+                arrConf: this.allTokens,
                 appTopAvoidHeight: this.appTopAvoidHeight,
                 appBottomAvoidHeight: this.appBottomAvoidHeight,
                 backupReload: (conf) => {

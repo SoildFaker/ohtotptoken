@@ -2,7 +2,6 @@ import { AbilityConstant, UIAbility, Want, Configuration,ApplicationStateChangeC
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
-import { MMKV } from '@tencent/mmkv';
 import { WindowUtil } from '../utils/WindowUtil';
 import { AppPreference } from '../utils/AppPreference';
 import { router } from '@kit.ArkUI';
@@ -12,16 +11,11 @@ import { cloudData } from '@kit.ArkData';
 import {PermissionManager}  from '../utils/PermissionManager';
 
 //单版本分布式键值数据库
-let kvManager: distributedKVStore.KVManager;
-let kvStore: distributedKVStore.SingleKVStore | null = null;
 let rdbStore: relationalStore.RdbStore | null = null;
 
 export default class EntryAbility extends UIAbility {
 
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
-    let appCtx = this.context.getApplicationContext();
-    let mmkvRootDir = MMKV.initialize(appCtx);
-    console.info('mmkv rootDir: ', mmkvRootDir);
     AppStorage.setOrCreate("appContext", this.context);
     AppStorage.setOrCreate('currentColorMode', this.context.config.colorMode);
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
@@ -49,8 +43,6 @@ export default class EntryAbility extends UIAbility {
     } catch (paramError) {
       console.error(`error: ${(paramError as BusinessError).code}, ${(paramError as BusinessError).message}`);
     }
-
-    this.initKvStore();
   }
 
   onDestroy(): void {
@@ -166,53 +158,5 @@ export default class EntryAbility extends UIAbility {
     }
 
   }
-  //初始化键值对数据库
-  initKvStore() :void{
-    //初始化键值数据库
-    let bundleName=this.context.resourceManager.getStringSync($r('app.string.app_name').id)
-    const kvManagerConfig: distributedKVStore.KVManagerConfig = {
-      context: this.context,
-      bundleName: bundleName,
-    }
-    try {
-      kvManager = distributedKVStore.createKVManager(kvManagerConfig);
-      console.info("Succeeded in creating KVManager");
-      const options: distributedKVStore.Options = {
-        createIfMissing: true,
-        encrypt: true,//加密
-        backup: false,//设置数据库文件是否备份
-        autoSync: true,//自动同步
-        kvStoreType: distributedKVStore.KVStoreType.SINGLE_VERSION,//表示单版本数据库。 数据不分设备，设备之间修改相同的Key会覆盖。
-        securityLevel: distributedKVStore.SecurityLevel.S3, //对于token密钥采菊表示数据库的安全级别为高级别，数据的泄露、篡改、破坏、销毁可能会给个人或组织导致严峻的不利影响。
-      };
-      kvManager.getKVStore('main_store', options, (err: BusinessError, store: distributedKVStore.SingleKVStore) => {
-        if (err) {
-          console.error(`Failed to get KVStore.code is ${err.code},message is ${err.message}`);
-          return;
-        }
-        console.info("Succeeded in getting KVStore");
-        kvStore = store;
-        //缓存对象
-        AppStorage.setOrCreate('kvManager', kvManager);
-        AppStorage.setOrCreate('kvStore', kvStore);
-        // const KEY_TEST_STRING_ELEMENT = 'app_laster_runtime';
-        // const VALUE_TEST_STRING_ELEMENT = new Date().toString();
-        // kvStore.put(KEY_TEST_STRING_ELEMENT, VALUE_TEST_STRING_ELEMENT, (err: BusinessError) => {
-        //   if (err != undefined) {
-        //     console.error(`Failed to put.code is ${err.code},message is ${err.message}`);
-        //     return;
-        //   }
-        //   console.info("Succeeded in putting");
-        // });
-      });
-      // kvStore.enableSync(true).then(() => {
-      //   console.info('Succeeded in enabling sync');
-      // }).catch((err: BusinessError) => {
-      //   console.error(`Failed to enable sync.code is ${err.code},message is ${err.message}`);
-      // });
-    } catch (e) {
-      let error = e as BusinessError;
-      console.error(`Failed to create KVManager.code is ${error.code},message is ${error.message}`);
-    }
-  }
+
 }

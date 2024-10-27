@@ -89,11 +89,10 @@ export struct SettingPage {
 
   private versionCode?: number;
 
-
   aboutToAppear(): void {
     bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION).then((bundleInfo) => {
       this.versionCode = bundleInfo.versionCode;
-      this.versionName = 'Version:'+bundleInfo.versionName;
+      this.versionName = 'Version:' + bundleInfo.versionName;
       this.appName = bundleInfo.name;
     });
   }
