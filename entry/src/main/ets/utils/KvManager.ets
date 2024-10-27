@@ -37,6 +37,12 @@ export class KvManager {
 
   async initPreference(): Promise<void> {
     this._kvStore = AppStorage.get<distributedKVStore.SingleKVStore>('kvStore');
+    let Context = AppStorage.get<common.UIAbilityContext>('appContext')
+    //订阅同步完成事件
+    this._kvStore?.on('syncComplete', (data: [string, number][]) => {
+      console.info(`syncComplete ${data}`);
+      Context?.eventHub.emit('KVStoreSyncComplete');
+    });
   }
 
   async setValue<T>(key: string, value: T): Promise<void> {

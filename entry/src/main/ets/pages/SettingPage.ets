@@ -77,6 +77,8 @@ export struct SettingPage {
   @Require @Param appBottomAvoidHeight: number = 0;
   @Require @Param appTopAvoidHeight: number = 0;
   @Event backupReload: (conf: Array<TokenConfig>) => void = () => {};
+  @Local versionName?: string;
+  @Local appName?: string;
 
   //备份时是否为导出模式
   private backup_is_input:boolean = true;
@@ -87,9 +89,12 @@ export struct SettingPage {
 
   private versionCode?: number;
 
+
   aboutToAppear(): void {
     bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION).then((bundleInfo) => {
       this.versionCode = bundleInfo.versionCode;
+      this.versionName = 'Version:'+bundleInfo.versionName;
+      this.appName = bundleInfo.name;
     });
   }
 
@@ -407,6 +412,13 @@ export struct SettingPage {
       ListItem() {
         SettingItem({ title: $r('app.string.setting_about') }) {
           Text("Github: SoildFaker/ohtotptoken\nE-mail: enbinli@outlook.com\nContributors: @Soildfaker, @eveloki, @lsxuan12138")
+            .fontSize(10)
+            .fontColor($r('app.color.str_gray'))
+          Divider().vertical(false).height(2)
+          Text(this.appName)
+            .fontSize(10)
+            .fontColor($r('app.color.str_gray'))
+          Text(this.versionName)
             .fontSize(10)
             .fontColor($r('app.color.str_gray'))
         }

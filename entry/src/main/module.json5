@@ -4,6 +4,20 @@
     "type": "entry",
     "description": "$string:module_desc",
     "mainElement": "EntryAbility",
+    "metadata": [
+      {
+        "name": "appgallery_privacy_hosted",
+        "value": "1"
+      },
+      {
+        "name": "appgallery_privacy_link_privacy_statement",
+        "value": 'https://agreement-drcn.hispace.dbankcloud.cn/index.html?lang=zh&agreementId=1537746898868267328' // 必须是https网址
+      },
+      {
+        "name": "appgallery_privacy_link_user_agreement",
+        "value": 'https://www.duan.red/yylx/opt/user-agreement-zh-cn.htm' // 必须是https网址
+      }
+    ],
     "deviceTypes": [
       "phone",
       "tablet",

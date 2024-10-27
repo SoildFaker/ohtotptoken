@@ -32,7 +32,7 @@ struct AgreementPage {
         }
       })
       Stack() {
-        Web({ controller: this.webViewController, src: $rawfile('user-agreement-zh-cn.htm') })
+        Web({ controller: this.webViewController, src: 'https://www.duan.red/yylx/opt/user-agreement-zh-cn.htm'})
           .darkMode(WebDarkMode.Auto)
           .domStorageAccess(true)
           .zoomAccess(true)
