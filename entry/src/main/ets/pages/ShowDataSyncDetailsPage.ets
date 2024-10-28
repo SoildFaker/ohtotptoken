@@ -19,9 +19,8 @@ struct ShowDataSyncDetailsPage {
       RelativeContainer() {
         Stack() {
           List({ space: 10 }) {
-            ListItem()
-            {
-              SettingItem({ title: '设备信息'}) {
+            ListItem() {
+              SettingItem({ title: '设备信息' }) {
                 Row() {
                   Blank()
                     .width(10)
@@ -31,6 +30,7 @@ struct ShowDataSyncDetailsPage {
                     .fontWeight(FontWeight.Medium)
                     .textAlign(TextAlign.Start)
                 }
+
                 Row() {
                   Blank()
                     .width(10)
@@ -45,9 +45,8 @@ struct ShowDataSyncDetailsPage {
             }
             .padding({ left: 10, right: 10 })
 
-            ListItem()
-            {
-              SettingItem({ title: '更新时间'}) {
+            ListItem() {
+              SettingItem({ title: '更新时间' }) {
                 Row() {
                   Blank()
                     .width(10)
@@ -61,9 +60,9 @@ struct ShowDataSyncDetailsPage {
 
             }
             .padding({ left: 10, right: 10 })
-            ListItem()
-            {
-              SettingItem({ title: '创建时间'}) {
+
+            ListItem() {
+              SettingItem({ title: '创建时间' }) {
                 Row() {
                   Blank()
                     .width(10)
@@ -77,9 +76,9 @@ struct ShowDataSyncDetailsPage {
 
             }
             .padding({ left: 10, right: 10 })
-            ListItem()
-            {
-              SettingItem({ title: '手动同步'}) {
+
+            ListItem() {
+              SettingItem({ title: '手动同步' }) {
                 Row() {
                   Blank()
                     .width(10)

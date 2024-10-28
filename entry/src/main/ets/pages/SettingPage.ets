@@ -122,9 +122,9 @@ export struct SettingPage {
     //订阅权限变更
     this.appCtx.eventHub.on('DATASYNCPermissionsUpdate', this.updateDATASYNCPermissions);
   }
+
   //更新数据同步权限
-  updateDATASYNCPermissions(isAccess: boolean)
-  {
+  updateDATASYNCPermissions(isAccess: boolean) {
     if (!isAccess) {
       //如果数据同步权限被关闭 则需要将两个同步都关闭
       this.RdbSyncEnable = false;
@@ -380,7 +380,7 @@ export struct SettingPage {
   // 在自定义组件即将析构销毁时将dialogController置空
   aboutToDisappear() {
     this.dialogController = null // 将dialogController置空
-    this.appCtx.eventHub.off('DATASYNCPermissionsUpdate',this.updateDATASYNCPermissions);
+    this.appCtx.eventHub.off('DATASYNCPermissionsUpdate', this.updateDATASYNCPermissions);
   }
 
   build() {

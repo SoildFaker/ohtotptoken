@@ -10,7 +10,6 @@ export class TokenStore {
   private token_uuids: string[] = [];
   private token_array: TokenConfig[] = [];
   private appCtx: common.UIAbilityContext | undefined = undefined;
-
   private static instance: TokenStore;
 
   private constructor() {
@@ -31,7 +30,7 @@ export class TokenStore {
   public async initTokenStore(): Promise<void> {
     await this.kvMgr.initKvManager();
     this.token_uuids = await this.kvMgr.getStringArray('token_uuids') ?? [];
-    if (this.token_uuids.length==0) {
+    if (this.token_uuids.length == 0) {
       //尝试从旧缓存数据中恢复记录 兼容旧版本
       this.token_uuids = await this.kvMgr.getValue<string[]>('token_uuids') ?? [];
     }
@@ -74,6 +73,7 @@ export class TokenStore {
     this.kvMgr.deleteValue(token_uuid);
     this.emitTokenChanged();
   }
+
   //手动同步
   async DataSync(): Promise<void> {
     // 警告KV数据库同步会存在覆盖问题 因为目前token_uuids用的是一个key 多设备会有问题
