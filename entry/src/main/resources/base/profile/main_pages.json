@@ -4,6 +4,7 @@
     "pages/SplashPage",
     "pages/PrivacyPage",
     "pages/AgreementPage",
-    "pages/ShowCodePage"
+    "pages/ShowCodePage",
+    "pages/ShowDataSyncDetailsPage"
   ]
 }

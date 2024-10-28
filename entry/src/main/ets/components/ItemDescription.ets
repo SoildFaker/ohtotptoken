@@ -18,12 +18,17 @@ export struct ItemDescription {
   @Require @Param description: string  | Resource = '';
 
   build() {
-    Text(this.description)
-      .fontSize($r('sys.float.ohos_id_text_size_body2'))
-      .fontColor($r('sys.color.ohos_id_color_text_secondary'))
-      .fontWeight(FontWeight.Regular)
-      .fontFamily('HarmonyHeiTi')
-      .lineHeight(19)
-      .width('100%')
+    Row()
+    {
+      Blank()
+        .width(10)
+      Text(this.description)
+        .fontSize($r('sys.float.ohos_id_text_size_body2'))
+        .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+        .fontWeight(FontWeight.Regular)
+        .fontFamily('HarmonyHeiTi')
+        .lineHeight(19)
+        .width('100%')
+    }
   }
 }

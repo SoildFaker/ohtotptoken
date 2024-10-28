@@ -90,6 +90,46 @@ export class KvManager {
     }
     return null;
   }
+  //使用getEntries模拟一个可以兼容的数组 这样可以规避多设备覆盖的问题
+  async getStringArray(key: string): Promise<string[]| null> {
+    if (this._kvStore) {
+      try {
+        let prefixKey="$.SA_"+key+"_";
+        let liststr:string[] = [];
+        let entries= await this._kvStore.getEntries(prefixKey);
+        entries.forEach((item)=>{
+          liststr.push(item.key.replace(prefixKey,''))
+        })
+        return liststr;
+      } catch (e) {
+        let error = e as BusinessError;
+        console.error(`duplicated calls should be ok.code is ${error.code},message is ${error.message}`);
+      }
+    }
+    return null;
+  }
+  //使用getEntries模拟一个可以兼容的数组 这样可以规避多设备覆盖的问题
+  async setStringArray(key: string, value:string[]): Promise<void> {
+    if (this._kvStore) {
+      let prefixKey="$.SA_"+key+"_";
+      let liststr:distributedKVStore.Entry[] = [];
+      value.forEach((item)=>{
+        let entry: distributedKVStore.Entry = {
+          key: prefixKey+item,
+          value: {
+            type: distributedKVStore.ValueType.STRING,
+            value: '1'
+          }
+        }
+        liststr.push(entry);
+      });
+      this._kvStore.putBatch(liststr).then(()=>{
+        return;
+      }).catch((err: BusinessError) => {
+        console.error(`Failed to put Batch.code is ${err.code},message is ${err.message}`);
+      });
+    }
+  }
 
   async setString(key: string, value: string): Promise<void> {
     if (this._kvStore) {

@@ -30,7 +30,7 @@ export class TokenStore {
 
   public async initTokenStore(): Promise<void> {
     await this.kvMgr.initKvManager();
-    this.token_uuids = await this.kvMgr.getValue<string[]>('token_uuids') ?? [];
+    this.token_uuids = await this.kvMgr.getStringArray('token_uuids') ?? [];
     this.appCtx = AppStorage.get<common.UIAbilityContext>('appContext') as common.UIAbilityContext;
     for (let i = 0; i < this.token_uuids.length; i++) {
       let token = await this.queryToken(this.token_uuids[i]);
@@ -56,7 +56,7 @@ export class TokenStore {
     if (!this.token_uuids.includes(token.TokenUUID)) {
       this.token_uuids.push(token.TokenUUID);
       this.token_array.push(token);
-      await this.kvMgr.setValue<string[]>('token_uuids', this.token_uuids);
+      await this.kvMgr.setStringArray('token_uuids', this.token_uuids);
       this.emitTokenChanged();
     } else {
       this.token_array[this.token_uuids.findIndex(uuid => uuid === token.TokenUUID)] = token;
@@ -65,7 +65,7 @@ export class TokenStore {
 
   public async deleteToken(token_uuid: string): Promise<void> {
     this.token_uuids = this.token_uuids.filter(uuid => uuid !== token_uuid);
-    await this.kvMgr.setValue<string[]>('token_uuids', this.token_uuids);
+    await this.kvMgr.setStringArray('token_uuids', this.token_uuids);
     this.token_array = this.token_array.filter(token => token.TokenUUID !== token_uuid);
     this.kvMgr.deleteValue(token_uuid);
     this.emitTokenChanged();

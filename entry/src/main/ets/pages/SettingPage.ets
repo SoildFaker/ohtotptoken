@@ -480,6 +480,14 @@ export struct SettingPage {
                 }
               })
               ItemDescription({ description: $r('app.string.data_rdb_cloud_sync_des') })
+              Divider().vertical(false).height(2)
+              SubItemButton({
+                symbol: $r('sys.symbol.arrow_counterclockwise_clock'),
+                text: $r('app.string.data_rdb_sync_details')
+              })
+                .onClick(() => {
+                  router.pushUrl({ url: 'pages/ShowDataSyncDetailsPage' });
+                })
             }
           }
           .padding({ left: 10, right: 10 })

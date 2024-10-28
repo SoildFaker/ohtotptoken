@@ -41,7 +41,6 @@ struct AgreementPage {
           .cacheMode(CacheMode.Default)
           .javaScriptAccess(true)
           .width(CommonConstants.FULL_PERCENT)
-          .height(500)
       }
     }
     .width('100%')

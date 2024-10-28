@@ -227,6 +227,10 @@
     {
       "name": "data_rdb_cloud_sync_des",
       "value": "数据将会通过华为云同步至您华为账户登录的其他设备上."
+    },
+    {
+      "name": "data_rdb_sync_details",
+      "value": "同步详情"
     }
   ]
 }

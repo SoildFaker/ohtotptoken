@@ -227,6 +227,10 @@
     {
       "name": "data_rdb_cloud_sync_des",
       "value": "Use Huawei Cloud Data sync"
+    },
+    {
+      "name": "data_rdb_sync_details",
+      "value": "Sync Details"
     }
   ]
 }

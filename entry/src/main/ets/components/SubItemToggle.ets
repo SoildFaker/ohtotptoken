@@ -21,6 +21,8 @@ export struct SubItemToggle {
 
   build() {
     Row() {
+      Blank()
+        .width(10)
       Text(this.title)
         .fontSize($r('sys.float.ohos_id_text_size_body1'))
         .fontColor($r('sys.color.ohos_id_color_text_primary'))
