@@ -3,6 +3,7 @@ import { CommonConstants } from '../utils/CommonConstants';
 import { TopNavigationView } from '../components/TopNavigationView';
 import { otpType, TokenConfig } from '../utils/TokenConfig';
 import { SettingItem } from '../components/SettingItem';
+import { deviceInfo } from '@kit.BasicServicesKit';
 
 @Entry
 @ComponentV2
@@ -24,8 +25,8 @@ struct ShowDataSyncDetailsPage {
                 Row() {
                   Blank()
                     .width(10)
-                  Text('设备名')
-                    .fontSize($r('sys.float.ohos_id_text_size_body1'))
+                  Text(deviceInfo.marketName)
+                    .fontSize($r('sys.float.ohos_id_text_size_body2'))
                     .fontColor($r('sys.color.ohos_id_color_text_primary'))
                     .fontWeight(FontWeight.Medium)
                     .textAlign(TextAlign.Start)
@@ -33,13 +34,61 @@ struct ShowDataSyncDetailsPage {
                 Row() {
                   Blank()
                     .width(10)
-                  Text('ALN-Al10')
+                  Text(deviceInfo.ODID)
                     .fontSize($r('sys.float.ohos_id_text_size_body2'))
                     .fontColor($r('sys.color.ohos_id_color_text_primary'))
                     .fontWeight(FontWeight.Medium)
                     .textAlign(TextAlign.Start)
                 }
+              }
 
+            }
+            .padding({ left: 10, right: 10 })
+
+            ListItem()
+            {
+              SettingItem({ title: '更新时间'}) {
+                Row() {
+                  Blank()
+                    .width(10)
+                  Text('???')
+                    .fontSize($r('sys.float.ohos_id_text_size_body2'))
+                    .fontColor($r('sys.color.ohos_id_color_text_primary'))
+                    .fontWeight(FontWeight.Medium)
+                    .textAlign(TextAlign.Start)
+                }
+              }
+
+            }
+            .padding({ left: 10, right: 10 })
+            ListItem()
+            {
+              SettingItem({ title: '创建时间'}) {
+                Row() {
+                  Blank()
+                    .width(10)
+                  Text('???')
+                    .fontSize($r('sys.float.ohos_id_text_size_body2'))
+                    .fontColor($r('sys.color.ohos_id_color_text_primary'))
+                    .fontWeight(FontWeight.Medium)
+                    .textAlign(TextAlign.Start)
+                }
+              }
+
+            }
+            .padding({ left: 10, right: 10 })
+            ListItem()
+            {
+              SettingItem({ title: '手动同步'}) {
+                Row() {
+                  Blank()
+                    .width(10)
+                  Text('???')
+                    .fontSize($r('sys.float.ohos_id_text_size_body2'))
+                    .fontColor($r('sys.color.ohos_id_color_text_primary'))
+                    .fontWeight(FontWeight.Medium)
+                    .textAlign(TextAlign.Start)
+                }
               }
 
             }

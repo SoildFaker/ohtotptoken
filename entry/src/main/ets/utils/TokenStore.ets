@@ -31,6 +31,10 @@ export class TokenStore {
   public async initTokenStore(): Promise<void> {
     await this.kvMgr.initKvManager();
     this.token_uuids = await this.kvMgr.getStringArray('token_uuids') ?? [];
+    if (this.token_uuids.length==0) {
+      //尝试从旧缓存数据中恢复记录 兼容旧版本
+      this.token_uuids = await this.kvMgr.getValue<string[]>('token_uuids') ?? [];
+    }
     this.appCtx = AppStorage.get<common.UIAbilityContext>('appContext') as common.UIAbilityContext;
     for (let i = 0; i < this.token_uuids.length; i++) {
       let token = await this.queryToken(this.token_uuids[i]);
