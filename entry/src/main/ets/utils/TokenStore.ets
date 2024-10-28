@@ -3,6 +3,7 @@ import { TokenConfig } from "./TokenConfig";
 import { HashMap, JSON } from "@kit.ArkTS";
 import { RdbManager } from "./RdbManager";
 import { common } from '@kit.AbilityKit';
+import { faceDetector } from "@kit.CoreVisionKit";
 
 export class TokenStore {
   private kvMgr: KvManager = KvManager.getInstance();
@@ -10,6 +11,7 @@ export class TokenStore {
   private token_uuids: string[] = [];
   private token_array: TokenConfig[] = [];
   private appCtx: common.UIAbilityContext | undefined = undefined;
+  private init_done: boolean = false;
   private static instance: TokenStore;
 
   private constructor() {
@@ -28,17 +30,22 @@ export class TokenStore {
   }
 
   public async initTokenStore(): Promise<void> {
+    if (this.init_done) {
+      return;
+    }
     await this.kvMgr.initKvManager();
     this.token_uuids = await this.kvMgr.getStringArray('token_uuids') ?? [];
     if (this.token_uuids.length == 0) {
       //尝试从旧缓存数据中恢复记录 兼容旧版本
       this.token_uuids = await this.kvMgr.getValue<string[]>('token_uuids') ?? [];
+      await this.kvMgr.setStringArray('token_uuids', this.token_uuids);
     }
     this.appCtx = AppStorage.get<common.UIAbilityContext>('appContext') as common.UIAbilityContext;
     for (let i = 0; i < this.token_uuids.length; i++) {
       let token = await this.queryToken(this.token_uuids[i]);
       this.token_array.push(token);
     }
+    this.init_done = true;
   }
 
   public async getTokenUUIDs(): Promise<string[]> {

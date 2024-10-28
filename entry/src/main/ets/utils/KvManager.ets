@@ -58,6 +58,9 @@ export class KvManager {
 
   async initKvManager(): Promise<void> {
     let ctx = AppStorage.get<common.UIAbilityContext>('appContext') as common.UIAbilityContext;
+    if (this._kvStore) {
+      return;
+    }
     await this.initKvStore(ctx).then((store) => {
       this._kvStore = store;
       //订阅同步完成事件
