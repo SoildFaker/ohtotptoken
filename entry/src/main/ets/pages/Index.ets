@@ -103,6 +103,12 @@ struct Index {
     //订阅KV数据库同步完成事件
     getContext(this).eventHub.on('KVStoreSyncComplete',() => {
       //todo 接收同步完成后刷新数据
+      tkStore.getTokens().then((tokens) => {
+        this.all_tokens = tokens;
+        this.token_loaded = false;
+        AppPreference.setAppDbKVSyncTime(new Date().toString());
+      });
+
     })
     //订阅RDB数据库同步完成事件
     getContext(this).eventHub.on('RDBStoreSyncComplete',() => {

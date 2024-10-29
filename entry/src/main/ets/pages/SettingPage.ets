@@ -511,7 +511,10 @@ export struct SettingPage {
 
           ListItem() {
             SettingItem({ title: $r('app.string.setting_about') }) {
-              Text("Github: SoildFaker/ohtotptoken\nE-mail: enbinli@outlook.com\nContributors: @Soildfaker, @eveloki, @lsxuan12138")
+              Hyperlink('https://github.com/SoildFaker/ohtotptoken', 'Github: SoildFaker/ohtotptoken') {
+              }
+              .color(Color.Blue)
+              Text("E-mail: enbinli@outlook.com\nContributors: @Soildfaker, @eveloki, @lsxuan12138")
                 .fontSize(10)
                 .fontColor($r('app.color.str_gray'))
               Divider().vertical(false).height(2)
