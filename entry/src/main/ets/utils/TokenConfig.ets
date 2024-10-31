@@ -21,6 +21,7 @@ export class TokenConfig {
   FortiToken: string;
   FortiDevID: string;
   TokenIcon: string;
+  RankScore: number;
 
   constructor(
     secret: string = '',
@@ -30,7 +31,8 @@ export class TokenConfig {
     algorithm: HMACAlgorithm = 'SHA1',
     period: number = 30,
     digits: number = 6,
-    counter: number = 0
+    counter: number = 0,
+    rank: number = 0
   ) {
     this.TokenSecret = secret;
     this.TokenType = type;
@@ -44,6 +46,7 @@ export class TokenConfig {
     this.FortiDevID = '';
     this.TokenUUID = util.generateRandomUUID();
     this.TokenIcon = getIconPathByIssuer(issuer);
+    this.RankScore = rank;
   }
 
 }

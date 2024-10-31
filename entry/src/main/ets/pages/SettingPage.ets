@@ -93,8 +93,6 @@ export struct SettingPage {
   @Require @Param appTopAvoidHeight: number = 0;
   @Event backupReload: (conf: Array<TokenConfig>) => void = () => {
   };
-  @Local versionName?: string;
-  @Local appName?: string;
   @Local RdbSyncEnable: boolean = false;
   @Local RdbCloudSyncEnable: boolean = false;
   @Local Is_loaded: boolean = false;
@@ -106,21 +104,27 @@ export struct SettingPage {
   private mediaFileUri: MediaFileUri = new MediaFileUri();
   private appCtx = AppStorage.get<common.UIAbilityContext>('appContext') as common.UIAbilityContext;
   private versionCode?: number;
+  private str_about_app: string = '';
+  private str_opensource_leg: string = '';
 
   aboutToAppear(): void {
-    // bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION).then((bundleInfo) => {
-    //   this.versionCode = bundleInfo.versionCode;
-    //   this.versionName = 'Version:' + bundleInfo.versionName;
-    //   this.appName = bundleInfo.name;
-    // });
     let bundleInfo = AppStorage.get<bundleManager.BundleInfo>("BundleInfo");
     this.versionCode = bundleInfo?.versionCode;
-    this.versionName = 'Version:' + bundleInfo?.versionName;
-    this.appName = bundleInfo?.name;
     this.RdbSyncEnable = AppPreference.getRdbSyncEnable();
     this.RdbCloudSyncEnable = AppPreference.getRdbCloudSyncEnable();
     //订阅权限变更
     this.appCtx.eventHub.on('DATASYNCPermissionsUpdate', this.updateDATASYNCPermissions);
+    this.str_about_app =
+      "Github: SoildFaker/ohtotptoken\n" +
+      "E-mail: enbinli@outlook.com\n" +
+      "Contributors: @Soildfaker, @eveloki, @lsxuan12138\n" +
+      "Bundle Name: " + bundleInfo?.name + "\n" +
+      "Version: " + bundleInfo?.versionName;
+    this.str_opensource_leg =
+      "Github: paolostivanin/libcotp\n" +
+      "Github: Netthaw/TOTP-MCU\n" +
+      "Github: ss23/fortitoken-mobile-registration\n" +
+      "Github: andOTP/andOTP - Icons";
   }
 
   //更新数据同步权限
@@ -410,7 +414,7 @@ export struct SettingPage {
               SubItemButton({
                 symbol: $r('sys.symbol.save'),
                 text: $r('app.string.setting_backup_export')
-              })//.layoutWeight(1)
+              })
                 .onClick(() => {
                   this.backup_is_input = true;
                   this.callFilePickerSaveFile()
@@ -418,7 +422,7 @@ export struct SettingPage {
               SubItemButton({
                 symbol: $r('sys.symbol.folder'),
                 text: $r('app.string.setting_backup_import')
-              })//.layoutWeight(1)
+              })
                 .onClick(() => {
                   this.backup_is_input = false;
                   this.callFilePickerSelectFile()
@@ -511,25 +515,20 @@ export struct SettingPage {
 
           ListItem() {
             SettingItem({ title: $r('app.string.setting_about') }) {
-              Text("Github: SoildFaker/ohtotptoken\nE-mail: enbinli@outlook.com\nContributors: @Soildfaker, @eveloki, @lsxuan12138")
+              Text(this.str_about_app)
                 .fontSize(10)
                 .fontColor($r('app.color.str_gray'))
-              Divider().vertical(false).height(2)
-              Text(this.appName)
-                .fontSize(10)
-                .fontColor($r('app.color.str_gray'))
-              Text(this.versionName)
-                .fontSize(10)
-                .fontColor($r('app.color.str_gray'))
+                .padding({ left: 10 })
             }
           }
           .padding({ left: 10, right: 10 })
 
           ListItem() {
             SettingItem({ title: $r('app.string.setting_opensource_leg') }) {
-              Text("Github: paolostivanin/libcotp\nGithub: Netthaw/TOTP-MCU\nGithub: ss23/fortitoken-mobile-registration\nGithub: andOTP/andOTP - Icons")
+              Text(this.str_opensource_leg)
                 .fontSize(10)
                 .fontColor($r('app.color.str_gray'))
+                .padding({ left: 10 })
             }
           }
           .padding({ left: 10, right: 10 })

@@ -45,6 +45,7 @@ export class TokenStore {
       let token = await this.queryToken(this.token_uuids[i]);
       this.token_array.push(token);
     }
+    this.sortTokens();
     this.init_done = true;
   }
 
@@ -61,16 +62,50 @@ export class TokenStore {
     return token ?? new TokenConfig();
   }
 
-  public async updateToken(token: TokenConfig): Promise<void> {
+  public sortTokens(): void {
+    this.token_array = this.token_array.sort((a, b) => a.RankScore - b.RankScore);
+    this.emitTokenChanged();
+  }
+
+  private async saveToken(token: TokenConfig): Promise<void> {
     await this.kvMgr.setValue<TokenConfig>(`token_${token.TokenUUID}`, token);
+  }
+
+  private async saveTokens(token1: TokenConfig, token2: TokenConfig): Promise<void> {
+    await this.kvMgr.setValue<TokenConfig>(`token_${token1.TokenUUID}`, token1);
+    await this.kvMgr.setValue<TokenConfig>(`token_${token2.TokenUUID}`, token2);
+  }
+
+  public async rearrangeToken(index: number, up: boolean): Promise<void> {
+    const token = this.token_array[index];
+    const score = token.RankScore;
+    if (up) {
+      if (index > 0) {
+        const token_swap = this.token_array[index - 1];
+        this.token_array[index].RankScore = token_swap.RankScore;
+        this.token_array[index - 1].RankScore = score;
+        this.saveTokens(token, token_swap);
+      }
+    } else {
+      if (index < this.token_array.length - 1) {
+        const token_swap = this.token_array[index + 1];
+        this.token_array[index].RankScore = token_swap.RankScore;
+        this.token_array[index + 1].RankScore = score;
+        this.saveTokens(token, token_swap);
+      }
+    }
+  }
+
+  public async updateToken(token: TokenConfig): Promise<void> {
+    await this.saveToken(token);
     if (!this.token_uuids.includes(token.TokenUUID)) {
       this.token_uuids.push(token.TokenUUID);
       this.token_array.push(token);
       await this.kvMgr.setStringArray('token_uuids', this.token_uuids);
-      this.emitTokenChanged();
     } else {
       this.token_array[this.token_uuids.findIndex(uuid => uuid === token.TokenUUID)] = token;
     }
+    this.emitTokenChanged();
   }
 
   public async deleteToken(token_uuid: string): Promise<void> {

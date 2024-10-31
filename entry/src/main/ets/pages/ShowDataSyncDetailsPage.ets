@@ -5,6 +5,7 @@ import { otpType, TokenConfig } from '../utils/TokenConfig';
 import { SettingItem } from '../components/SettingItem';
 import { deviceInfo } from '@kit.BasicServicesKit';
 
+@Preview
 @Entry
 @ComponentV2
 struct ShowDataSyncDetailsPage {
@@ -19,6 +20,9 @@ struct ShowDataSyncDetailsPage {
       RelativeContainer() {
         Stack() {
           List({ space: 10 }) {
+            ListItem() {
+
+            }
             ListItem() {
               SettingItem({ title: '设备信息' }) {
                 Row() {
@@ -98,8 +102,10 @@ struct ShowDataSyncDetailsPage {
           .scrollBar(BarState.Off)
           .backgroundColor($r('app.color.window_background'))
           .width('100%')
+          .height('100%')
         }
       }
+
     }
     .width('100%')
     .height('100%')
