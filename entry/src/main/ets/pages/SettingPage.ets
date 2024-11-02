@@ -513,7 +513,7 @@ export struct SettingPage {
             SettingItem({ title: $r('app.string.setting_about') }) {
               Hyperlink('https://github.com/SoildFaker/ohtotptoken', 'Github: SoildFaker/ohtotptoken') {
               }
-              .color(Color.Blue)
+              .height(10)
               Text("E-mail: enbinli@outlook.com\nContributors: @Soildfaker, @eveloki, @lsxuan12138")
                 .fontSize(10)
                 .fontColor($r('app.color.str_gray'))
@@ -524,6 +524,9 @@ export struct SettingPage {
               Text(this.versionName)
                 .fontSize(10)
                 .fontColor($r('app.color.str_gray'))
+              Hyperlink('https://beian.miit.gov.cn', 'APP备案预留') {
+              }
+              .height(10)
             }
           }
           .padding({ left: 10, right: 10 })

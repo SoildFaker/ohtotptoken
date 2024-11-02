@@ -95,6 +95,8 @@ struct ShowDataSyncDetailsPage {
                         TokenStore.getInstance().DataSync().then(()=>{
                           setTimeout(()=>{
                             this.Is_loaded=false;
+                            AppPreference.setAppDbKVSyncTime(new Date().toString());
+                            this.AppDbKVSyncTime=AppPreference.getAppDbKVSyncTime();
                           },1500)
                         })
                       })
