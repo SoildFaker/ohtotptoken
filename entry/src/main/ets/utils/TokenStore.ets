@@ -71,7 +71,7 @@ export class TokenStore {
     await this.kvMgr.setValue<TokenConfig>(`token_${token.TokenUUID}`, token);
   }
 
-  private async saveTokens(token1: TokenConfig, token2: TokenConfig): Promise<void> {
+  private async saveTokenPair(token1: TokenConfig, token2: TokenConfig): Promise<void> {
     await this.kvMgr.setValue<TokenConfig>(`token_${token1.TokenUUID}`, token1);
     await this.kvMgr.setValue<TokenConfig>(`token_${token2.TokenUUID}`, token2);
   }
@@ -84,33 +84,34 @@ export class TokenStore {
         const token_swap = this.token_array[index - 1];
         this.token_array[index].RankScore = token_swap.RankScore;
         this.token_array[index - 1].RankScore = score;
-        this.saveTokens(token, token_swap);
+        this.saveTokenPair(token, token_swap);
       }
     } else {
       if (index < this.token_array.length - 1) {
         const token_swap = this.token_array[index + 1];
         this.token_array[index].RankScore = token_swap.RankScore;
         this.token_array[index + 1].RankScore = score;
-        this.saveTokens(token, token_swap);
+        this.saveTokenPair(token, token_swap);
       }
     }
   }
 
   public async updateToken(token: TokenConfig): Promise<void> {
-    await this.saveToken(token);
-    if (!this.token_uuids.includes(token.TokenUUID)) {
-      this.token_uuids.push(token.TokenUUID);
-      this.token_array.push(token);
-      await this.kvMgr.setStringArray('token_uuids', this.token_uuids);
+    let token_new = token;
+    if (!this.token_uuids.includes(token_new.TokenUUID)) {
+      token_new.RankScore = this.token_array[this.token_array.length - 1].RankScore + 1;
+      this.token_uuids.push(token_new.TokenUUID);
+      this.token_array.push(token_new);
+      await this.kvMgr.setTokenUUID(token_new.TokenUUID);
     } else {
-      this.token_array[this.token_uuids.findIndex(uuid => uuid === token.TokenUUID)] = token;
+      this.token_array[this.token_uuids.findIndex(uuid => uuid === token_new.TokenUUID)] = token_new;
     }
+    await this.saveToken(token_new);
     this.emitTokenChanged();
   }
 
   public async deleteToken(token_uuid: string): Promise<void> {
-    this.token_uuids = this.token_uuids.filter(uuid => uuid !== token_uuid);
-    await this.kvMgr.setStringArray('token_uuids', this.token_uuids);
+    await this.kvMgr.delTokenUUID(token_uuid);
     this.token_array = this.token_array.filter(token => token.TokenUUID !== token_uuid);
     this.kvMgr.deleteValue(token_uuid);
     this.emitTokenChanged();

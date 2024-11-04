@@ -111,6 +111,17 @@ export class KvManager {
     }
     return null;
   }
+
+  async setTokenUUID(uuid: string): Promise<void> {
+    const prefixKey = "$.SA_token_uuids_" + uuid;
+    this.setString(prefixKey, '1');
+  }
+
+  async delTokenUUID(uuid: string): Promise<void> {
+    const prefixKey = "$.SA_token_uuids_" + uuid;
+    this.deleteValue(prefixKey);
+  }
+
   //使用getEntries模拟一个可以兼容的数组 这样可以规避多设备覆盖的问题
   async setStringArray(key: string, value:string[]): Promise<void> {
     if (this._kvStore) {

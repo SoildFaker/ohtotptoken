@@ -84,7 +84,12 @@ export struct TokenItem {
           .maxLines(1)
           .fontColor($r('app.color.token_number'))
           .fontSize(30)
-          .onClick(() => copyText(this.TokenNumber))
+          .gesture(
+            TapGesture({ count: 2 })
+              .onAction(() => {
+                copyText(this.TokenNumber);
+              })
+          )
         if (this.Config.TokenType == otpType.HOTP)  {
           Text(this.TokenCounter)
             .textAlign(TextAlign.End)
@@ -143,5 +148,5 @@ function copyText(text: string) {
   const pasteboardData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, text);
   const systemPasteboard = pasteboard.getSystemPasteboard();
   systemPasteboard.setData(pasteboardData); // 将数据放入剪切板
-  promptAction.showToast({ message: 'Token copied:'+text });
+  promptAction.showToast({ message: 'Token copied: ' + text });
 }
