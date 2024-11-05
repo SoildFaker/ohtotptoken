@@ -243,6 +243,10 @@
     {
       "name": "data_dev_info",
       "value": "设备信息"
+    },
+    {
+      "name": "app_ua_add_token",
+      "value": "添加密钥"
     }
   ]
 }

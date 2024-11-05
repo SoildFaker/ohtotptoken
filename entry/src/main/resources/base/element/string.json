@@ -243,6 +243,11 @@
     {
       "name": "data_dev_info",
       "value": "Device Info."
+    },
+    {
+      "name": "app_ua_add_token",
+      "value": "Add Token"
     }
+
   ]
 }

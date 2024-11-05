@@ -480,7 +480,7 @@ export struct SettingPage {
                 }
               })
               ItemDescription({ description: $r('app.string.data_rdb_cloud_sync_des') })
-              Divider().vertical(false).height(2)
+              Divider().vertical(false).height(2).accessibilityLevel("no")
               SubItemButton({
                 symbol: $r('sys.symbol.arrow_counterclockwise_clock'),
                 text: $r('app.string.data_rdb_sync_details')
@@ -517,7 +517,7 @@ export struct SettingPage {
               Text("E-mail: enbinli@outlook.com\nContributors: @Soildfaker, @eveloki, @lsxuan12138")
                 .fontSize(10)
                 .fontColor($r('app.color.str_gray'))
-              Divider().vertical(false).height(2)
+              Divider().vertical(false).height(2).accessibilityLevel("no")
               Text(this.appName)
                 .fontSize(10)
                 .fontColor($r('app.color.str_gray'))

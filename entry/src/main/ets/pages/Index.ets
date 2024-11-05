@@ -197,6 +197,7 @@ struct Index {
           })
           this.dialog_totp_config.open()
         })
+        .accessibilityText($r('app.string.tab_token_add_key'))
       MenuItem({ content: $r('app.string.tab_token_add_forti_key') })
         .onClick(() => {
           this.dialog_forti_config = new CustomDialogController({
@@ -206,6 +207,7 @@ struct Index {
           })
           this.dialog_forti_config.open()
         })
+        .accessibilityText($r('app.string.tab_token_add_forti_key'))
       MenuItem({ content: $r('app.string.tab_token_add_stream_key') })
         .onClick(() => {
           this.dialog_steam_config = new CustomDialogController({
@@ -215,6 +217,7 @@ struct Index {
           })
           this.dialog_steam_config.open()
         })
+        .accessibilityText($r('app.string.tab_token_add_stream_key'))
     }
   }
 
@@ -427,6 +430,7 @@ struct Index {
                 .onClick(() => {
                   this.btn_token_add_clicked += 1
                 })
+                .accessibilityText($r('app.string.app_ua_add_token'))
               }
 
             }
