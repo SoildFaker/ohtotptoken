@@ -94,15 +94,15 @@ export class KvManager {
     return null;
   }
   //使用getEntries模拟一个可以兼容的数组 这样可以规避多设备覆盖的问题
-  async getStringArray(key: string): Promise<string[]| null> {
+  async getStringArray(key: string): Promise<string[] | null> {
     if (this._kvStore) {
       try {
-        let prefixKey="$.SA_"+key+"_";
-        let liststr:string[] = [];
-        let entries= await this._kvStore.getEntries(prefixKey);
-        entries.forEach((item)=>{
-          liststr.push(item.key.replace(prefixKey,''))
-        })
+        let prefixKey = "$.SA_" + key + "_";
+        let liststr: string[] = [];
+        let entries = await this._kvStore.getEntries(prefixKey);
+        entries.forEach((item) => {
+          liststr.push(item.key.replace(prefixKey, ''));
+        });
         return liststr;
       } catch (e) {
         let error = e as BusinessError;
@@ -111,14 +111,25 @@ export class KvManager {
     }
     return null;
   }
+
+  async setTokenUUID(uuid: string): Promise<void> {
+    const prefixKey = "$.SA_token_uuids_" + uuid;
+    this.setString(prefixKey, '1');
+  }
+
+  async delTokenUUID(uuid: string): Promise<void> {
+    const prefixKey = "$.SA_token_uuids_" + uuid;
+    this.deleteValue(prefixKey);
+  }
+
   //使用getEntries模拟一个可以兼容的数组 这样可以规避多设备覆盖的问题
   async setStringArray(key: string, value:string[]): Promise<void> {
     if (this._kvStore) {
-      let prefixKey="$.SA_"+key+"_";
+      let prefixKey = "$.SA_" + key + "_";
       let liststr:distributedKVStore.Entry[] = [];
-      value.forEach((item)=>{
+      value.forEach((item) => {
         let entry: distributedKVStore.Entry = {
-          key: prefixKey+item,
+          key: prefixKey + item,
           value: {
             type: distributedKVStore.ValueType.STRING,
             value: '1'

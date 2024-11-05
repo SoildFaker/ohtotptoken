@@ -2,7 +2,8 @@ import { systemDateTime } from '@kit.BasicServicesKit';
 import { otpType, TokenConfig } from '../utils/TokenConfig';
 import { generateOTP } from '../utils/TokenUtils';
 import { TokenIcon } from './TokenIcon';
-import { router } from '@kit.ArkUI';
+import { pasteboard } from '@kit.BasicServicesKit';
+import { promptAction } from '@kit.ArkUI';
 
 @Preview
 @ComponentV2
@@ -83,6 +84,12 @@ export struct TokenItem {
           .maxLines(1)
           .fontColor($r('app.color.token_number'))
           .fontSize(30)
+          .gesture(
+            TapGesture({ count: 2 })
+              .onAction(() => {
+                copyText(this.TokenNumber);
+              })
+          )
         if (this.Config.TokenType == otpType.HOTP)  {
           Text(this.TokenCounter)
             .textAlign(TextAlign.End)
@@ -136,4 +143,10 @@ export struct TokenItem {
       //router.pushUrl({ url: 'pages/ShowCodePage' });
     })
   }
+}
+function copyText(text: string) {
+  const pasteboardData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, text);
+  const systemPasteboard = pasteboard.getSystemPasteboard();
+  systemPasteboard.setData(pasteboardData); // 将数据放入剪切板
+  promptAction.showToast({ message: 'Token copied: ' + text });
 }

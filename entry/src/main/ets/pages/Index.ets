@@ -129,17 +129,20 @@ struct Index {
   }
 
   async updateTokenConfig(conf: TokenConfig): Promise<void> {
-    tkStore.updateToken(conf);
+    await tkStore.updateToken(conf);
     promptAction.showToast({message: `token ${conf.TokenIssuer}:${conf.TokenName} updated.`})
   }
 
-  updateTokenConfigs(tokens: Array<TokenConfig>): void {
-    tokens.forEach(token => {
-      if (token.TokenUUID === undefined || token.TokenUUID === null) {
-        token.TokenUUID = util.generateRandomUUID();
+  async updateTokenConfigs(tokens: Array<TokenConfig>): Promise<void> {
+    for (let i = 0; i < tokens.length; i++) {
+      if (tokens[i].TokenUUID === undefined) {
+        tokens[i].TokenUUID = util.generateRandomUUID();
       }
-      this.updateTokenConfig(token);
-    });
+      if (tokens[i].RankScore === undefined) {
+        tokens[i].RankScore = i;
+      }
+      await this.updateTokenConfig(tokens[i]);
+    }
     promptAction.showToast({message: `${tokens.length} token(s) updated.`})
   }
 
@@ -233,7 +236,7 @@ struct Index {
   }
 
   @Builder
-  TokenItemStart(conf: TokenConfig) {
+  TokenItemStart(conf: TokenConfig, index: number) {
     Row({ space: 10 }) {
       Button({ type: ButtonType.Circle }) {
         Text() {
@@ -252,6 +255,36 @@ struct Index {
           })
         });
         this.dialog_qrcode.open();
+      })
+      Button({ type: ButtonType.Circle }) {
+        Text() {
+          SymbolSpan($r('sys.symbol.chevron_up'))
+            .fontSize(30)
+            .fontWeight(FontWeight.Medium)
+            .fontColor([Color.White])
+        }
+      }
+      .backgroundColor(Color.Green)
+      .padding(10)
+      .onClick(() => {
+        tkStore.rearrangeToken(index, true).then(() => {
+          tkStore.sortTokens();
+        });
+      })
+      Button({ type: ButtonType.Circle }) {
+        Text() {
+          SymbolSpan($r('sys.symbol.chevron_down'))
+            .fontSize(30)
+            .fontWeight(FontWeight.Medium)
+            .fontColor([Color.White])
+        }
+      }
+      .backgroundColor(Color.Green)
+      .padding(10)
+      .onClick(() => {
+        tkStore.rearrangeToken(index, false).then(() => {
+          tkStore.sortTokens();
+        });
       })
       .margin({ right: 10 })
     }
@@ -392,7 +425,7 @@ struct Index {
                       .padding({ left: 10, right: 10 })
                       .swipeAction({
                         start: {
-                          builder: () => { this.TokenItemStart(token) }
+                          builder: () => { this.TokenItemStart(token, index) }
                         },
                         end: {
                           builder: () => { this.TokenItemEnd(token) },
@@ -443,8 +476,9 @@ struct Index {
                 arrConf: this.all_tokens,
                 appTopAvoidHeight: this.appTopAvoidHeight,
                 appBottomAvoidHeight: this.appBottomAvoidHeight,
-                backupReload: (conf) => {
-                  this.updateTokenConfigs(conf);
+                backupReload: async (conf) => {
+                  await this.updateTokenConfigs(conf);
+                  tkStore.sortTokens();
                 },
               })
                 .height('100%')
