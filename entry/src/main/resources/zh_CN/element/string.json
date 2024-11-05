@@ -231,6 +231,18 @@
     {
       "name": "data_rdb_sync_details",
       "value": "同步详情"
+    },
+    {
+      "name": "data_kv_sync_time",
+      "value": "更新时间"
+    },
+    {
+      "name": "data_sync_manual",
+      "value": "手动同步"
+    },
+    {
+      "name": "data_dev_info",
+      "value": "设备信息"
     }
   ]
 }
