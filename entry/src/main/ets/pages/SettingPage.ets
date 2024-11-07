@@ -22,6 +22,7 @@ import { SubItemButton } from '../components/SubItemButton';
 import { SettingItem } from '../components/SettingItem';
 import { userAuth } from '@kit.UserAuthenticationKit';
 import { PermissionManager } from '../utils/PermissionManager';
+import { EncryptionPassWordDialog } from '../dialogs/EncryptionPassWordDialog';
 import { faceDetector } from '@kit.CoreVisionKit';
 
 class backup_file {
@@ -30,61 +31,6 @@ class backup_file {
   configs!: Array<TokenConfig>;
 }
 
-// region 加密导出输入密码弹框
-@Preview
-@CustomDialog
-@Component
-struct EncryptionPassWordDialog {
-  private textValue: string = '';
-  private inputValue: string = '';
-  controller?: CustomDialogController;
-  cancel: () => void = () => {
-  };
-  confirm: (text: string) => void = (text: string) => {
-  };
-
-  build() {
-    Column({ space: 10 }) {
-      Text($r('app.string.dialog_backup_password')).fontSize(20).margin({ top: 10, bottom: 10 })
-      TextInput({ placeholder: $r('app.string.dialog_backup_password_placeholder'), text: this.textValue })
-        .height(60)
-        .width('90%')
-        .maxLength(16)
-        .type(InputType.Password)
-        .maxLength(32)
-        .showPasswordIcon(true)
-        .onChange((value: string) => {
-          this.textValue = value
-        })
-      Flex({ justifyContent: FlexAlign.SpaceAround }) {
-        Button($r('app.string.setting_backup_cancel'))
-          .onClick(() => {
-            if (this.controller != undefined) {
-              this.cancel()
-              this.controller.close()
-            }
-          })
-          .fontColor($r('app.color.item_fg'))
-          .backgroundColor(Color.Transparent)
-          .width('100%')
-        Button($r('app.string.setting_backup_confirm'))
-          .onClick(() => {
-            if (this.controller != undefined) {
-              this.inputValue = this.textValue
-              this.confirm(this.inputValue)
-              this.controller.close()
-            }
-          })
-          .fontColor($r('app.color.item_fg'))
-          .backgroundColor(Color.Transparent)
-          .width('100%')
-      }.margin({ bottom: 10 })
-    }
-    .borderRadius(10)
-  }
-}
-
-// endregion
 @Preview
 @ComponentV2
 export struct SettingPage {
@@ -533,13 +479,6 @@ export struct SettingPage {
                 .fontSize(10)
                 .fontColor($r('app.color.str_gray'))
                 .padding({ left: 10 })
-              Divider().vertical(false).height(2).accessibilityLevel("no")
-              Text(this.appName)
-                .fontSize(10)
-                .fontColor($r('app.color.str_gray'))
-              Text(this.versionName)
-                .fontSize(10)
-                .fontColor($r('app.color.str_gray'))
             }
           }
           .padding({ left: 10, right: 10 })

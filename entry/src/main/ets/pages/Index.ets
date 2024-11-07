@@ -18,6 +18,9 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 import CommonEventManager from '@ohos.commonEventManager';
 import { TokenStore } from '../utils/TokenStore';
 import { PermissionManager } from '../utils/PermissionManager';
+import { DropFilesDialog } from '../dialogs/DropFilesDialog';
+import { unifiedDataChannel, uniformTypeDescriptor } from '@kit.ArkData';
+import { faceDetector } from '@kit.CoreVisionKit';
 
 const TAG = 'PrivacySubscribe';
 
@@ -42,6 +45,7 @@ struct Index {
   private dialog_qrcode?: CustomDialogController;
   private alert_dialog_str: string =
     getContext(this).resourceManager.getStringSync($r('app.string.alert_remove_confirm_msg'))
+  private DropFilesDialogIsOpen:boolean=false;
 
   private readonly eventId = 'usual.event.PRIVACY_STATE_CHANGED';
   // 订阅者信息, 用于保存创建成功的订阅者对象，后续使用其完成订阅及退订的动作
@@ -50,6 +54,40 @@ struct Index {
   private subscribeInfo: CommonEventManager.CommonEventSubscribeInfo = {
     events: [this.eventId]
   };
+  //拖拽文件弹框
+  private DropFilesDialogController: CustomDialogController | null = new CustomDialogController({
+    builder: DropFilesDialog({
+    }),
+    cancel: () => {
+    },
+    autoCancel: true,
+    openAnimation:({
+      delay: 0,
+      duration: 200, // 动画时长
+      curve: Curve.EaseInOut, // 动画曲线
+    }),
+    closeAnimation:({
+      delay: 0,
+      duration: 200, // 动画时长
+      curve: Curve.EaseInOut, // 动画曲线
+    }),
+    onWillDismiss: (dismissDialogAction: DismissDialogAction) => {
+      console.info("reason=" + JSON.stringify(dismissDialogAction.reason))
+      console.log("dialog onWillDismiss")
+      this.DropFilesDialogIsOpen=false;
+      if (dismissDialogAction.reason == DismissReason.PRESS_BACK) {
+        dismissDialogAction.dismiss()
+      }
+      if (dismissDialogAction.reason == DismissReason.TOUCH_OUTSIDE) {
+        dismissDialogAction.dismiss()
+      }
+    },
+    alignment: DialogAlignment.Bottom,
+    offset: { dx: 0, dy: -20 },
+    gridCount: 4,
+    customStyle: false,
+    cornerRadius: 10,
+  })
 
   //build()函数之前执行 如果启用了隐私防截屏 在这里设置为隐私模式
   aboutToAppear(): void {
@@ -504,5 +542,23 @@ struct Index {
     }
     .width('100%')
     .height('100%')
+    .allowDrop([uniformTypeDescriptor.UniformDataType.FILE])
+    .onDrop((event?: DragEvent, extraParams?: string) => {
+    })
+    .onDragEnter((event) => {
+      promptAction.showToast({message: `onDragEnter`})
+      //检测到开始拖拽
+      if (!this.DropFilesDialogIsOpen) {
+        this.DropFilesDialogIsOpen=true;
+        this.DropFilesDialogController?.open();
+      }
+    })
+    .onDragLeave((event) => {
+      promptAction.showToast({message: `onDragLeave`})
+      //检测到离开拖拽区域
+      this.DropFilesDialogIsOpen=false;
+      this.DropFilesDialogController?.close();
+    })
+
   }
 }
