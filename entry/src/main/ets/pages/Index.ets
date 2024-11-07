@@ -546,7 +546,7 @@ struct Index {
     .onDrop((event?: DragEvent, extraParams?: string) => {
     })
     .onDragEnter((event) => {
-      promptAction.showToast({message: `onDragEnter`})
+      //promptAction.showToast({message: `onDragEnter`})
       //检测到开始拖拽
       if (!this.DropFilesDialogIsOpen) {
         this.DropFilesDialogIsOpen=true;
@@ -554,7 +554,7 @@ struct Index {
       }
     })
     .onDragLeave((event) => {
-      promptAction.showToast({message: `onDragLeave`})
+      //promptAction.showToast({message: `onDragLeave`})
       //检测到离开拖拽区域
       this.DropFilesDialogIsOpen=false;
       this.DropFilesDialogController?.close();
