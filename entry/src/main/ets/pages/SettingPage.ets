@@ -66,9 +66,9 @@ export struct SettingPage {
     //订阅权限变更
     this.appCtx.eventHub.on('DATASYNCPermissionsUpdate', this.updateDATASYNCPermissions);
     this.str_about_app =
-      "Github: SoildFaker/ohtotptoken\n" +
+      "Github: SolidFaker/ohtotptoken\n" +
       "E-mail: enbinli@outlook.com\n" +
-      "Contributors: @Soildfaker, @eveloki, @lsxuan12138\n" +
+      "Contributors: @Solidfaker, @eveloki, @lsxuan12138\n" +
       "Bundle Name: " + bundleInfo?.name + "\n" +
       "Version: " + bundleInfo?.versionName;
     this.str_opensource_leg =
@@ -486,6 +486,9 @@ export struct SettingPage {
 
           ListItem() {
             Row(){
+              Hyperlink('https://github.com/SolidFaker/ohtotptoken/issues', $r('app.string.app_issue_feedback'))
+                .height(10)
+                .padding({ left: 10 })
               Hyperlink('https://beian.miit.gov.cn/', '粤ICP备2020075515号-2A')
                 .height(10)
                 .padding({ left: 10 })
