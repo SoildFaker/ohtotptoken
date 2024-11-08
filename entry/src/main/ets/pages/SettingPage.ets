@@ -16,7 +16,7 @@ import { cryptoFramework } from '@kit.CryptoArchitectureKit';
 import { buffer, util } from '@kit.ArkTS';
 import { SubItemToggle } from '../components/SubItemToggle'
 import { ItemDescription } from '../components/ItemDescription'
-import { router } from '@kit.ArkUI';
+import { Content, router } from '@kit.ArkUI';
 import { AppPreference } from '../utils/AppPreference';
 import { SubItemButton } from '../components/SubItemButton';
 import { SettingItem } from '../components/SettingItem';
@@ -24,6 +24,7 @@ import { userAuth } from '@kit.UserAuthenticationKit';
 import { PermissionManager } from '../utils/PermissionManager';
 import { EncryptionPassWordDialog } from '../dialogs/EncryptionPassWordDialog';
 import { faceDetector } from '@kit.CoreVisionKit';
+import { unifiedDataChannel, uniformTypeDescriptor } from '@kit.ArkData';
 
 class backup_file {
   magic!: number;
@@ -478,6 +479,15 @@ export struct SettingPage {
               Text(this.str_opensource_leg)
                 .fontSize(10)
                 .fontColor($r('app.color.str_gray'))
+                .padding({ left: 10 })
+            }
+          }
+          .padding({ left: 10, right: 10 })
+
+          ListItem() {
+            SettingItem({ title: $r('app.string.app_filing_information') }) {
+              Hyperlink('https://beian.miit.gov.cn/', '粤ICP备2020075515号-2A')
+                .height(10)
                 .padding({ left: 10 })
             }
           }

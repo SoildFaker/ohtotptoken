@@ -1,4 +1,5 @@
 import { unifiedDataChannel, uniformTypeDescriptor } from '@kit.ArkData';
+import { bundleManager,common } from '@kit.AbilityKit';
 //文件拖拽
 @Preview
 @CustomDialog
@@ -7,6 +8,7 @@ export struct DropFilesDialog {
   @State triggerValueReplace: number = 0;
   @State replaceFlag:boolean =false;
   controller?: CustomDialogController;
+  private appCtx = AppStorage.get<common.UIAbilityContext>('appContext') as common.UIAbilityContext;
   build() {
     Column({ space: 10}) {
       Row()
@@ -32,7 +34,11 @@ export struct DropFilesDialog {
         .allowDrop([uniformTypeDescriptor.UniformDataType.FILE])
         .onDrop((event?: DragEvent, extraParams?: string) => {
           console.log("enter onDrop")
-
+          if (event!=null) {
+            let records: Array<unifiedDataChannel.UnifiedRecord> = event.getData().getRecords();
+            let plainfile: unifiedDataChannel.File = records[0] as unifiedDataChannel.File;
+            this.appCtx.eventHub.emit('onFileDrop',plainfile.uri);
+          }
         })
         .onDragEnter((event) => {
           this.replaceFlag=true;
@@ -41,6 +47,8 @@ export struct DropFilesDialog {
         .onDragLeave((event) => {
           this.replaceFlag=false;
           this.triggerValueReplace = this.triggerValueReplace + 1;
+        })
+        .onDragEnd((event: DragEvent) =>{
         })
       }
       .width('90%')

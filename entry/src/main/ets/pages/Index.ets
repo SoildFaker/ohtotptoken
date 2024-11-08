@@ -20,12 +20,26 @@ import { TokenStore } from '../utils/TokenStore';
 import { PermissionManager } from '../utils/PermissionManager';
 import { DropFilesDialog } from '../dialogs/DropFilesDialog';
 import { unifiedDataChannel, uniformTypeDescriptor } from '@kit.ArkData';
+import { EncryptionPassWordDialog } from '../dialogs/EncryptionPassWordDialog';
 import { faceDetector } from '@kit.CoreVisionKit';
+import MediaFileUri from '../utils/MediaFileUri';
+import { cryptoFramework } from '@kit.CryptoArchitectureKit';
+import {
+  base32Decode,
+  base32Encode,
+  stringToIntArray,
+  intArrayToString,
+  generateFileNameWithDate
+} from '../utils/TokenUtils'
 
 const TAG = 'PrivacySubscribe';
 
 let tkStore = TokenStore.getInstance();
-
+class backup_file {
+  magic!: number;
+  version!: number;
+  configs!: Array<TokenConfig>;
+}
 @Entry
 @ComponentV2
 struct Index {
@@ -88,6 +102,8 @@ struct Index {
     customStyle: false,
     cornerRadius: 10,
   })
+
+  private backup_select_uri: string = '';
 
   //build()函数之前执行 如果启用了隐私防截屏 在这里设置为隐私模式
   aboutToAppear(): void {
@@ -160,7 +176,121 @@ struct Index {
         AppPreference.setRdbCloudSyncEnable(false);
       }
     })
+
+    this.appCtx.eventHub.on('onFileDrop',( plainfile:string)=>{
+
+      this.backup_select_uri = plainfile;
+      if (this.backup_select_uri.endsWith('.bak')) {
+        //后缀bak为加密包 唤醒加密导入弹窗
+        this.dialogController?.open();
+      } else if (this.backup_select_uri.endsWith('.json')) {
+        this.readContentFromSelectedFile(this.backup_select_uri);
+      }
+      setTimeout(()=>{
+        this.DropFilesDialogIsOpen=false;
+        this.DropFilesDialogController?.close();
+        },250)
+    });
   }
+
+  //region 导入
+  private backup_magic: number = 0x55aaeebb;
+  private mediaFileUri: MediaFileUri = new MediaFileUri();
+  private dialogController: CustomDialogController | null = new CustomDialogController({
+    builder: EncryptionPassWordDialog({
+      cancel: () => {
+      },
+      confirm: (password: string) => {
+        this.readContentFromSelectedFileEncryption(this.backup_select_uri, password);
+      },
+      textValue: "",
+      inputValue: ""
+    }),
+    cancel: () => {
+    },
+    autoCancel: true,
+    onWillDismiss: (dismissDialogAction: DismissDialogAction) => {
+      console.info("reason=" + JSON.stringify(dismissDialogAction.reason))
+      console.log("dialog onWillDismiss")
+      if (dismissDialogAction.reason == DismissReason.PRESS_BACK) {
+        dismissDialogAction.dismiss()
+      }
+      if (dismissDialogAction.reason == DismissReason.TOUCH_OUTSIDE) {
+        dismissDialogAction.dismiss()
+      }
+    },
+    alignment: DialogAlignment.Bottom,
+    offset: { dx: 0, dy: -20 },
+    gridCount: 4,
+    customStyle: false,
+    cornerRadius: 10,
+  })
+  // 加密导入
+  async readContentFromSelectedFileEncryption(myUri: string, password: string): Promise<void> {
+    let backup_string = this.mediaFileUri.readFileContent(myUri);
+    try {
+      this.decryptFile(backup_string, password).then((backup_string) => {
+        let backup: backup_file = JSON.parse(backup_string);
+        if (backup.magic == this.backup_magic) {
+          this.updateTokenConfigs(backup.configs).then(()=>{
+            tkStore.sortTokens();
+          });
+        } else {
+          promptAction.showToast({ message: 'Error: invalid backup file!' })
+        }
+      })
+    } catch (err) {
+      promptAction.showToast({ message: err.message })
+    }
+
+  }
+  async decryptFile(file_enc: string, user_key: string): Promise<string> {
+    let aes_decoder = cryptoFramework.createCipher('AES128|CBC|PKCS7');
+    let aes_iv: cryptoFramework.IvParamsSpec = {
+      algName: "IvParamsSpec",
+      iv: { data: stringToIntArray('ohtotptokenaesiv') }
+    };
+    let spec: cryptoFramework.PBKDF2Spec = {
+      algName: 'PBKDF2',
+      password: user_key,
+      salt: new Uint8Array(16),
+      iterations: 10000,
+      keySize: 16
+    };
+    let kdf = cryptoFramework.createKdf('PBKDF2|SHA256');
+    let symKeyBlob = kdf.generateSecretSync(spec);
+    let aesGenerator = cryptoFramework.createSymKeyGenerator('AES128');
+    let aes_key = aesGenerator.convertKeySync(symKeyBlob);
+    await aes_decoder.init(cryptoFramework.CryptoMode.DECRYPT_MODE, aes_key, aes_iv).catch((reason: string) => {
+      promptAction.showToast({ message: reason });
+    });
+    return new Promise<string>((resolve) => {
+      let file_buf = base32Decode(file_enc);
+      aes_decoder.doFinal({ data: file_buf }).then((decryptData) => {
+        let decoder = new util.TextDecoder()
+        resolve(decoder.decodeToString(decryptData.data));
+      }).catch((reason: BusinessError) => {
+        promptAction.showToast({ message: reason.message });
+      });
+    });
+  }
+  async readContentFromSelectedFile(myUri: string): Promise<void> {
+    let backup_string = this.mediaFileUri.readFileContent(myUri);
+    try {
+      let backup: backup_file = JSON.parse(intArrayToString(base32Decode(backup_string).buffer as ArrayBuffer));
+      if (backup.magic == this.backup_magic) {
+        this.updateTokenConfigs(backup.configs).then(()=>{
+          tkStore.sortTokens();
+        });
+      } else {
+        promptAction.showToast({ message: 'Error: invalid backup file!' })
+      }
+    } catch (err) {
+      promptAction.showToast({ message: err.message })
+    }
+
+  }
+  //endregion
 
   async onTokenChanged(): Promise<void> {
     this.all_tokens = await tkStore.getTokens();
@@ -544,6 +674,8 @@ struct Index {
     .height('100%')
     .allowDrop([uniformTypeDescriptor.UniformDataType.FILE])
     .onDrop((event?: DragEvent, extraParams?: string) => {
+      this.DropFilesDialogIsOpen=false;
+      this.DropFilesDialogController?.close();
     })
     .onDragEnter((event) => {
       //promptAction.showToast({message: `onDragEnter`})
@@ -558,6 +690,9 @@ struct Index {
       //检测到离开拖拽区域
       this.DropFilesDialogIsOpen=false;
       this.DropFilesDialogController?.close();
+    })
+    .onDragEnd((event)=>{
+
     })
 
   }

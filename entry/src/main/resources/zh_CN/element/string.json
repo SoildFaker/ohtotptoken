@@ -251,6 +251,10 @@
     {
       "name": "drop_file_import_data",
       "value": "拖入文件导入数据"
+    },
+    {
+      "name": "app_filing_information",
+      "value": "备案信息"
     }
   ]
 }
