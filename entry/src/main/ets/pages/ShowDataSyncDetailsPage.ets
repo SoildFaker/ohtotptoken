@@ -8,6 +8,7 @@ import { AppPreference } from '../utils/AppPreference';
 import { SubItemButton } from '../components/SubItemButton';
 import { TokenStore } from '../utils/TokenStore';
 
+@Preview
 @Entry
 @ComponentV2
 struct ShowDataSyncDetailsPage {
@@ -17,7 +18,7 @@ struct ShowDataSyncDetailsPage {
   aboutToAppear(): void {
     this.AppDbKVSyncTime = AppPreference.getAppDbKVSyncTime();
     if (this.AppDbKVSyncTime == '' || this.AppDbKVSyncTime == null) {
-      this.AppDbKVSyncTime = '??';
+      this.AppDbKVSyncTime = 'invalid';
     }
   }
 
@@ -46,6 +47,7 @@ struct ShowDataSyncDetailsPage {
             .justifyContent(FlexAlign.Center)
           } else {
             List({ space: 10 }) {
+              ListItem()
               ListItem() {
                 SettingItem({ title: $r('app.string.data_dev_info') }) {
                   Row() {
@@ -111,6 +113,7 @@ struct ShowDataSyncDetailsPage {
             .scrollBar(BarState.Off)
             .backgroundColor($r('app.color.window_background'))
             .width('100%')
+            .height('100%')
           }
         }
       }

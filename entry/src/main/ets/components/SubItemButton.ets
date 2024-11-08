@@ -26,6 +26,6 @@ export struct SubItemButton {
     .height(40)
     .width('100%')
     .backgroundColor($r('app.color.item_bg'))
-    .clickEffect({level:ClickEffectLevel.LIGHT, scale: 0.5})
+    .clickEffect({level:ClickEffectLevel.LIGHT, scale: 0.95})
   }
 }

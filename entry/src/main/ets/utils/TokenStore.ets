@@ -99,14 +99,11 @@ export class TokenStore {
   public async updateToken(token: TokenConfig): Promise<void> {
     let token_new = token;
     if (!this.token_uuids.includes(token_new.TokenUUID)) {
-      if (this.token_array.length==0)
-      {
+      if (this.token_array.length == 0) {
         token_new.RankScore = 1;//如果是第一次新增 就将rank设置为1
-      }
-      else
-      {
+      } else {
         //否则设置成上一个新增的RankScore+1 但是这样有问题 改成寻找RankScore最大的+1
-        let maxRankItem=this.token_array.reduce((max, current) => (max.RankScore > current.RankScore ? max : current))
+        let maxRankItem = this.token_array.reduce((max, current) => (max.RankScore > current.RankScore ? max : current))
         token_new.RankScore = maxRankItem.RankScore + 1;
       }
       this.token_uuids.push(token_new.TokenUUID);

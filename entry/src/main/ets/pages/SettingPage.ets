@@ -485,11 +485,13 @@ export struct SettingPage {
           .padding({ left: 10, right: 10 })
 
           ListItem() {
-            SettingItem({ title: $r('app.string.app_filing_information') }) {
+            Row(){
               Hyperlink('https://beian.miit.gov.cn/', '粤ICP备2020075515号-2A')
                 .height(10)
                 .padding({ left: 10 })
             }
+            .justifyContent(FlexAlign.Center)
+            .width('100%')
           }
           .padding({ left: 10, right: 10 })
 
