@@ -16,13 +16,15 @@ import { cryptoFramework } from '@kit.CryptoArchitectureKit';
 import { buffer, util } from '@kit.ArkTS';
 import { SubItemToggle } from '../components/SubItemToggle'
 import { ItemDescription } from '../components/ItemDescription'
-import { router } from '@kit.ArkUI';
+import { Content, router } from '@kit.ArkUI';
 import { AppPreference } from '../utils/AppPreference';
 import { SubItemButton } from '../components/SubItemButton';
 import { SettingItem } from '../components/SettingItem';
 import { userAuth } from '@kit.UserAuthenticationKit';
 import { PermissionManager } from '../utils/PermissionManager';
+import { EncryptionPassWordDialog } from '../dialogs/EncryptionPassWordDialog';
 import { faceDetector } from '@kit.CoreVisionKit';
+import { unifiedDataChannel, uniformTypeDescriptor } from '@kit.ArkData';
 
 class backup_file {
   magic!: number;
@@ -30,61 +32,6 @@ class backup_file {
   configs!: Array<TokenConfig>;
 }
 
-// region 加密导出输入密码弹框
-@Preview
-@CustomDialog
-@Component
-struct EncryptionPassWordDialog {
-  private textValue: string = '';
-  private inputValue: string = '';
-  controller?: CustomDialogController;
-  cancel: () => void = () => {
-  };
-  confirm: (text: string) => void = (text: string) => {
-  };
-
-  build() {
-    Column({ space: 10 }) {
-      Text($r('app.string.dialog_backup_password')).fontSize(20).margin({ top: 10, bottom: 10 })
-      TextInput({ placeholder: $r('app.string.dialog_backup_password_placeholder'), text: this.textValue })
-        .height(60)
-        .width('90%')
-        .maxLength(16)
-        .type(InputType.Password)
-        .maxLength(32)
-        .showPasswordIcon(true)
-        .onChange((value: string) => {
-          this.textValue = value
-        })
-      Flex({ justifyContent: FlexAlign.SpaceAround }) {
-        Button($r('app.string.setting_backup_cancel'))
-          .onClick(() => {
-            if (this.controller != undefined) {
-              this.cancel()
-              this.controller.close()
-            }
-          })
-          .fontColor($r('app.color.item_fg'))
-          .backgroundColor(Color.Transparent)
-          .width('100%')
-        Button($r('app.string.setting_backup_confirm'))
-          .onClick(() => {
-            if (this.controller != undefined) {
-              this.inputValue = this.textValue
-              this.confirm(this.inputValue)
-              this.controller.close()
-            }
-          })
-          .fontColor($r('app.color.item_fg'))
-          .backgroundColor(Color.Transparent)
-          .width('100%')
-      }.margin({ bottom: 10 })
-    }
-    .borderRadius(10)
-  }
-}
-
-// endregion
 @Preview
 @ComponentV2
 export struct SettingPage {
@@ -93,6 +40,8 @@ export struct SettingPage {
   @Require @Param appTopAvoidHeight: number = 0;
   @Event backupReload: (conf: Array<TokenConfig>) => void = () => {
   };
+  @Local versionName?: string;
+  @Local appName?: string;
   @Local RdbSyncEnable: boolean = false;
   @Local RdbCloudSyncEnable: boolean = false;
   @Local Is_loaded: boolean = false;
@@ -110,6 +59,8 @@ export struct SettingPage {
   aboutToAppear(): void {
     let bundleInfo = AppStorage.get<bundleManager.BundleInfo>("BundleInfo");
     this.versionCode = bundleInfo?.versionCode;
+    this.versionName = 'Version:' + bundleInfo?.versionName;
+    this.appName = bundleInfo?.name;
     this.RdbSyncEnable = AppPreference.getRdbSyncEnable();
     this.RdbCloudSyncEnable = AppPreference.getRdbCloudSyncEnable();
     //订阅权限变更
@@ -414,7 +365,7 @@ export struct SettingPage {
               SubItemButton({
                 symbol: $r('sys.symbol.save'),
                 text: $r('app.string.setting_backup_export')
-              })
+              })//.layoutWeight(1)
                 .onClick(() => {
                   this.backup_is_input = true;
                   this.callFilePickerSaveFile()
@@ -422,7 +373,7 @@ export struct SettingPage {
               SubItemButton({
                 symbol: $r('sys.symbol.folder'),
                 text: $r('app.string.setting_backup_import')
-              })
+              })//.layoutWeight(1)
                 .onClick(() => {
                   this.backup_is_input = false;
                   this.callFilePickerSelectFile()
@@ -528,6 +479,15 @@ export struct SettingPage {
               Text(this.str_opensource_leg)
                 .fontSize(10)
                 .fontColor($r('app.color.str_gray'))
+                .padding({ left: 10 })
+            }
+          }
+          .padding({ left: 10, right: 10 })
+
+          ListItem() {
+            SettingItem({ title: $r('app.string.app_filing_information') }) {
+              Hyperlink('https://beian.miit.gov.cn/', '粤ICP备2020075515号-2A')
+                .height(10)
                 .padding({ left: 10 })
             }
           }

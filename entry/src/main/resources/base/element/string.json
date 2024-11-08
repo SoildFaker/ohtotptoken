@@ -243,6 +243,18 @@
     {
       "name": "data_dev_info",
       "value": "Device Info."
+    },
+    {
+      "name": "app_ua_add_token",
+      "value": "Add Token"
+    },
+    {
+      "name": "drop_file_import_data",
+      "value": "Drop File This Import Data"
+    },
+    {
+      "name": "app_filing_information",
+      "value": "Filing Information"
     }
   ]
 }

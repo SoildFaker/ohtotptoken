@@ -38,6 +38,7 @@ export struct SubItemToggle {
         .onChange((isOn: boolean) => {
           this.onChange(isOn);
         })
+        .clickEffect({level:ClickEffectLevel.LIGHT, scale: 0.5})
     }
     .height(48)
     .width('100%')
