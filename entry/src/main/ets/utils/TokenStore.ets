@@ -64,6 +64,7 @@ export class TokenStore {
 
   public sortTokens(): void {
     this.token_array = this.token_array.sort((a, b) => a.RankScore - b.RankScore);
+    this.token_uuids = this.token_array.map(token => token.TokenUUID);
     this.emitTokenChanged();
   }
 
@@ -82,15 +83,21 @@ export class TokenStore {
     if (up) {
       if (index > 0) {
         const token_swap = this.token_array[index - 1];
+        const token_uuid_swap = this.token_uuids[index - 1];
         this.token_array[index].RankScore = token_swap.RankScore;
         this.token_array[index - 1].RankScore = score;
+        this.token_uuids[index - 1] = this.token_uuids[index];
+        this.token_uuids[index] = token_uuid_swap;
         this.saveTokenPair(token, token_swap);
       }
     } else {
       if (index < this.token_array.length - 1) {
         const token_swap = this.token_array[index + 1];
+        const token_uuid_swap = this.token_uuids[index + 1];
         this.token_array[index].RankScore = token_swap.RankScore;
         this.token_array[index + 1].RankScore = score;
+        this.token_uuids[index + 1] = this.token_uuids[index];
+        this.token_uuids[index] = token_uuid_swap;
         this.saveTokenPair(token, token_swap);
       }
     }
