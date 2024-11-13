@@ -259,6 +259,10 @@
     {
       "name": "app_issue_feedback",
       "value": "问题反馈"
+    },
+    {
+      "name": "app_scan_code",
+      "value": "快捷扫码"
     }
   ]
 }
