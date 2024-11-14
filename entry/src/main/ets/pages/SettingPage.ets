@@ -433,8 +433,8 @@ export struct SettingPage {
                   this.RdbCloudSyncEnable = IsOn;
                   AppPreference.setRdbCloudSyncEnable(IsOn);
                 }
-              })
-              ItemDescription({ description: $r('app.string.data_rdb_cloud_sync_des') })
+              }).visibility(Visibility.None)
+              ItemDescription({ description: $r('app.string.data_rdb_cloud_sync_des') }).visibility(Visibility.None)
               Divider().vertical(false).height(2)
               SubItemButton({
                 symbol: $r('sys.symbol.arrow_counterclockwise_clock'),

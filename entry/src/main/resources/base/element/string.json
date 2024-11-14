@@ -259,6 +259,10 @@
     {
       "name": "app_issue_feedback",
       "value": "Issue Feedback"
+    },
+    {
+      "name": "app_scan_code",
+      "value": "Scan Code"
     }
   ]
 }

@@ -6,6 +6,7 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 import { getIconPathByIssuer, HMACAlgorithm } from '../utils/TokenUtils';
 import { TokenIcon } from '../components/TokenIcon';
 
+@Entry
 @Preview
 @CustomDialog
 export struct TOTPConfigDialog {
@@ -13,6 +14,8 @@ export struct TOTPConfigDialog {
   @Prop conf_json?: string = '';
   @State conf: TokenConfig = new TokenConfig();
   @State btn_camera_clicked: number = 0;
+  //弹窗扫码值 初始化 给首页快速扫码使用
+  @State scan_code_original_Value:string='';
 
   cancel?: () => void;
   confirm: (new_conf: string) => void = () => {};
@@ -20,6 +23,9 @@ export struct TOTPConfigDialog {
   aboutToAppear(): void {
     if (this.conf_json != undefined && this.conf_json.length > 0) {
       this.conf = JSON.parse(this.conf_json!);
+    }
+    if (this.scan_code_original_Value!='') {
+      this.addNewConfigOTP(this.scan_code_original_Value);
     }
   }
 
@@ -68,6 +74,21 @@ export struct TOTPConfigDialog {
     this.conf.TokenDigits = parseInt(parameters['digits'] ?? '6');
   }
 
+  scanCode():void{
+    let options: scanBarcode.ScanOptions = {
+      scanTypes: [scanCore.ScanType.ALL],
+      enableMultiMode: true,
+      enableAlbum: true
+    };
+    scanBarcode.startScanForResult(getContext(this), options).then((result: scanBarcode.ScanResult) => {
+      this.addNewConfigOTP(result.originalValue)
+      hilog.info(0x0001, '[Scan CPSample]', `Succeeded in getting ScanResult by promise with options, result is ${JSON.stringify(result)}`);
+    }).catch((error: BusinessError) => {
+      hilog.error(0x0001, '[Scan CPSample]',
+        `Failed to get ScanResult by promise with options. Code:${error.code}, message: ${error.message}`);
+    });
+  }
+
   build() {
     Column({ space: 10 }) {
       Row() {
@@ -87,18 +108,7 @@ export struct TOTPConfigDialog {
             this.btn_camera_clicked)
           .onClick(() => {
             this.btn_camera_clicked++
-            let options: scanBarcode.ScanOptions = {
-              scanTypes: [scanCore.ScanType.ALL],
-              enableMultiMode: true,
-              enableAlbum: true
-            };
-            scanBarcode.startScanForResult(getContext(this), options).then((result: scanBarcode.ScanResult) => {
-              this.addNewConfigOTP(result.originalValue)
-              hilog.info(0x0001, '[Scan CPSample]', `Succeeded in getting ScanResult by promise with options, result is ${JSON.stringify(result)}`);
-            }).catch((error: BusinessError) => {
-              hilog.error(0x0001, '[Scan CPSample]',
-                `Failed to get ScanResult by promise with options. Code:${error.code}, message: ${error.message}`);
-            });
+            this.scanCode();
           })
       }
       .width('100%')

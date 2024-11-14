@@ -3,6 +3,7 @@ import { bundleManager,common } from '@kit.AbilityKit';
 import { TokenConfig, otpType } from '../utils/TokenConfig';
 import { TOTPConfigDialog } from '../dialogs/OTPConfigDialog';
 import { FortiConfigDialog } from '../dialogs/FortiConfigDialog';
+import { scanCore, scanBarcode } from '@kit.ScanKit';
 import { TokenItem } from '../components/TokenItem';
 import { SettingPage } from '../pages/SettingPage'
 import { HashMap, util } from '@kit.ArkTS';
@@ -359,6 +360,29 @@ struct Index {
   @Builder
   TokenAddMenu() {
     Menu() {
+      MenuItem({ content: $r('app.string.app_scan_code') })
+        .onClick(() => {
+          let options: scanBarcode.ScanOptions = {
+            scanTypes: [scanCore.ScanType.ALL],
+            enableMultiMode: true,
+            enableAlbum: true
+          };
+          scanBarcode.startScanForResult(getContext(this), options).then((result: scanBarcode.ScanResult) => {
+            this.dialog_totp_config = new CustomDialogController({
+              builder: TOTPConfigDialog({
+                scan_code_original_Value:result.originalValue,//弹窗立刻扫码赋值
+                confirm: (new_conf) => {this.updateTokenConfig(JSON.parse(new_conf))}
+              })
+            })
+            this.dialog_totp_config.open()
+            hilog.info(0x0001, '[Scan CPSample]', `Succeeded in getting ScanResult by promise with options, result is ${JSON.stringify(result)}`);
+          }).catch((error: BusinessError) => {
+            hilog.error(0x0001, '[Scan CPSample]',
+              `Failed to get ScanResult by promise with options. Code:${error.code}, message: ${error.message}`);
+          });
+
+        })
+        .accessibilityText($r('app.string.app_scan_code'))
       MenuItem({ content: $r('app.string.tab_token_add_key') })
         .onClick(() => {
           this.dialog_totp_config = new CustomDialogController({
