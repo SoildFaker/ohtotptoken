@@ -1,36 +1,19 @@
 import { TokenConfig } from '../utils/TokenConfig';
-import { picker } from '@kit.CoreFileKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { bundleManager, common } from '@kit.AbilityKit';
-import {
-  base32Decode,
-  base32Encode,
-  stringToIntArray,
-  intArrayToString,
-  generateFileNameWithDate
-} from '../utils/TokenUtils'
+import { generateFileNameWithDate } from '../utils/TokenUtils'
 import promptAction from '@ohos.promptAction'
-import Logger from '../utils/Logger';
-import MediaFileUri from '../utils/MediaFileUri';
-import { cryptoFramework } from '@kit.CryptoArchitectureKit';
-import { buffer, util } from '@kit.ArkTS';
 import { SubItemToggle } from '../components/SubItemToggle'
 import { ItemDescription } from '../components/ItemDescription'
-import { Content, router } from '@kit.ArkUI';
+import { router } from '@kit.ArkUI';
 import { AppPreference } from '../utils/AppPreference';
 import { SubItemButton } from '../components/SubItemButton';
 import { SettingItem } from '../components/SettingItem';
 import { userAuth } from '@kit.UserAuthenticationKit';
 import { PermissionManager } from '../utils/PermissionManager';
 import { EncryptionPassWordDialog } from '../dialogs/EncryptionPassWordDialog';
-import { faceDetector } from '@kit.CoreVisionKit';
-import { unifiedDataChannel, uniformTypeDescriptor } from '@kit.ArkData';
-
-class backup_file {
-  magic!: number;
-  version!: number;
-  configs!: Array<TokenConfig>;
-}
+import { restoreFromBackup, saveBackupToFile, TokenBackup } from '../utils/TokenBackup';
+import { showSaveFilePicker, showSelectFilePicker } from '../utils/FileUtils';
 
 @Preview
 @ComponentV2
@@ -47,10 +30,7 @@ export struct SettingPage {
   @Local Is_loaded: boolean = false;
   //备份时是否为导出模式
   private backup_is_input: boolean = true;
-  private backup_magic: number = 0x55aaeebb;
-  private backup_save_uri: string = '';
   private backup_select_uri: string = '';
-  private mediaFileUri: MediaFileUri = new MediaFileUri();
   private appCtx = AppStorage.get<common.UIAbilityContext>('appContext') as common.UIAbilityContext;
   private versionCode?: number;
   private str_about_app: string = '';
@@ -90,36 +70,29 @@ export struct SettingPage {
   }
 
   //region 加密导入导出
-  private dialogController: CustomDialogController | null = new CustomDialogController({
+  private password_input_dialog: CustomDialogController | null = new CustomDialogController({
     builder: EncryptionPassWordDialog({
-      cancel: () => {
-      },
+      cancel: () => {},
       confirm: (password: string) => {
         if (this.backup_is_input) { // 如果是导出 就要调用导出加密函数
-          const documentSaveOptions = new picker.DocumentSaveOptions();
-          documentSaveOptions.newFileNames = [`totp_backup_${generateFileNameWithDate()}.bak`];
-          documentSaveOptions.fileSuffixChoices = ['BAK|.bak', '.bak'];
-          let context = getContext(this) as common.Context;
-          const documentViewPicker = new picker.DocumentViewPicker(context);
-          documentViewPicker.save(documentSaveOptions).then((documentSaveResult: Array<string>) => {
-            if (documentSaveResult !== null && documentSaveResult !== undefined && documentSaveResult.length == 1) {
-              this.backup_save_uri = documentSaveResult[0];
-              Logger.info('documentViewPicker.save to file succeed and uris are:' + documentSaveResult);
-              this.writeContentForSaveAsFileEncryption(this.backup_save_uri, password);
-            }
-          }).catch((err: BusinessError) => {
-            Logger.error(`Invoke documentViewPicker.save failed, code is ${err.code}, message is ${err.message}`);
-          })
-        } else {
-          // 加密导入
-          this.readContentFromSelectedFileEncryption(this.backup_select_uri, password);
+          showSaveFilePicker([`totp_backup_${generateFileNameWithDate()}.bak`], ['BAK|.bak']).then((uris) => {
+            const backup: TokenBackup = new TokenBackup(this.versionCode ?? 0, this.arrConf);
+            saveBackupToFile(uris[0], backup, true, password).then(() => {
+              promptAction.showToast({ message: "Backup Success" });
+            }).catch((reason: BusinessError) => {
+              promptAction.showToast({ message: reason.message });
+            });
+          });
+        } else { // 加密导入
+          restoreFromBackup(this.backup_select_uri, true, password).then((backup) => {
+            this.backupReload(backup.configs);
+          });
         }
       },
       textValue: "",
       inputValue: ""
     }),
-    cancel: () => {
-    },
+    cancel: () => {},
     autoCancel: true,
     onWillDismiss: (dismissDialogAction: DismissDialogAction) => {
       console.info("reason=" + JSON.stringify(dismissDialogAction.reason))
@@ -138,115 +111,7 @@ export struct SettingPage {
     cornerRadius: 10,
   })
 
-  async writeContentForSaveAsFile(myUri: string): Promise<void> {
-    let backup: backup_file = { magic: this.backup_magic, version: this.versionCode ?? 0, configs: this.arrConf };
-    let backup_string = base32Encode(stringToIntArray(JSON.stringify(backup)));
-    this.mediaFileUri.writeFileContent(myUri, backup_string);
-    promptAction.showToast({ message: `BackUp Success.` })
-  }
-
-  // 加密导出
-  async writeContentForSaveAsFileEncryption(myUri: string, password: string): Promise<void> {
-    let backup: backup_file = { magic: this.backup_magic, version: this.versionCode ?? 0, configs: this.arrConf };
-    this.encryptFile(JSON.stringify(backup), password).then((backup_string) => {
-      this.mediaFileUri.writeFileContent(myUri, backup_string);
-      promptAction.showToast({ message: `BackUp Success.` })
-    });
-  }
-
-  async readContentFromSelectedFile(myUri: string): Promise<void> {
-    let backup_string = this.mediaFileUri.readFileContent(myUri);
-    try {
-      let backup: backup_file = JSON.parse(intArrayToString(base32Decode(backup_string).buffer as ArrayBuffer));
-      if (backup.magic == this.backup_magic) {
-        this.backupReload(backup.configs);
-      } else {
-        promptAction.showToast({ message: 'Error: invalid backup file!' })
-      }
-    } catch (err) {
-      promptAction.showToast({ message: err.message })
-    }
-
-  }
-
-  async decryptFile(file_enc: string, user_key: string): Promise<string> {
-    let aes_decoder = cryptoFramework.createCipher('AES128|CBC|PKCS7');
-    let aes_iv: cryptoFramework.IvParamsSpec = {
-      algName: "IvParamsSpec",
-      iv: { data: stringToIntArray('ohtotptokenaesiv') }
-    };
-    let spec: cryptoFramework.PBKDF2Spec = {
-      algName: 'PBKDF2',
-      password: user_key,
-      salt: new Uint8Array(16),
-      iterations: 10000,
-      keySize: 16
-    };
-    let kdf = cryptoFramework.createKdf('PBKDF2|SHA256');
-    let symKeyBlob = kdf.generateSecretSync(spec);
-    let aesGenerator = cryptoFramework.createSymKeyGenerator('AES128');
-    let aes_key = aesGenerator.convertKeySync(symKeyBlob);
-    await aes_decoder.init(cryptoFramework.CryptoMode.DECRYPT_MODE, aes_key, aes_iv).catch((reason: string) => {
-      promptAction.showToast({ message: reason });
-    });
-    return new Promise<string>((resolve) => {
-      let file_buf = base32Decode(file_enc);
-      aes_decoder.doFinal({ data: file_buf }).then((decryptData) => {
-        let decoder = new util.TextDecoder()
-        resolve(decoder.decodeToString(decryptData.data));
-      }).catch((reason: BusinessError) => {
-        promptAction.showToast({ message: reason.message });
-      });
-    });
-  }
-
-  async encryptFile(file_str: string, user_key: string): Promise<string> {
-    let aes_encoder = cryptoFramework.createCipher('AES128|CBC|PKCS7');
-    let aes_iv: cryptoFramework.IvParamsSpec = {
-      algName: "IvParamsSpec",
-      iv: { data: stringToIntArray('ohtotptokenaesiv') }
-    };
-    let spec: cryptoFramework.PBKDF2Spec = {
-      algName: 'PBKDF2',
-      password: user_key,
-      salt: new Uint8Array(16),
-      iterations: 10000,
-      keySize: 16
-    };
-    let kdf = cryptoFramework.createKdf('PBKDF2|SHA256');
-    let symKeyBlob = kdf.generateSecretSync(spec);
-    let aesGenerator = cryptoFramework.createSymKeyGenerator('AES128');
-    let aes_key = aesGenerator.convertKeySync(symKeyBlob);
-    aes_encoder.initSync(cryptoFramework.CryptoMode.ENCRYPT_MODE, aes_key, aes_iv);
-    return new Promise<string>((resolve) => {
-      aes_encoder.doFinal({ data: new Uint8Array(buffer.from(file_str).buffer) }).then((encryptData) => {
-        resolve(base32Encode(encryptData.data));
-      }).catch((reason: BusinessError) => {
-        promptAction.showToast({ message: reason.message });
-      });
-    });
-  }
-
-  // 加密导入
-  async readContentFromSelectedFileEncryption(myUri: string, password: string): Promise<void> {
-    let backup_string = this.mediaFileUri.readFileContent(myUri);
-    try {
-      this.decryptFile(backup_string, password).then((backup_string) => {
-        let backup: backup_file = JSON.parse(backup_string);
-        if (backup.magic == this.backup_magic) {
-          this.backupReload(backup.configs);
-        } else {
-          promptAction.showToast({ message: 'Error: invalid backup file!' })
-        }
-      })
-    } catch (err) {
-      promptAction.showToast({ message: err.message })
-    }
-
-  }
-
   async callFilePickerSaveFile(): Promise<void> {
-
     this.getUIContext().showAlertDialog(
       {
         title: $r('app.string.setting_backup_output'),
@@ -261,26 +126,20 @@ export struct SettingPage {
           {
             value: $r('app.string.setting_backup_type_default'),
             action: () => {
-              const documentSaveOptions = new picker.DocumentSaveOptions();
-              documentSaveOptions.newFileNames = [`totp_backup_${generateFileNameWithDate()}.json`];
-              documentSaveOptions.fileSuffixChoices = ['JSON|.json', '.json'];
-              let context = getContext(this) as common.Context;
-              const documentViewPicker = new picker.DocumentViewPicker(context);
-              documentViewPicker.save(documentSaveOptions).then((documentSaveResult: Array<string>) => {
-                if (documentSaveResult !== null && documentSaveResult !== undefined && documentSaveResult.length == 1) {
-                  this.backup_save_uri = documentSaveResult[0];
-                  Logger.info('documentViewPicker.save to file succeed and uris are:' + documentSaveResult);
-                  this.writeContentForSaveAsFile(this.backup_save_uri);
-                }
-              }).catch((err: BusinessError) => {
-                Logger.error(`Invoke documentViewPicker.save failed, code is ${err.code}, message is ${err.message}`);
-              })
+              showSaveFilePicker([`totp_backup_${generateFileNameWithDate()}.json`], ['JSON|.json']).then((uris) => {
+                const backup: TokenBackup = new TokenBackup(this.versionCode, this.arrConf);
+                saveBackupToFile(uris[0], backup).then(() => {
+                  promptAction.showToast({ message: "Backup Success" });
+                }).catch((reason: BusinessError) => {
+                  promptAction.showToast({ message: reason.message });
+                });
+              });
             }
           },
           {
             value: $r('app.string.setting_backup_type_enc'),
             action: () => {
-              this.dialogController?.open();
+              this.password_input_dialog?.open();
             }
           },
           {
@@ -306,35 +165,26 @@ export struct SettingPage {
         }
       }
     );
-
   }
 
   async callFilePickerSelectFile(): Promise<void> {
-    const documentSelectOptions = new picker.DocumentSelectOptions();
-    documentSelectOptions.maxSelectNumber = 1;
-    documentSelectOptions.fileSuffixFilters = ['JSON|.json,BAK|.bak', '.json,.bak'];
-    let context = getContext(this) as common.Context;
-    const documentViewPicker = new picker.DocumentViewPicker(context);
-    documentViewPicker.select(documentSelectOptions).then((documentSelectResult: Array<string>) => {
-      if (documentSelectResult !== null && documentSelectResult !== undefined && documentSelectResult.length == 1) {
-        this.backup_select_uri = documentSelectResult[0];
-        Logger.info('documentViewPicker.select to file succeed and uris are:' + documentSelectResult);
-        if (this.backup_select_uri.endsWith('.bak')) {
-          //后缀bak为加密包 唤醒加密导入弹窗
-          this.dialogController?.open();
-        } else {
-          this.readContentFromSelectedFile(this.backup_select_uri);
-        }
+    showSelectFilePicker(1, ['JSON|.json', 'BAK|.bak']).then((uris) => {
+      this.backup_select_uri = uris[0];
+      if (this.backup_select_uri.endsWith('.bak')) {
+        //后缀bak为加密包 唤醒加密导入弹窗
+        this.password_input_dialog?.open();
+      } else {
+        restoreFromBackup(uris[0]).then((backup) => {
+          this.backupReload(backup.configs);
+        })
       }
-    }).catch((err: BusinessError) => {
-      Logger.error(`Invoke documentViewPicker.select failed, code is ${err.code}, message is ${err.message}`);
-    })
+    });
   }
 
   //endregion
   // 在自定义组件即将析构销毁时将dialogController置空
   aboutToDisappear() {
-    this.dialogController = null // 将dialogController置空
+    this.password_input_dialog = null // 将dialogController置空
     this.appCtx.eventHub.off('DATASYNCPermissionsUpdate', this.updateDATASYNCPermissions);
   }
 

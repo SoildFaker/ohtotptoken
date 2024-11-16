@@ -11,12 +11,9 @@ export struct DropFilesDialog {
   private appCtx = AppStorage.get<common.UIAbilityContext>('appContext') as common.UIAbilityContext;
   build() {
     Column({ space: 10}) {
-      Row()
-      {
-        Row()
-        {
-          Column()
-          {
+      Row() {
+        Row() {
+          Column() {
             SymbolGlyph(this.replaceFlag ? $r('sys.symbol.chevron_down_2_circle') : $r('sys.symbol.arrow_down_circle'))
               .fontWeight(FontWeight.Lighter)
               .fontSize(96)
@@ -26,7 +23,6 @@ export struct DropFilesDialog {
               .fontSize(20)
               .fontColor($r('app.color.str_gray'))
           }
-
         }
         .width('100%')
         .height('40%')
@@ -35,7 +31,7 @@ export struct DropFilesDialog {
         .onDrop((event?: DragEvent, extraParams?: string) => {
           console.log("enter onDrop")
           if (event!=null) {
-            let records: Array<unifiedDataChannel.UnifiedRecord> = event.getData().getRecords();
+            let records: Array<unifiedDataChannel.UnifiedRecord >= event.getData().getRecords();
             let plainfile: unifiedDataChannel.File = records[0] as unifiedDataChannel.File;
             this.appCtx.eventHub.emit('onFileDrop',plainfile.uri);
           }

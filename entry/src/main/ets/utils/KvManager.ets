@@ -93,6 +93,7 @@ export class KvManager {
     }
     return null;
   }
+
   //使用getEntries模拟一个可以兼容的数组 这样可以规避多设备覆盖的问题
   async getStringArray(key: string): Promise<string[] | null> {
     if (this._kvStore) {
