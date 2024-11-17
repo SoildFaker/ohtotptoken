@@ -8,7 +8,7 @@ import { TokenItem } from '../components/TokenItem';
 import { SettingPage } from '../pages/SettingPage'
 import { util } from '@kit.ArkTS';
 import { fileIo as fs } from '@kit.CoreFileKit';
-import { BusinessError } from '@kit.BasicServicesKit';
+import { BusinessError, systemDateTime } from '@kit.BasicServicesKit';
 import { router } from '@kit.ArkUI';
 import promptAction from '@ohos.promptAction'
 import { SteamConfigDialog } from '../dialogs/SteamConfigDialog';
@@ -93,6 +93,10 @@ struct Index {
 
   //build()函数之前执行 如果启用了隐私防截屏 在这里设置为隐私模式
   aboutToAppear(): void {
+    // periodically update timestamp for tokens
+    setInterval(() => {
+      this.updateTimestamp();
+    }, 1000);
     router.clear();
     PermissionManager.getInstance().verifyPermissionsAndPushEvent();
     bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION).then((bundleInfo) => {
@@ -108,6 +112,7 @@ struct Index {
       });
     });
 
+    // save certification for forti token
     let cer_path = getContext(this).cacheDir + "/fmt.ks"
     fs.access(cer_path, fs.AccessModeType.EXIST).then((exist) => {
       if (!exist) {
@@ -214,6 +219,16 @@ struct Index {
     cornerRadius: 10,
   })
   //endregion
+
+  updateTimestamp(): void {
+    const timestamp = Math.floor(systemDateTime.getTime() / 1000);
+    getContext(this).eventHub.emit('onTimestampChanged', timestamp, false);
+  }
+
+  onPageShow(): void {
+    const timestamp = Math.floor(systemDateTime.getTime() / 1000);
+    getContext(this).eventHub.emit('onTimestampChanged', timestamp, true);
+  }
 
   async onTokenChanged(): Promise<void> {
     this.all_tokens = await tkStore.getTokens();

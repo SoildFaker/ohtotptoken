@@ -18,35 +18,38 @@ export struct TokenItem {
 
   private steam_chars: string = "23456789BCDFGHJKMNPQRTVWXY";
   private steam_digits: number = 5;
+  private token_steps: number = 0;
 
   aboutToAppear(): void {
+    getContext(this).eventHub.on('onTimestampChanged', (timestamp: number, force: boolean) => this.onTimestampChanged(timestamp, force));
+    this.updateToken();
+  }
+
+  onTimestampChanged(timestamp: number, force: boolean): void {
+    this.token_steps = Math.floor(timestamp / this.Config.TokenPeriod);
+    this.TokenLeftPeriod = this.Config.TokenPeriod - timestamp % this.Config.TokenPeriod;
+    if (this.TokenLeftPeriod == this.Config.TokenPeriod || force) {
+      this.updateTOTPToken();
+    }
+  }
+
+  updateToken() {
     if (this.Config.TokenType == otpType.HOTP) {
       this.updateHOTPToken();
     } else {
-      let steps = Math.floor(systemDateTime.getTime() / 1000)
-      this.refreshTOTPToken(steps);
+      const timestamp = Math.floor(systemDateTime.getTime() / 1000);
+      this.onTimestampChanged(timestamp, true);
     }
   }
 
   updateHOTPToken() {
     this.TokenCounter = this.Config.TokenCounter.toString();
     this.TokenNumber = generateOTP(this.Config, this.Config.TokenCounter).toString().padStart(this.Config.TokenDigits, '0');
-    getContext(this).eventHub.emit('updateHOTPToken'+this.Config.TokenUUID,this.TokenCounter,this.TokenNumber)
   }
 
   updateTOTPToken() {
-    let timestamp = Math.floor(systemDateTime.getTime() / 1000);
-    this.TokenLeftPeriod = this.Config.TokenPeriod - timestamp % this.Config.TokenPeriod;
-    if (this.TokenLeftPeriod == this.Config.TokenPeriod) {
-      this.refreshTOTPToken(timestamp);
-    }
-    getContext(this).eventHub.emit('updateTOTPToken'+this.Config.TokenUUID,this.TokenLeftPeriod,this.TokenNumber)
-  }
-
-  refreshTOTPToken(timestamp: number) {
-    let steps = Math.floor(timestamp / this.Config.TokenPeriod);
     if (this.Config.TokenType === otpType.Steam) {
-      let int_code = generateOTP(this.Config, steps);
+      let int_code = generateOTP(this.Config, this.token_steps);
       let total_chars = this.steam_chars.length;
       this.TokenNumber = '';
       for (let index = 0; index < this.steam_digits; index++) {
@@ -55,7 +58,7 @@ export struct TokenItem {
         int_code = Math.floor(int_code / total_chars);
       }
     } else {
-      this.TokenNumber = generateOTP(this.Config, steps).toString().padStart(this.Config.TokenDigits, '0');
+      this.TokenNumber = generateOTP(this.Config, this.token_steps).toString().padStart(this.Config.TokenDigits, '0');
     }
   }
 
@@ -129,21 +132,9 @@ export struct TokenItem {
     .width('100%')
     .height(60)
     .backgroundColor($r("app.color.item_bg"))
-    .onAppear(() => {
-      if (this.Config.TokenType === otpType.HOTP) {
-        this.updateHOTPToken();
-      } else {
-        this.updateTOTPToken();
-        setInterval(() => {
-          this.updateTOTPToken();
-        }, 1000)
-      }
-    })
-    .onClick(()=>{
-      //router.pushUrl({ url: 'pages/ShowCodePage' });
-    })
   }
 }
+
 function copyText(text: string) {
   const pasteboardData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, text);
   const systemPasteboard = pasteboard.getSystemPasteboard();
