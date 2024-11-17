@@ -3,7 +3,7 @@ import { ConfigurationConstant } from "@kit.AbilityKit";
 @Preview
 @ComponentV2
 export struct TokenIcon {
-  @Require @Param icon: string;
+  @Require @Param icon: string = '';
 
   build() {
     if (this.icon == undefined || this.icon == '') {

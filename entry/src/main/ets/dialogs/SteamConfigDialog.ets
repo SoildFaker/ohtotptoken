@@ -1,10 +1,12 @@
 import { TokenConfig } from '../utils/TokenConfig';
 import { scanCore, scanBarcode } from '@kit.ScanKit';
-import { url } from '@kit.ArkTS';
+import { JSON, url } from '@kit.ArkTS';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { getIconPathByIssuer } from '../utils/TokenUtils';
 import { TokenIcon } from '../components/TokenIcon';
+import { readFileContent, showSelectFilePicker } from '../utils/FileUtils';
+import json from '@ohos.util.json';
 
 @Preview
 @CustomDialog
@@ -13,6 +15,7 @@ export struct SteamConfigDialog {
   @Prop conf_json?: string = '';
   @State conf: TokenConfig = new TokenConfig('', 3, 'Steam', 'User', 'SHA1', 30, 10);
   @State btn_camera_clicked: number = 0;
+  @State btn_wait_from_file: boolean = false;
 
   cancel?: () => void;
 
@@ -20,7 +23,7 @@ export struct SteamConfigDialog {
 
   aboutToAppear(): void {
     if (this.conf_json != undefined && this.conf_json.length > 0) {
-      this.conf = JSON.parse(this.conf_json!);
+      this.conf = JSON.parse(this.conf_json!) as TokenConfig;
     }
   }
 
@@ -113,6 +116,29 @@ export struct SteamConfigDialog {
               this.conf.TokenSecret = value
             })
             .width('70%')
+        }
+        .width('100%')
+        .justifyContent(FlexAlign.SpaceBetween)
+        Row() {
+          Stack() {
+            Button($r('app.string.dialog_cfg_steam_from_mafile'))
+              .onClick(() => {
+                showSelectFilePicker(1, ['maFile|.mafile']).then((uris) => {
+                  readFileContent(uris[0]).then((content) => {
+                    const json = JSON.parse(content) as Record<string, string>;
+                    this.addNewConfigOTP(json['uri'] ?? '')
+                  });
+                });
+              })
+              .enabled(!this.btn_wait_from_file)
+              .backgroundColor($r("app.color.item_bg"))
+              .fontColor($r('app.color.str_main'))
+              .border({ width: 1 })
+              .width('100%')
+            LoadingProgress()
+              .height(30)
+              .visibility(this.btn_wait_from_file ? Visibility.Visible : Visibility.Hidden)
+          }
         }
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)

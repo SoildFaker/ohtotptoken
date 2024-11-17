@@ -263,6 +263,10 @@
     {
       "name": "app_scan_code",
       "value": "快捷扫码"
+    },
+    {
+      "name": "dialog_cfg_steam_from_mafile",
+      "value": "从 maFile 文件导入"
     }
   ]
 }

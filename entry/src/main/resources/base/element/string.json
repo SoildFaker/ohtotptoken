@@ -263,6 +263,10 @@
     {
       "name": "app_scan_code",
       "value": "Scan Code"
+    },
+    {
+      "name": "dialog_cfg_steam_from_mafile",
+      "value": "Import From maFile"
     }
   ]
 }
