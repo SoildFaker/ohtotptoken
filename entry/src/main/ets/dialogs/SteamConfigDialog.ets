@@ -15,7 +15,6 @@ export struct SteamConfigDialog {
   @Prop conf_json?: string = '';
   @State conf: TokenConfig = new TokenConfig('', 3, 'Steam', 'User', 'SHA1', 30, 10);
   @State btn_camera_clicked: number = 0;
-  @State btn_wait_from_file: boolean = false;
 
   cancel?: () => void;
 
@@ -115,30 +114,25 @@ export struct SteamConfigDialog {
             .onChange((value) => {
               this.conf.TokenSecret = value
             })
+            .type(InputType.Password)
             .width('70%')
         }
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)
         Row() {
-          Stack() {
-            Button($r('app.string.dialog_cfg_steam_from_mafile'))
-              .onClick(() => {
-                showSelectFilePicker(1, ['maFile|.mafile']).then((uris) => {
-                  readFileContent(uris[0]).then((content) => {
-                    const json = JSON.parse(content) as Record<string, string>;
-                    this.addNewConfigOTP(json['uri'] ?? '')
-                  });
+          Button($r('app.string.dialog_cfg_steam_from_mafile'))
+            .onClick(() => {
+              showSelectFilePicker(1, ['maFile|.mafile']).then((uris) => {
+                readFileContent(uris[0]).then((content) => {
+                  const json = JSON.parse(content) as Record<string, string>;
+                  this.addNewConfigOTP(json['uri'] ?? '')
                 });
-              })
-              .enabled(!this.btn_wait_from_file)
-              .backgroundColor($r("app.color.item_bg"))
-              .fontColor($r('app.color.str_main'))
-              .border({ width: 1 })
-              .width('100%')
-            LoadingProgress()
-              .height(30)
-              .visibility(this.btn_wait_from_file ? Visibility.Visible : Visibility.Hidden)
-          }
+              });
+            })
+            .backgroundColor($r("app.color.item_bg"))
+            .fontColor($r('app.color.str_main'))
+            .border({ width: 1 })
+            .width('100%')
         }
         .width('100%')
         .justifyContent(FlexAlign.SpaceBetween)

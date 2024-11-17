@@ -272,6 +272,7 @@ export struct FortiConfigDialog {
             .onChange((value) => {
               this.conf.TokenSecret = value
             })
+            .type(InputType.Password)
             .width('70%')
         }
         .width('100%')
