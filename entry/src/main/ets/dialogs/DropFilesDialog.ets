@@ -1,5 +1,5 @@
 import { unifiedDataChannel, uniformTypeDescriptor } from '@kit.ArkData';
-import { bundleManager,common } from '@kit.AbilityKit';
+import { common } from '@kit.AbilityKit';
 //文件拖拽
 @Preview
 @CustomDialog

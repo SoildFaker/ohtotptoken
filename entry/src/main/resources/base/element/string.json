@@ -267,6 +267,14 @@
     {
       "name": "dialog_cfg_steam_from_mafile",
       "value": "Import From maFile"
+    },
+    {
+      "name": "setting_hide_token",
+      "value": "Hide Tokens"
+    },
+    {
+      "name": "setting_safety_hide_token_des",
+      "value": "Hiding user tokens enhances security."
     }
   ]
 }

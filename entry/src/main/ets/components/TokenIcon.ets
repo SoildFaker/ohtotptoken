@@ -1,4 +1,5 @@
 import { ConfigurationConstant } from "@kit.AbilityKit";
+import { edgeWidths } from "@ohos.arkui.node";
 
 @Preview
 @ComponentV2
@@ -16,12 +17,12 @@ export struct TokenIcon {
           .width(40)
           .height(40)
           .fillColor($r('app.color.item_fg'))
-          .clipShape(new Circle({ width: 40, height: 40 }))
+          .objectFit(ImageFit.Contain)
       } else {
         Image($rawfile(this.icon))
           .width(40)
           .height(40)
-          .clipShape(new Circle({ width: 40, height: 40 }))
+          .objectFit(ImageFit.Contain)
       }
 
     }

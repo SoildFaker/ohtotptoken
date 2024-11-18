@@ -267,6 +267,14 @@
     {
       "name": "dialog_cfg_steam_from_mafile",
       "value": "从 maFile 文件导入"
+    },
+    {
+      "name": "setting_hide_token",
+      "value": "隐藏令牌"
+    },
+    {
+      "name": "setting_safety_hide_token_des",
+      "value": "默认不显示令牌以提高安全性。"
     }
   ]
 }

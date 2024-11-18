@@ -35,6 +35,7 @@ struct Index {
   @Local all_tokens: TokenConfig[] = [];
   @Local tab_bar_index: number = 0;
   @Local token_loaded: Boolean = true;
+  @Local token_hide_enable: boolean = AppPreference.getSafetyHideTokenEnable();
 
   private appCtx = AppStorage.get<common.UIAbilityContext>('appContext') as common.UIAbilityContext;
   private windowClass = AppStorage.get("windowClass") as window.Window;
@@ -546,6 +547,7 @@ struct Index {
                       ListItem() {
                         TokenItem({
                           Config: token,
+                          TokenHideEnable: this.token_hide_enable,
                           Update: async (conf_new) => {
                             this.updateTokenConfig(conf_new);
                           }
@@ -609,6 +611,11 @@ struct Index {
                   await this.updateTokenConfigs(conf);
                   tkStore.sortTokens();
                 },
+                updateSettings: (key_name) => {
+                  if (key_name === 'app_safety_hide_token_enable') {
+                    this.token_hide_enable = AppPreference.getSafetyHideTokenEnable();
+                  }
+                }
               })
                 .height('100%')
 

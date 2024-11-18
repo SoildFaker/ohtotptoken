@@ -6,12 +6,14 @@ export class AppPreference {
   private static app_safety_privacy_enable: boolean = false;
   // 安全性应用锁定设置
   private static app_safety_lock_enable: boolean = false;
+  // 隐藏令牌
+  private static app_safety_hide_token_enable: boolean = false;
   // 数据库是否启用云同步
   private static app_db_rds_cloud_sync_enable: boolean = false;
   // 数据库是否启用跨设备流转
   private static app_db_rds_sync_enable: boolean = false;
-  //kv数据库同步时间
-  private static app_db_kv_sync_time:string ='';
+  // kv数据库同步时间
+  private static app_db_kv_sync_time: string = '';
 
   //获取是否启用跨设备流转
   public static getRdbSyncEnable(): boolean {
@@ -29,9 +31,15 @@ export class AppPreference {
   public static getSafetyLockEnable(): boolean {
     return AppPreference.app_safety_lock_enable;
   }
+
+  public static getSafetyHideTokenEnable(): boolean {
+    return AppPreference.app_safety_hide_token_enable;
+  }
+
   public static getAppDbKVSyncTime(): string {
     return AppPreference.app_db_kv_sync_time;
   }
+
   public static setAppDbKVSyncTime(value: string): void {
     AppPreference.app_db_kv_sync_time = value;
     AppPreference.prefMgr.setValue<string>('app_db_kv_sync_time', value);
@@ -57,6 +65,11 @@ export class AppPreference {
     AppPreference.prefMgr.setValue<boolean>('app_safety_lock_enable', enable);
   }
 
+  public static setSafetyHideTokenEnable(enable: boolean): void {
+    AppPreference.app_safety_hide_token_enable = enable;
+    AppPreference.prefMgr.setValue<boolean>('app_safety_hide_token_enable', enable);
+  }
+
   public static async getKey(key: string): Promise<string | null> {
     try {
       return await AppPreference.prefMgr.getValue<string>(key);
@@ -71,7 +84,6 @@ export class AppPreference {
       return await AppPreference.prefMgr.setValue<string>(key, value);
     } catch (ex) {
     }
-
   }
 
   public static async loadSettings(): Promise<void> {
@@ -80,6 +92,9 @@ export class AppPreference {
     })
     await AppPreference.prefMgr.getValue<boolean>('app_safety_lock_enable').then((val) => {
       AppPreference.app_safety_lock_enable = val ?? false;
+    })
+    await AppPreference.prefMgr.getValue<boolean>('app_safety_hide_token_enable').then((val) => {
+      AppPreference.app_safety_hide_token_enable = val ?? false;
     })
     await AppPreference.prefMgr.getValue<boolean>('app_db_rds_cloud_sync_enable').then((val) => {
       AppPreference.app_db_rds_cloud_sync_enable = val ?? false;

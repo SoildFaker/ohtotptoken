@@ -6,7 +6,6 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 import { getIconPathByIssuer } from '../utils/TokenUtils';
 import { TokenIcon } from '../components/TokenIcon';
 import { readFileContent, showSelectFilePicker } from '../utils/FileUtils';
-import json from '@ohos.util.json';
 
 @Preview
 @CustomDialog

@@ -21,8 +21,9 @@ export struct SettingPage {
   @Require @Param arrConf: Array<TokenConfig> = [];
   @Require @Param appBottomAvoidHeight: number = 0;
   @Require @Param appTopAvoidHeight: number = 0;
-  @Event backupReload: (conf: Array<TokenConfig>) => void = () => {
-  };
+  @Event backupReload: (conf: Array<TokenConfig>) => void = () => {};
+  @Event updateSettings: (key_name: string) => void = () => {};
+
   @Local versionName?: string;
   @Local appName?: string;
   @Local RdbSyncEnable: boolean = false;
@@ -257,6 +258,14 @@ export struct SettingPage {
                 }
               })
               ItemDescription({ description: $r('app.string.setting_safety_lock_des') })
+              SubItemToggle({
+                title: $r('app.string.setting_hide_token'), isOn: AppPreference.getSafetyHideTokenEnable(),
+                onChange: (IsOn: boolean) => {
+                  AppPreference.setSafetyHideTokenEnable(IsOn);
+                  this.updateSettings('app_safety_hide_token_enable');
+                }
+              })
+              ItemDescription({ description: $r('app.string.setting_safety_hide_token_des') })
             }
           }
           .padding({ left: 10, right: 10 })
