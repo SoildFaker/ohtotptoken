@@ -26,10 +26,12 @@ export struct TokenItem {
   }
 
   onTimestampChanged(timestamp: number, force: boolean): void {
-    this.token_steps = Math.floor(timestamp / this.Config.TokenPeriod);
-    this.TokenLeftPeriod = this.Config.TokenPeriod - timestamp % this.Config.TokenPeriod;
-    if (this.TokenLeftPeriod == this.Config.TokenPeriod || force) {
-      this.updateTOTPToken();
+    if (this.Config.TokenType !== otpType.HOTP) {
+      this.token_steps = Math.floor(timestamp / this.Config.TokenPeriod);
+      this.TokenLeftPeriod = this.Config.TokenPeriod - timestamp % this.Config.TokenPeriod;
+      if (this.TokenLeftPeriod == this.Config.TokenPeriod || force) {
+        this.updateTOTPToken();
+      }
     }
   }
 
