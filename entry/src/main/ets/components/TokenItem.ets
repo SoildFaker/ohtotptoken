@@ -4,6 +4,7 @@ import { generateOTP } from '../utils/TokenUtils';
 import { TokenIcon } from './TokenIcon';
 import { pasteboard } from '@kit.BasicServicesKit';
 import { promptAction } from '@kit.ArkUI';
+import { SteamUtils } from '../utils/SteamUtils';
 
 let last_token_hide = true;
 
@@ -20,8 +21,6 @@ export struct TokenItem {
   @Local btn_hotp_clicked: number = 0;
   @Local TokenHide: boolean = last_token_hide;
 
-  private steam_chars: string = "23456789BCDFGHJKMNPQRTVWXY";
-  private steam_digits: number = 5;
   private token_steps: number = 0;
 
   aboutToAppear(): void {
@@ -54,17 +53,11 @@ export struct TokenItem {
   }
 
   updateTOTPToken() {
+    let int_code = generateOTP(this.Config, this.token_steps);
     if (this.Config.TokenType === otpType.Steam) {
-      let int_code = generateOTP(this.Config, this.token_steps);
-      let total_chars = this.steam_chars.length;
-      this.TokenNumber = '';
-      for (let index = 0; index < this.steam_digits; index++) {
-        let pos = int_code % total_chars;
-        this.TokenNumber += this.steam_chars[pos];
-        int_code = Math.floor(int_code / total_chars);
-      }
+      this.TokenNumber = SteamUtils.SteamTokenFromTOTP(int_code);
     } else {
-      this.TokenNumber = generateOTP(this.Config, this.token_steps).toString().padStart(this.Config.TokenDigits, '0');
+      this.TokenNumber = int_code.toString().padStart(this.Config.TokenDigits, '0');
     }
   }
 

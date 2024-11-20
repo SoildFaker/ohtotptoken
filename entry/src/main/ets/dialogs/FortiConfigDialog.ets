@@ -1,9 +1,7 @@
 import { TokenConfig } from '../utils/TokenConfig';
-import { base32Decode, base32Encode, stringToIntArray, getIconPathByIssuer } from '../utils/TokenUtils'
-import { scanCore, scanBarcode } from '@kit.ScanKit';
+import { base32Decode, base32Encode, stringToIntArray, getIconPathByIssuer, ScanBarCode } from '../utils/TokenUtils'
 import { http } from '@kit.NetworkKit';
 import { BusinessError } from '@kit.BasicServicesKit';
-import { hilog } from '@kit.PerformanceAnalysisKit';
 import { cryptoFramework } from '@kit.CryptoArchitectureKit';
 import { buffer, util } from '@kit.ArkTS';
 import promptAction from '@ohos.promptAction'
@@ -96,14 +94,11 @@ export struct FortiConfigDialog {
       return;
     }
     this.btn_wait_from_forti = true;
-    raw_token = raw_token.slice(2)
-    let raw_token_hex = buffer.from(raw_token).toString('hex')// Array.from(raw_token, byte => byte.toString(16).padStart(2, '0')).join('')
-    let httpRequest = http.createHttp();
-    httpRequest.on('headersReceive', (header: Object) => {
-      console.info('header: ' + JSON.stringify(header));
-    })
+    raw_token = raw_token.slice(2);
+    let raw_token_hex = buffer.from(raw_token).toString('hex');
 
-    let cer_path = this.cache_dir + "/fmt.ks"
+    let httpRequest = http.createHttp();
+    let cer_path = this.cache_dir + "/fmt.ks";
 
     httpRequest.request(
       "https://globalftm.fortinet.net/SoftToken/Provisioning.asmx/Mobile",
@@ -135,12 +130,10 @@ export struct FortiConfigDialog {
             this.decrypt_seed(resp.d.seed!)
             this.conf.TokenName = resp.d.issuer!
           }
-          httpRequest.off('headersReceive');
           httpRequest.destroy();
         } else {
           this.btn_wait_from_forti = false;
           console.info('error:' + JSON.stringify(err));
-          httpRequest.off('headersReceive');
           httpRequest.destroy();
         }
       });
@@ -166,17 +159,8 @@ export struct FortiConfigDialog {
             this.btn_camera_clicked)
           .onClick(() => {
             this.btn_camera_clicked++
-            let options: scanBarcode.ScanOptions = {
-              scanTypes: [scanCore.ScanType.ALL],
-              enableMultiMode: true,
-              enableAlbum: true
-            };
-            scanBarcode.startScanForResult(getContext(this), options).then((result: scanBarcode.ScanResult) => {
-              this.conf.FortiToken = result.originalValue
-              hilog.info(0x0001, '[Scan CPSample]', `Succeeded in getting ScanResult by promise with options, result is ${JSON.stringify(result)}`);
-            }).catch((error: BusinessError) => {
-              hilog.error(0x0001, '[Scan CPSample]',
-                `Failed to get ScanResult by promise with options. Code:${error.code}, message: ${error.message}`);
+            ScanBarCode().then((code) => {
+              this.conf.FortiToken = code;
             });
           })
       }

@@ -1,5 +1,6 @@
 import { HMACAlgorithm, getIconPathByIssuer } from './TokenUtils';
 import { util } from '@kit.ArkTS';
+import { maFile } from './SteamUtils';
 
 export enum otpType {
   TOTP,
@@ -22,6 +23,7 @@ export class TokenConfig {
   FortiDevID: string;
   TokenIcon: string;
   RankScore: number;
+  SteamMaFile: maFile | null = null;
 
   constructor(
     secret: string = '',

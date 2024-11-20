@@ -1,6 +1,8 @@
 import { cryptoFramework } from '@kit.CryptoArchitectureKit';
 import { buffer, HashSet } from '@kit.ArkTS';
+import { common } from '@kit.AbilityKit';
 import { TokenConfig } from './TokenConfig';
+import { scanBarcode, scanCore } from '@kit.ScanKit';
 
 const RFC4648 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 const RFC4648_HEX = '0123456789ABCDEFGHIJKLMNOPQRSTUV';
@@ -41,6 +43,23 @@ function doHmacBySync(steps: number, algorithm: HMACAlgorithm, message: string):
   mac.updateSync({ data: byteArray });
   let macResult = mac.doFinalSync();
   return macResult.data;
+}
+
+export async function ScanBarCode(): Promise<string> {
+  if (canIUse('SystemCapability.Multimedia.Scan.ScanBarcode')) {
+    if (canIUse('SystemCapability.Multimedia.Scan.Core')) {
+      let options: scanBarcode.ScanOptions = {
+        scanTypes: [scanCore.ScanType.ALL],
+        enableMultiMode: true,
+        enableAlbum: true
+      };
+      let context = AppStorage.get<common.UIAbilityContext>('appContext') as common.UIAbilityContext;
+      return scanBarcode.startScanForResult(context, options).then((result: scanBarcode.ScanResult) => {
+        return result.originalValue;
+      });
+    }
+  }
+  return '';
 }
 
 export function generateOTP(conf: TokenConfig, steps: number): number {

@@ -1,11 +1,9 @@
 import { TokenConfig } from '../utils/TokenConfig';
-import { scanCore, scanBarcode } from '@kit.ScanKit';
 import { JSON, url } from '@kit.ArkTS';
-import { BusinessError } from '@kit.BasicServicesKit';
-import { hilog } from '@kit.PerformanceAnalysisKit';
-import { getIconPathByIssuer } from '../utils/TokenUtils';
+import { getIconPathByIssuer, ScanBarCode } from '../utils/TokenUtils';
 import { TokenIcon } from '../components/TokenIcon';
 import { readFileContent, showSelectFilePicker } from '../utils/FileUtils';
+import { maFile } from '../utils/SteamUtils';
 
 @Preview
 @CustomDialog
@@ -82,17 +80,8 @@ export struct SteamConfigDialog {
             this.btn_camera_clicked)
           .onClick(() => {
             this.btn_camera_clicked++
-            let options: scanBarcode.ScanOptions = {
-              scanTypes: [scanCore.ScanType.ALL],
-              enableMultiMode: true,
-              enableAlbum: true
-            };
-            scanBarcode.startScanForResult(getContext(this), options).then((result: scanBarcode.ScanResult) => {
-              this.addNewConfigOTP(result.originalValue)
-              hilog.info(0x0001, '[Scan CPSample]', `Succeeded in getting ScanResult by promise with options, result is ${JSON.stringify(result)}`);
-            }).catch((error: BusinessError) => {
-              hilog.error(0x0001, '[Scan CPSample]',
-                `Failed to get ScanResult by promise with options. Code:${error.code}, message: ${error.message}`);
+            ScanBarCode().then((code) => {
+              this.addNewConfigOTP(code)
             });
           })
       }
@@ -123,8 +112,8 @@ export struct SteamConfigDialog {
             .onClick(() => {
               showSelectFilePicker(1, ['maFile|.mafile']).then((uris) => {
                 readFileContent(uris[0]).then((content) => {
-                  const json = JSON.parse(content) as Record<string, string>;
-                  this.addNewConfigOTP(json['uri'] ?? '')
+                  this.conf.SteamMaFile = JSON.parse(content) as maFile;
+                  this.addNewConfigOTP(this.conf.SteamMaFile.uri ?? '')
                 });
               });
             })

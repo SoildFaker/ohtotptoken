@@ -1,9 +1,6 @@
 import { otpType, TokenConfig } from '../utils/TokenConfig';
-import { scanCore, scanBarcode } from '@kit.ScanKit';
 import { url } from '@kit.ArkTS';
-import { BusinessError } from '@kit.BasicServicesKit';
-import { hilog } from '@kit.PerformanceAnalysisKit';
-import { getIconPathByIssuer, HMACAlgorithm } from '../utils/TokenUtils';
+import { getIconPathByIssuer, HMACAlgorithm, ScanBarCode } from '../utils/TokenUtils';
 import { TokenIcon } from '../components/TokenIcon';
 
 @Entry
@@ -74,21 +71,6 @@ export struct TOTPConfigDialog {
     this.conf.TokenDigits = parseInt(parameters['digits'] ?? '6');
   }
 
-  scanCode():void{
-    let options: scanBarcode.ScanOptions = {
-      scanTypes: [scanCore.ScanType.ALL],
-      enableMultiMode: true,
-      enableAlbum: true
-    };
-    scanBarcode.startScanForResult(getContext(this), options).then((result: scanBarcode.ScanResult) => {
-      this.addNewConfigOTP(result.originalValue)
-      hilog.info(0x0001, '[Scan CPSample]', `Succeeded in getting ScanResult by promise with options, result is ${JSON.stringify(result)}`);
-    }).catch((error: BusinessError) => {
-      hilog.error(0x0001, '[Scan CPSample]',
-        `Failed to get ScanResult by promise with options. Code:${error.code}, message: ${error.message}`);
-    });
-  }
-
   build() {
     Column({ space: 10 }) {
       Row() {
@@ -108,7 +90,9 @@ export struct TOTPConfigDialog {
             this.btn_camera_clicked)
           .onClick(() => {
             this.btn_camera_clicked++
-            this.scanCode();
+            ScanBarCode().then((code) => {
+              this.addNewConfigOTP(code)
+            });
           })
       }
       .width('100%')
