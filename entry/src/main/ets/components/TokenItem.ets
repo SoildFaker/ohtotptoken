@@ -39,6 +39,9 @@ export struct TokenItem {
   }
 
   updateToken() {
+    if (this.Config === undefined) {
+      return;
+    }
     if (this.Config.TokenType == otpType.HOTP) {
       this.updateHOTPToken();
     } else {

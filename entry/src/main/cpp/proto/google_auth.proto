@@ -1,0 +1,47 @@
+// LICENSE: GNU General Public License v3.0 to Beem Development (https://github.com/beemdevelopment)
+// From https://github.com/beemdevelopment/Aegis/pull/406/files#diff-410b85c0f939a198f70af5fc855a21ed
+// Changes: modified package name.
+
+syntax = "proto3";
+
+package googleauth;
+
+message MigrationPayload {
+  enum Algorithm {
+    ALGORITHM_UNSPECIFIED = 0;
+    SHA1 = 1;
+    SHA256 = 2;
+    SHA512 = 3;
+    MD5 = 4;
+  }
+
+  enum DigitCount {
+    DIGIT_COUNT_UNSPECIFIED = 0;
+    SIX = 1;
+    EIGHT = 2;
+    SEVEN = 3;
+  }
+
+  enum OtpType {
+    OTP_TYPE_UNSPECIFIED = 0;
+    HOTP = 1;
+    TOTP = 2;
+  }
+
+  message OtpParameters {
+    bytes secret = 1;
+    string name = 2;
+    string issuer = 3;
+    Algorithm algorithm = 4;
+    DigitCount digits = 5;
+    OtpType type = 6;
+    int64 counter = 7;
+    string unique_id = 8;
+  }
+
+  repeated OtpParameters otp_parameters = 1;
+  int32 version = 2;
+  int32 batch_size = 3;
+  int32 batch_index = 4;
+  int32 batch_id = 5;
+}

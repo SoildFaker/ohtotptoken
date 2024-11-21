@@ -5,7 +5,7 @@ import { TOTPConfigDialog } from '../dialogs/OTPConfigDialog';
 import { FortiConfigDialog } from '../dialogs/FortiConfigDialog';
 import { TokenItem } from '../components/TokenItem';
 import { SettingPage } from '../pages/SettingPage'
-import { util } from '@kit.ArkTS';
+import { url, util } from '@kit.ArkTS';
 import { fileIo as fs } from '@kit.CoreFileKit';
 import { BusinessError, systemDateTime } from '@kit.BasicServicesKit';
 import { router } from '@kit.ArkUI';
@@ -23,6 +23,7 @@ import { uniformTypeDescriptor } from '@kit.ArkData';
 import { EncryptionPassWordDialog } from '../dialogs/EncryptionPassWordDialog';
 import { restoreFromBackup } from '../utils/TokenBackup';
 import { ScanBarCode } from '../utils/TokenUtils';
+import { decodeProtobuf } from '../utils/GoogleAuthUtils';
 
 const TAG = 'PrivacySubscribe';
 
@@ -299,15 +300,23 @@ struct Index {
   TokenAddMenu() {
     Menu() {
       MenuItem({ content: $r('app.string.app_scan_code') })
-        .onClick(() => {
+        .onClick(async () => {
           ScanBarCode().then((code) => {
-            this.dialog_totp_config = new CustomDialogController({
-              builder: TOTPConfigDialog({
-                scan_code_original_Value: code, // 弹窗立刻扫码赋值
-                confirm: (new_conf) => {this.updateTokenConfig(JSON.parse(new_conf))}
+            // google authenticator migration
+            if (code.startsWith('otpauth-migration://offline?data=')) {
+              const data = new url.URLParams(url.URL.parseURL(code).search).get("data");
+              decodeProtobuf(decodeURIComponent(data ?? '')).then((confs) => {
+                 this.updateTokenConfigs(confs);
+              });
+            } else if (code.startsWith('otpauth://')) {
+              this.dialog_totp_config = new CustomDialogController({
+                builder: TOTPConfigDialog({
+                  scan_code_original_Value: code, // 弹窗立刻扫码赋值
+                  confirm: (new_conf) => {this.updateTokenConfig(JSON.parse(new_conf))}
+                })
               })
-            })
-            this.dialog_totp_config.open()
+              this.dialog_totp_config.open()
+            }
           });
         })
         .accessibilityText($r('app.string.app_scan_code'))

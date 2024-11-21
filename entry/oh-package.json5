@@ -6,6 +6,7 @@
   "author": "",
   "license": "",
   "dependencies": {
+    "libotpcutils.so": "file:./src/main/cpp/types/libotpcutils"
   }
 }
 
