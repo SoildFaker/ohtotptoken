@@ -24,5 +24,6 @@ Opensource OTP Authenticator for HarmonyOS Next
 - [paolostivanin/libcotp](https://github.com/paolostivanin/libcotp)
 - [Netthaw/TOTP-MCU](https://github.com/Netthaw/TOTP-MCU)
 - [ss23/fortitoken-mobile-registration](https://github.com/ss23/fortitoken-mobile-registration)
-- [andOTP/andOTP](https://github.com/andOTP/andOTP)
+- [andOTP/andOTP](https://github.com/andOTP/andOTP): icons
 - [iamhyc/Aigis](https://github.com/iamhyc/Aigis)
+- [nanopb/nanopb](https://github.com/nanopb/nanopb): protobuf for google authenticator migration

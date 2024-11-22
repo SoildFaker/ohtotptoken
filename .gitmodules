@@ -1,0 +1,3 @@
+[submodule "entry/src/main/cpp/nanopb"]
+	path = entry/src/main/cpp/nanopb
+	url = https://github.com/nanopb/nanopb

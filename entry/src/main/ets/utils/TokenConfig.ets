@@ -23,7 +23,7 @@ export class TokenConfig {
   FortiDevID: string;
   TokenIcon: string;
   RankScore: number;
-  SteamMaFile: maFile | null = null;
+  SteamMaFile: maFile | undefined = undefined;
 
   constructor(
     secret: string = '',

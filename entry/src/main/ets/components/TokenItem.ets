@@ -6,7 +6,7 @@ import { pasteboard } from '@kit.BasicServicesKit';
 import { promptAction } from '@kit.ArkUI';
 import { SteamUtils } from '../utils/SteamUtils';
 
-let last_token_hide = true;
+let current_token_hide_map: Map<string, boolean> = new Map();
 
 @Preview
 @ComponentV2
@@ -19,7 +19,7 @@ export struct TokenItem {
   @Local TokenCounter: string = '0';
   @Local TokenLeftPeriod: number = 0;
   @Local btn_hotp_clicked: number = 0;
-  @Local TokenHide: boolean = last_token_hide;
+  @Local TokenHide: boolean = current_token_hide_map[this.Config.TokenUUID] ?? true;
 
   private token_steps: number = 0;
 
@@ -93,6 +93,7 @@ export struct TokenItem {
         }
         .onClick(() => {
           this.TokenHide = !this.TokenHide;
+          current_token_hide_map[this.Config.TokenUUID] = false;
         })
 
       } else {
@@ -119,7 +120,10 @@ export struct TokenItem {
           }
         }
         .onClick(() => {
-          this.TokenHide = this.TokenHideEnable ? !this.TokenHide : this.TokenHide;
+          if (this.TokenHideEnable) {
+            this.TokenHide = !this.TokenHide;
+            current_token_hide_map[this.Config.TokenUUID] = true;
+          }
         })
 
         if (this.Config.TokenType == otpType.HOTP) {
@@ -134,7 +138,6 @@ export struct TokenItem {
               this.Config.TokenCounter++;
               this.Update(this.Config)
               this.updateHOTPToken();
-              last_token_hide = false;
             })
         } else {
           Stack() {

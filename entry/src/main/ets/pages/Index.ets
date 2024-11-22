@@ -33,7 +33,7 @@ let tkStore = TokenStore.getInstance();
 @ComponentV2
 struct Index {
   @Local btn_token_add_clicked: number = 0;
-  @Local all_tokens: TokenConfig[] = [];
+  @Local CurrentTokens: TokenConfig[] = [];
   @Local tab_bar_index: number = 0;
   @Local token_loaded: Boolean = true;
   @Local token_hide_enable: boolean = AppPreference.getSafetyHideTokenEnable();
@@ -95,10 +95,6 @@ struct Index {
 
   //build()函数之前执行 如果启用了隐私防截屏 在这里设置为隐私模式
   aboutToAppear(): void {
-    // periodically update timestamp for tokens
-    setInterval(() => {
-      this.updateTimestamp();
-    }, 1000);
     router.clear();
     PermissionManager.getInstance().verifyPermissionsAndPushEvent();
     bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION).then((bundleInfo) => {
@@ -109,7 +105,7 @@ struct Index {
     tkStore.initTokenStore().then(() => {
       getContext(this).eventHub.on('onTokenChanged', () => this.onTokenChanged());
       tkStore.getTokens().then((tokens) => {
-        this.all_tokens = tokens;
+        this.CurrentTokens = tokens;
         this.token_loaded = false;
       });
     });
@@ -151,7 +147,7 @@ struct Index {
     getContext(this).eventHub.on('KVStoreSyncComplete',() => {
       //todo 接收同步完成后刷新数据
       tkStore.getTokens().then((tokens) => {
-        this.all_tokens = tokens;
+        this.CurrentTokens = tokens;
         this.token_loaded = false;
         AppPreference.setAppDbKVSyncTime(new Date().toString());
       });
@@ -186,6 +182,10 @@ struct Index {
         this.DropFilesDialogController?.close();
         }, 250)
     });
+    // periodically update timestamp for tokens
+    setInterval(() => {
+      this.updateTimestamp();
+    }, 1000);
   }
 
   //region 导入
@@ -233,12 +233,14 @@ struct Index {
   }
 
   async onTokenChanged(): Promise<void> {
-    this.all_tokens = await tkStore.getTokens();
+    this.CurrentTokens = await tkStore.getTokens();
   }
 
-  async updateTokenConfig(conf: TokenConfig): Promise<void> {
+  async updateTokenConfig(conf: TokenConfig, toast: boolean = true): Promise<void> {
     await tkStore.updateToken(conf);
-    promptAction.showToast({message: `token ${conf.TokenIssuer}:${conf.TokenName} updated.`})
+    if (toast) {
+      promptAction.showToast({message: `token ${conf.TokenIssuer}:${conf.TokenName} updated.`})
+    }
   }
 
   async updateTokenConfigs(tokens: Array<TokenConfig>): Promise<void> {
@@ -246,10 +248,7 @@ struct Index {
       if (tokens[i].TokenUUID === undefined) {
         tokens[i].TokenUUID = util.generateRandomUUID();
       }
-      if (tokens[i].RankScore === undefined) {
-        tokens[i].RankScore = i;
-      }
-      await this.updateTokenConfig(tokens[i]);
+      await this.updateTokenConfig(tokens[i], false);
     }
     promptAction.showToast({message: `${tokens.length} token(s) updated.`})
   }
@@ -385,36 +384,6 @@ struct Index {
         });
         this.dialog_qrcode.open();
       })
-      Button({ type: ButtonType.Circle }) {
-        Text() {
-          SymbolSpan($r('sys.symbol.chevron_up'))
-            .fontSize(30)
-            .fontWeight(FontWeight.Medium)
-            .fontColor([Color.White])
-        }
-      }
-      .backgroundColor(Color.Green)
-      .padding(10)
-      .onClick(() => {
-        tkStore.rearrangeToken(index, true).then(() => {
-          tkStore.sortTokens();
-        });
-      })
-      Button({ type: ButtonType.Circle }) {
-        Text() {
-          SymbolSpan($r('sys.symbol.chevron_down'))
-            .fontSize(30)
-            .fontWeight(FontWeight.Medium)
-            .fontColor([Color.White])
-        }
-      }
-      .backgroundColor(Color.Green)
-      .padding(10)
-      .onClick(() => {
-        tkStore.rearrangeToken(index, false).then(() => {
-          tkStore.sortTokens();
-        });
-      })
       .margin({ right: 10 })
     }
   }
@@ -448,7 +417,7 @@ struct Index {
             value: $r('app.string.dialog_btn_confirm'),
             fontColor: Color.Red,
             action: async () => {
-              this.all_tokens = this.all_tokens.filter(_ => _.TokenUUID !== conf.TokenUUID);
+              this.CurrentTokens = this.CurrentTokens.filter(_ => _.TokenUUID !== conf.TokenUUID);
               tkStore.deleteToken(conf.TokenUUID);
             }
           }
@@ -542,13 +511,13 @@ struct Index {
                         .height(50 + this.appTopAvoidHeight)
                         .width('100%')
                     }
-                    ForEach(this.all_tokens, (token: TokenConfig, index: number) => {
+                    ForEach(this.CurrentTokens, (token: TokenConfig, index: number) => {
                       ListItem() {
                         TokenItem({
                           Config: token,
                           TokenHideEnable: this.token_hide_enable,
                           Update: async (conf_new) => {
-                            this.updateTokenConfig(conf_new);
+                            this.updateTokenConfig(conf_new, false);
                           }
                         })
                       }
@@ -564,6 +533,9 @@ struct Index {
                     }, (item: TokenConfig) => {
                       return JSON.stringify(item)
                     })
+                      .onMove((from, to) => {
+                        tkStore.updateTokenRank(from, to);
+                      })
                     ListItem() {
                       Row()
                         .width('100%')
@@ -603,7 +575,7 @@ struct Index {
 
             TabContent() {
               SettingPage({
-                arrConf: this.all_tokens,
+                arrConf: this.CurrentTokens,
                 appTopAvoidHeight: this.appTopAvoidHeight,
                 appBottomAvoidHeight: this.appBottomAvoidHeight,
                 backupReload: async (conf) => {

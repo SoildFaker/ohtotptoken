@@ -1,9 +1,7 @@
 import { KvManager } from "./KvManager";
 import { TokenConfig } from "./TokenConfig";
-import { HashMap, JSON } from "@kit.ArkTS";
 import { RdbManager } from "./RdbManager";
 import { common } from '@kit.AbilityKit';
-import { faceDetector } from "@kit.CoreVisionKit";
 
 export class TokenStore {
   private kvMgr: KvManager = KvManager.getInstance();
@@ -72,60 +70,48 @@ export class TokenStore {
     await this.kvMgr.setValue<TokenConfig>(`token_${token.TokenUUID}`, token);
   }
 
-  private async saveTokenPair(token1: TokenConfig, token2: TokenConfig): Promise<void> {
-    await this.kvMgr.setValue<TokenConfig>(`token_${token1.TokenUUID}`, token1);
-    await this.kvMgr.setValue<TokenConfig>(`token_${token2.TokenUUID}`, token2);
-  }
-
-  public async rearrangeToken(index: number, up: boolean): Promise<void> {
-    const token = this.token_array[index];
-    const score = token.RankScore;
-    if (up) {
-      if (index > 0) {
-        const token_swap = this.token_array[index - 1];
-        const token_uuid_swap = this.token_uuids[index - 1];
-        this.token_array[index].RankScore = token_swap.RankScore;
-        this.token_array[index - 1].RankScore = score;
-        this.token_uuids[index - 1] = this.token_uuids[index];
-        this.token_uuids[index] = token_uuid_swap;
-        this.saveTokenPair(token, token_swap);
+  public async updateTokenRank(from: number, to: number): Promise<void> {
+    this.token_array[from].RankScore = to;
+    await this.saveToken(this.token_array[from]);
+    if (from > to) {
+      for (let i = to; i < from; i++) {
+        this.token_array[i].RankScore++;
+        await this.saveToken(this.token_array[i]);
       }
     } else {
-      if (index < this.token_array.length - 1) {
-        const token_swap = this.token_array[index + 1];
-        const token_uuid_swap = this.token_uuids[index + 1];
-        this.token_array[index].RankScore = token_swap.RankScore;
-        this.token_array[index + 1].RankScore = score;
-        this.token_uuids[index + 1] = this.token_uuids[index];
-        this.token_uuids[index] = token_uuid_swap;
-        this.saveTokenPair(token, token_swap);
+      for (let i = from + 1; i <= to; i++) {
+        this.token_array[i].RankScore--;
+        await this.saveToken(this.token_array[i]);
       }
     }
+    this.sortTokens();
   }
 
   public async updateToken(token: TokenConfig): Promise<void> {
     let token_new = token;
     if (!this.token_uuids.includes(token_new.TokenUUID)) {
-      if (this.token_array.length == 0) {
-        token_new.RankScore = 1;//如果是第一次新增 就将rank设置为1
-      } else {
-        //否则设置成上一个新增的RankScore+1 但是这样有问题 改成寻找RankScore最大的+1
-        let maxRankItem = this.token_array.reduce((max, current) => (max.RankScore > current.RankScore ? max : current))
-        token_new.RankScore = maxRankItem.RankScore + 1;
-      }
+      token_new.RankScore = this.token_array.length;
       this.token_uuids.push(token_new.TokenUUID);
       this.token_array.push(token_new);
       await this.kvMgr.setTokenUUID(token_new.TokenUUID);
     } else {
-      this.token_array[this.token_uuids.findIndex(uuid => uuid === token_new.TokenUUID)] = token_new;
+      const token_index = this.token_uuids.findIndex(uuid => uuid === token_new.TokenUUID);
+      token_new.RankScore = this.token_array[token_index].RankScore;
+      this.token_array[token_index] = token_new;
     }
     await this.saveToken(token_new);
     this.emitTokenChanged();
   }
 
   public async deleteToken(token_uuid: string): Promise<void> {
-    await this.kvMgr.delTokenUUID(token_uuid);
+    const token_index = this.token_uuids.findIndex(uuid => uuid === token_uuid);
+    for (let i = token_index; i < this.token_array.length; i++) {
+      this.token_array[i].RankScore--;
+      await this.saveToken(this.token_array[i]);
+    }
     this.token_array = this.token_array.filter(token => token.TokenUUID !== token_uuid);
+
+    await this.kvMgr.delTokenUUID(token_uuid);
     this.kvMgr.deleteValue(token_uuid);
     this.emitTokenChanged();
   }
