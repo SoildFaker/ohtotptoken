@@ -63,12 +63,12 @@ export async function decodeProtobuf(payload: string): Promise<Array<TokenConfig
   GAs.forEach((ga) => {
     let token = new TokenConfig();
     token.TokenType = GA_TYPE_MAP.get(ga.type) ?? otpType.TOTP;
-    token.TokenSecret = ga.secret;
-    token.TokenIssuer = ga.issuer;
-    token.TokenName = ga.name;
+    token.TokenSecret = ga.secret ?? '';
+    token.TokenIssuer = ga.issuer ?? 'Unknown';
+    token.TokenName = ga.name ?? 'Unknown';
     token.TokenAlgorithm = GA_ALG_MAP.get(ga.algorithm) ?? 'SHA1';
     token.TokenPeriod = 30;
-    token.TokenCounter = ga.counter;
+    token.TokenCounter = ga.counter ?? 0;
     token.TokenDigits = GA_DIGIT_MAP.get(ga.digits) ?? 6;
     token.TokenIcon = getIconPathByIssuer(token.TokenIssuer);
     result.push(token)
