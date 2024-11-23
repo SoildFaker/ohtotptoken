@@ -235,8 +235,18 @@ for (let item of iconsArray) {
 }
 
 export function getIconPathByIssuer(issuer: string): string {
-  if (iconsSet.has(issuer.toLowerCase())) {
-    return 'icons/token_image_' + issuer.toLowerCase() + '.svg';
+  try {
+    if (issuer==undefined||issuer==null||issuer.length==0)
+    {
+      return '';
+    }
+    else if (iconsSet.has(issuer.toLowerCase())) {
+      return 'icons/token_image_' + issuer.toLowerCase() + '.svg';
+    }
+    return '';
   }
-  return '';
+  catch (ex)
+  {
+    return '';
+  }
 }
